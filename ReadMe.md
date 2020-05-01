@@ -1,5 +1,6 @@
 # PyPhysX - python wrapper for PhysX Nvidia
 [![Build Status](https://travis-ci.com/petrikvladimir/pyphysx.svg?branch=master)](https://travis-ci.com/petrikvladimir/pyphysx) 
+[![codecov](https://codecov.io/gh/petrikvladimir/pyphysx/branch/master/graph/badge.svg)](https://codecov.io/gh/petrikvladimir/pyphysx)
 
 ## Installation
 ```
