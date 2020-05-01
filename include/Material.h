@@ -9,9 +9,7 @@
 #ifndef SIM_PHYSX_MATERIAL_H
 #define SIM_PHYSX_MATERIAL_H
 
-
-#include <PxPhysics.h>
-#include <PxMaterial.h>
+#include <PxPhysicsAPI.h>
 #include <BasePhysxPointer.h>
 
 class Material : public BasePhysxPointer<physx::PxMaterial> {
@@ -29,7 +27,22 @@ public:
     [[nodiscard]] auto get_static_friction() const {
         return get_physx_ptr()->getStaticFriction();
     }
-    //todo: add dynamic friction/restitution setter getter
+
+    void set_dynamic_friction(float dynamic_friction) {
+        get_physx_ptr()->setDynamicFriction(dynamic_friction);
+    }
+
+    [[nodiscard]] auto get_dynamic_friction() const {
+        return get_physx_ptr()->getDynamicFriction();
+    }
+
+    void set_restitution(float restitution) {
+        get_physx_ptr()->setRestitution(restitution);
+    }
+
+    [[nodiscard]] auto get_restitution() const {
+        return get_physx_ptr()->getRestitution();
+    }
 };
 
 #endif //SIM_PHYSX_MATERIAL_H

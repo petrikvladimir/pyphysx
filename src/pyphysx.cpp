@@ -35,10 +35,17 @@ PYBIND11_MODULE(pyphysx, m) {
                  pybind11::arg("restitution") = 0.)
             .def("__repr__",
                  [](const Material &m) {
-                     return "<physx.Material " + std::to_string(m.get_static_friction()) + ">";
-                 }
-            )
-            .def("get_static_friction", &Material::get_static_friction);
+                     return "<pyphysx.Material ("
+                            + std::to_string(m.get_static_friction()) + ", "
+                            + std::to_string(m.get_dynamic_friction()) + ", "
+                            + std::to_string(m.get_restitution()) + ") >";
+                 })
+            .def("get_static_friction", &Material::get_static_friction)
+            .def("get_dynamic_friction", &Material::get_dynamic_friction)
+            .def("get_restitution", &Material::get_restitution)
+            .def("set_static_friction", &Material::set_static_friction, pybind11::arg("static_friction") = 0.)
+            .def("set_dynamic_friction", &Material::set_dynamic_friction, pybind11::arg("dynamic_friction") = 0.)
+            .def("set_restitution", &Material::set_restitution, pybind11::arg("restitution") = 0.);
 
 
     py::class_<RigidDynamic>(m, "RigidDynamic")

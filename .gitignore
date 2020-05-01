@@ -4,3 +4,4 @@ cmake-build-release
 dist
 pyphysx.egg-info
 .pytest_cache
+.idea
