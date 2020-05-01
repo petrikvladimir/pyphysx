@@ -16,7 +16,6 @@ class MaterialTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
-        cls.physics = Physics()
 
     def test_creation(self):
         mat = Material()

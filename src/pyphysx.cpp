@@ -9,24 +9,19 @@
 #include <pybind11/stl.h>
 
 #include <Physics.h>
+#include <Scene.h>
 #include <Material.h>
 #include <RigidDynamic.h>
+#include <Shape.h>
 
 namespace py = pybind11;
 
-#ifndef NORENDER
-
 PYBIND11_MODULE(pyphysx, m) {
-#else
-    PYBIND11_MODULE(pyphysx_norender, m) {
-#endif
-
-
     py::class_<Physics>(m, "Physics")
-            .def(py::init<int>(), pybind11::arg("num_cpu") = 0)
-            .def("create_scene", &Physics::create_scene);
+            .def_static("set_num_cpu", &Physics::set_num_cpu, pybind11::arg("num_cpu") = 0);
 
-    py::class_<Scene>(m, "Scene");
+    py::class_<Scene>(m, "Scene")
+            .def(py::init<>());
 
     py::class_<Material>(m, "Material")
             .def(py::init<float, float, float>(),
@@ -47,6 +42,12 @@ PYBIND11_MODULE(pyphysx, m) {
             .def("set_dynamic_friction", &Material::set_dynamic_friction, pybind11::arg("dynamic_friction") = 0.)
             .def("set_restitution", &Material::set_restitution, pybind11::arg("restitution") = 0.);
 
+    py::class_<Shape>(m, "Shape")
+            .def(py::init<>())
+            .def_static("create_box", &Shape::create_box, pybind11::arg("size"), pybind11::arg("material"),
+                        pybind11::arg("is_exclusive") = true)
+            .def_static("create_sphere", &Shape::create_box, pybind11::arg("radius"), pybind11::arg("material"),
+                        pybind11::arg("is_exclusive") = true);
 
     py::class_<RigidDynamic>(m, "RigidDynamic")
             .def(py::init<>());

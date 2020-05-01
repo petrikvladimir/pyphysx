@@ -7,22 +7,23 @@
 #ifndef SIM_PHYSX_RIGIDDYNAMIC_H
 #define SIM_PHYSX_RIGIDDYNAMIC_H
 
-#include <Eigen/src/Core/Matrix.h>
+#include <transformation_utils.h>
 #include <PxPhysicsAPI.h>
 #include <BasePhysxPointer.h>
-#include <transformation_utils.h>
+#include <Shape.h>
 
 class RigidDynamic : public BasePhysxPointer<physx::PxRigidDynamic> {
 
 public:
     RigidDynamic() : BasePhysxPointer() {
-        set_physx_ptr(PxGetPhysics().createRigidDynamic(physx::PxTransform(physx::PxIdentity)));
+        set_physx_ptr(Physics::get_physics()->createRigidDynamic(physx::PxTransform(physx::PxIdentity)));
     }
 
-    void attach_box(const Eigen::Vector3f &sz, float mass, Material mat) {
-        physx::PxRigidActorExt::createExclusiveShape(*get_physx_ptr(),
-                                                     physx::PxBoxGeometry(0.5 * sz[0], 0.5 * sz[1], 0.5 * sz[2]),
-                                                     *mat.get_physx_ptr(), physx::PxShapeFlag::eSIMULATION_SHAPE);
+    void attach_shape(const Shape &shape) {
+        get_physx_ptr()->attachShape(*shape.get_physx_ptr());
+    }
+
+    void set_mass_and_update_inertia(float mass) {
         physx::PxRigidBodyExt::setMassAndUpdateInertia(*get_physx_ptr(), mass);
     }
 

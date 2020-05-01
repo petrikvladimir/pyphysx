@@ -9,7 +9,7 @@
 #ifndef SIM_PHYSX_MATERIAL_H
 #define SIM_PHYSX_MATERIAL_H
 
-#include <PxPhysicsAPI.h>
+#include <Physics.h>
 #include <BasePhysxPointer.h>
 
 class Material : public BasePhysxPointer<physx::PxMaterial> {
@@ -17,7 +17,7 @@ class Material : public BasePhysxPointer<physx::PxMaterial> {
 public:
     /** @brief Create new material using global physics instance. */
     Material(float static_friction, float dynamic_friction, float restitution) : BasePhysxPointer() {
-        set_physx_ptr(PxGetPhysics().createMaterial(static_friction, dynamic_friction, restitution));
+        set_physx_ptr(Physics::get_physics()->createMaterial(static_friction, dynamic_friction, restitution));
     }
 
     void set_static_friction(float static_friction) {
