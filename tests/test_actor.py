@@ -13,7 +13,7 @@ sys.path.append('lib')
 from pyphysx import *
 
 
-class MaterialTest(unittest.TestCase):
+class ActorTest(unittest.TestCase):
 
     def test_global_pose(self):
         actor = RigidDynamic()
@@ -26,6 +26,11 @@ class MaterialTest(unittest.TestCase):
         p, q = actor.get_global_pose()
         np.testing.assert_almost_equal(p, [0, 2, 1])
         np.testing.assert_almost_equal(q, [1, 0, 0, 1] / np.sqrt(2))  # quaternion is always normalized
+
+    def test_mass(self):
+        actor = RigidDynamic()
+        actor.set_mass_and_update_inertia(0.5)
+        self.assertAlmostEqual(0.5, actor.get_mass())
 
 
 if __name__ == '__main__':

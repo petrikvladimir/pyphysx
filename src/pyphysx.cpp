@@ -22,7 +22,10 @@ PYBIND11_MODULE(pyphysx, m) {
             .def_static("set_num_cpu", &Physics::set_num_cpu, pybind11::arg("num_cpu") = 0);
 
     py::class_<Scene>(m, "Scene")
-            .def(py::init<>());
+            .def(py::init<>())
+            .def("simulate", &Scene::simulate, arg("dt") = 1. / 60., arg("num_substeps") = 1)
+            .def("add_actor", &Scene::add_actor, arg("actor"))
+            .def_readwrite("simulation_time", &Scene::simulation_time);
 
     py::class_<Material>(m, "Material")
             .def(py::init<float, float, float>(),
@@ -47,7 +50,7 @@ PYBIND11_MODULE(pyphysx, m) {
             .def(py::init<>())
             .def_static("create_box", &Shape::create_box, pybind11::arg("size"), pybind11::arg("material"),
                         pybind11::arg("is_exclusive") = true)
-            .def_static("create_sphere", &Shape::create_box, pybind11::arg("radius"), pybind11::arg("material"),
+            .def_static("create_sphere", &Shape::create_sphere, pybind11::arg("radius"), pybind11::arg("material"),
                         pybind11::arg("is_exclusive") = true);
 
     py::class_<RigidDynamic>(m, "RigidDynamic")
@@ -56,7 +59,8 @@ PYBIND11_MODULE(pyphysx, m) {
             .def("set_global_pose", &RigidDynamic::set_global_pose, arg("pos"),
                  arg("quat") = Eigen::Vector4f(0., 0., 0., 1.))
             .def("set_mass_and_update_inertia", &RigidDynamic::set_mass_and_update_inertia, arg("mass") = 1.)
-            .def("get_global_pose", &RigidDynamic::get_global_pose);
+            .def("get_global_pose", &RigidDynamic::get_global_pose)
+            .def("get_mass", &RigidDynamic::get_mass);
 
 
 }

@@ -27,6 +27,10 @@ public:
         physx::PxRigidBodyExt::setMassAndUpdateInertia(*get_physx_ptr(), mass);
     }
 
+    auto get_mass() {
+        return get_physx_ptr()->getMass();
+    }
+
     auto get_global_pose() {
         return transform_to_eigen(get_physx_ptr()->getGlobalPose());
     }
