@@ -4,6 +4,7 @@ python:
 before_install:
   - python --version
   - pip install -U pip
+  - pip install -U conan
   - pip install codecov
   - export PYPHYSX_COV=true
 install:
