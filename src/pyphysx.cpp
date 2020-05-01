@@ -37,7 +37,8 @@ PYBIND11_MODULE(pyphysx, m) {
                  [](const Material &m) {
                      return "<physx.Material " + std::to_string(m.get_static_friction()) + ">";
                  }
-            );
+            )
+            .def("get_static_friction", &Material::get_static_friction);
 
 
     py::class_<RigidDynamic>(m, "RigidDynamic")

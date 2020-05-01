@@ -5,8 +5,13 @@ before_install:
   - python --version
   - pip install -U pip
   - pip install codecov
+  - export PYPHYSX_COV=true
 install:
-  - pip install ".[test]" .
-script: pytest
+  - python setup.py build
+#  - pip install ".[test]" .
+script:
+  - cd build/temp.linux-x86_64-3.7
+  - pytest tests
+  - make gcov
 after_success:
-  - codecov
+  - codecov -X gcov
