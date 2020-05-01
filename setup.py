@@ -70,8 +70,8 @@ setup(
     long_description='',
     ext_modules=[CMakeExtension('pyphysx')],
     cmdclass=dict(build_ext=CMakeBuild),
-    install_requires=['numpy'],
-    setup_requires=['pytest-runner', 'conan'],
+    install_requires=['conan', 'numpy'],
+    setup_requires=['pytest-runner'],
     tests_require=['pytest'],
     zip_safe=False,
 )
