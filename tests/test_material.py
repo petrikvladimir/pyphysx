@@ -13,9 +13,6 @@ from pyphysx import *
 
 
 class MaterialTest(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls) -> None:
-        super().setUpClass()
 
     def test_creation(self):
         mat = Material()

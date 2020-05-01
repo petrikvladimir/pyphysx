@@ -7,10 +7,10 @@
 #ifndef SIM_PHYSX_RIGIDDYNAMIC_H
 #define SIM_PHYSX_RIGIDDYNAMIC_H
 
-#include <transformation_utils.h>
-#include <PxPhysicsAPI.h>
+#include <Physics.h>
 #include <BasePhysxPointer.h>
 #include <Shape.h>
+#include <transformation_utils.h>
 
 class RigidDynamic : public BasePhysxPointer<physx::PxRigidDynamic> {
 
@@ -27,15 +27,14 @@ public:
         physx::PxRigidBodyExt::setMassAndUpdateInertia(*get_physx_ptr(), mass);
     }
 
-    void set_global_pose(const Eigen::Vector3f &sz) {
-
+    auto get_global_pose() {
+        return transform_to_eigen(get_physx_ptr()->getGlobalPose());
     }
 
-    void get_global_pose() {
-
+    void set_global_pose(const Eigen::Vector3f &pos, const Eigen::Vector4f &quat) {
+        get_physx_ptr()->setGlobalPose(eigen_to_transform(pos, quat));
     }
 
 };
-
 
 #endif //SIM_PHYSX_RIGIDDYNAMIC_H

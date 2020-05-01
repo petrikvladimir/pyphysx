@@ -15,6 +15,7 @@
 #include <Shape.h>
 
 namespace py = pybind11;
+using py::arg;
 
 PYBIND11_MODULE(pyphysx, m) {
     py::class_<Physics>(m, "Physics")
@@ -50,7 +51,12 @@ PYBIND11_MODULE(pyphysx, m) {
                         pybind11::arg("is_exclusive") = true);
 
     py::class_<RigidDynamic>(m, "RigidDynamic")
-            .def(py::init<>());
+            .def(py::init<>())
+            .def("attach_shape", &RigidDynamic::attach_shape, arg("shape"))
+            .def("set_global_pose", &RigidDynamic::set_global_pose, arg("pos"),
+                 arg("quat") = Eigen::Vector4f(0., 0., 0., 1.))
+            .def("set_mass_and_update_inertia", &RigidDynamic::set_mass_and_update_inertia, arg("mass") = 1.)
+            .def("get_global_pose", &RigidDynamic::get_global_pose);
 
 
 }
