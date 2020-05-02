@@ -32,6 +32,15 @@ class ActorTest(unittest.TestCase):
         actor.set_mass_and_update_inertia(0.5)
         self.assertAlmostEqual(0.5, actor.get_mass())
 
+    def test_get_shapes(self):
+        actor = RigidDynamic()
+        s1 = Shape.create_box([0.1] * 3, Material())
+        s2 = Shape.create_box([0.2] * 3, Material())
+        actor.attach_shape(s1)
+        actor.attach_shape(s2)
+        shapes = actor.get_atached_shapes()
+        self.assertEqual(2, len(shapes))
+
 
 if __name__ == '__main__':
     unittest.main()

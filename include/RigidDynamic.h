@@ -23,6 +23,16 @@ public:
         get_physx_ptr()->attachShape(*shape.get_physx_ptr());
     }
 
+    auto get_atached_shapes() {
+        std::vector<physx::PxShape *> shapes_ptr(get_physx_ptr()->getNbShapes());
+        get_physx_ptr()->getShapes(&shapes_ptr[0], shapes_ptr.size());
+        std::vector<Shape> shapes(shapes_ptr.size());
+        for (size_t i = 0; i < shapes.size(); ++i) {
+            shapes[i].set_physx_ptr(shapes_ptr[i]);
+        }
+        return shapes;
+    }
+
     void set_mass_and_update_inertia(float mass) {
         physx::PxRigidBodyExt::setMassAndUpdateInertia(*get_physx_ptr(), mass);
     }

@@ -60,7 +60,8 @@ PYBIND11_MODULE(pyphysx, m) {
                  arg("quat") = Eigen::Vector4f(0., 0., 0., 1.))
             .def("set_mass_and_update_inertia", &RigidDynamic::set_mass_and_update_inertia, arg("mass") = 1.)
             .def("get_global_pose", &RigidDynamic::get_global_pose)
-            .def("get_mass", &RigidDynamic::get_mass);
+            .def("get_mass", &RigidDynamic::get_mass)
+            .def("get_atached_shapes", &RigidDynamic::get_atached_shapes);
 
 
 }
