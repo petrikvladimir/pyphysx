@@ -29,7 +29,7 @@ class ActorTest(unittest.TestCase):
 
     def test_mass(self):
         actor = RigidDynamic()
-        actor.set_mass_and_update_inertia(0.5)
+        actor.set_mass(0.5)
         self.assertAlmostEqual(0.5, actor.get_mass())
 
     def test_get_shapes(self):

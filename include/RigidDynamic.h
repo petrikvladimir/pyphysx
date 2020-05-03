@@ -26,7 +26,7 @@ public:
             RigidActor(reinterpret_cast<RigidActor::type_physx *>(physxPtr)) {
     }
 
-    void set_mass_and_update_inertia(float mass) {
+    void set_mass(float mass) {
         physx::PxRigidBodyExt::setMassAndUpdateInertia(*get_dyn_ptr(), mass);
     }
 

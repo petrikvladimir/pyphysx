@@ -23,6 +23,23 @@ class SceneTestCase(unittest.TestCase):
         expected_distance = -0.5 * 9.81 * scene.simulation_time ** 2
         self.assertAlmostEqual(actor.get_global_pose()[0][2], expected_distance, places=2)
 
+    def test_get_actors(self):
+        scene = Scene()
+        r1 = RigidDynamic()
+        r2 = RigidDynamic()
+        r3 = RigidDynamic()
+        r1.set_mass(1.)
+        r2.set_mass(2.)
+        r3.set_mass(3.)
+        scene.add_actor(r1)
+        scene.add_actor(r2)
+        scene.add_actor(r3)
+        actors = scene.get_dynamic_rigid_actors()
+        self.assertEqual(3, len(actors))
+        self.assertAlmostEqual(1., actors[0].get_mass())
+        self.assertAlmostEqual(2., actors[1].get_mass())
+        self.assertAlmostEqual(3., actors[2].get_mass())
+
 
 if __name__ == '__main__':
     unittest.main()

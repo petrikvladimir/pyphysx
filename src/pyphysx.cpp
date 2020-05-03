@@ -25,6 +25,8 @@ PYBIND11_MODULE(pyphysx, m) {
             .def(py::init<>())
             .def("simulate", &Scene::simulate, arg("dt") = 1. / 60., arg("num_substeps") = 1)
             .def("add_actor", &Scene::add_actor, arg("actor"))
+            .def("get_static_rigid_actors", &Scene::get_static_rigid_actors)
+            .def("get_dynamic_rigid_actors", &Scene::get_dynamic_rigid_actors)
             .def_readwrite("simulation_time", &Scene::simulation_time);
 
     py::class_<Material>(m, "Material")
@@ -58,7 +60,7 @@ PYBIND11_MODULE(pyphysx, m) {
             .def("attach_shape", &RigidDynamic::attach_shape, arg("shape"))
             .def("set_global_pose", &RigidDynamic::set_global_pose, arg("pos"),
                  arg("quat") = Eigen::Vector4f(0., 0., 0., 1.))
-            .def("set_mass_and_update_inertia", &RigidDynamic::set_mass_and_update_inertia, arg("mass") = 1.)
+            .def("set_mass", &RigidDynamic::set_mass, arg("mass") = 1.)
             .def("get_global_pose", &RigidDynamic::get_global_pose)
             .def("get_mass", &RigidDynamic::get_mass)
             .def("get_atached_shapes", &RigidDynamic::get_atached_shapes);
