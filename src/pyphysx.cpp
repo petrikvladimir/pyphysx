@@ -47,11 +47,11 @@ PYBIND11_MODULE(pyphysx, m) {
             .def("set_restitution", &Material::set_restitution, pybind11::arg("restitution") = 0.);
 
     py::class_<Shape>(m, "Shape")
-            .def(py::init<>())
             .def_static("create_box", &Shape::create_box, pybind11::arg("size"), pybind11::arg("material"),
                         pybind11::arg("is_exclusive") = true)
             .def_static("create_sphere", &Shape::create_sphere, pybind11::arg("radius"), pybind11::arg("material"),
-                        pybind11::arg("is_exclusive") = true);
+                        pybind11::arg("is_exclusive") = true)
+            .def("get_shape_data", &Shape::get_shape_data);
 
     py::class_<RigidDynamic>(m, "RigidDynamic")
             .def(py::init<>())

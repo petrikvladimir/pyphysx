@@ -13,6 +13,11 @@
 template<class T>
 class BasePhysxPointer {
 public:
+    typedef T type_physx;
+
+    BasePhysxPointer() : ref(0) {}
+
+    explicit BasePhysxPointer(T *physx_ptr) : ref(reinterpret_cast<uintptr_t>(physx_ptr)) {}
 
     /** @brief Set physx pointer to the object created elsewhere. */
     void set_physx_ptr(T *physx_ptr) {

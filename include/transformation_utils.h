@@ -44,4 +44,24 @@ auto eigen_to_transform(const Eigen::Vector3f &pos, const Eigen::Vector4f &quat)
     return physx::PxTransform(eigen_to_pxvec(pos), eigen_to_quat(quat));
 }
 
+template<class T>
+auto from_vector_of_physx_ptr(const std::vector<typename T::type_physx *> &ptrs) {
+    std::vector<T> vec;
+    vec.reserve(ptrs.size());
+    for (const auto &p : ptrs) {
+        vec.emplace_back(T(p));
+    }
+    return vec;
+}
+
+template<class T, class TP>
+auto from_vector_of_physx_ptr(const std::vector<TP *> &ptrs) {
+    std::vector<T> vec;
+    vec.reserve(ptrs.size());
+    for (const auto &p : ptrs) {
+        vec.emplace_back(T(p));
+    }
+    return vec;
+}
+
 #endif //SIM_PHYSX_TRANSFORMATION_UTILS_H

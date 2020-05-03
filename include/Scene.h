@@ -9,7 +9,6 @@
 
 #include <Physics.h>
 #include <BasePhysxPointer.h>
-#include <PxScene.h>
 #include <RigidDynamic.h>
 
 class Scene : public BasePhysxPointer<physx::PxScene> {
@@ -35,6 +34,22 @@ public:
 
     void add_actor(const RigidDynamic &actor) {
         get_physx_ptr()->addActor(*actor.get_physx_ptr());
+    }
+
+    auto get_static_rigid_actors() {
+        auto n = get_physx_ptr()->getNbActors(physx::PxActorTypeFlag::eRIGID_STATIC);
+        std::vector<physx::PxRigidActor *> actors(n);
+        get_physx_ptr()->getActors(physx::PxActorTypeFlag::eRIGID_STATIC,
+                                   reinterpret_cast<physx::PxActor **>(&actors[0]), n);
+        return from_vector_of_physx_ptr<RigidActor>(actors);
+    }
+
+    auto get_dynamic_rigid_actors() {
+        auto n = get_physx_ptr()->getNbActors(physx::PxActorTypeFlag::eRIGID_DYNAMIC);
+        std::vector<physx::PxRigidDynamic *> actors(n);
+        get_physx_ptr()->getActors(physx::PxActorTypeFlag::eRIGID_DYNAMIC,
+                                   reinterpret_cast<physx::PxActor **>(&actors[0]), n);
+        return from_vector_of_physx_ptr<RigidDynamic, physx::PxRigidDynamic>(actors);
     }
 
 public:
