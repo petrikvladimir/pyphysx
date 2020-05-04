@@ -12,7 +12,7 @@ from pyphysx_render.utils import *
 
 
 class PyPhysXWindow(pyglet.window.Window):
-    def __init__(self, queue: Queue, fps=25, **kwargs):
+    def __init__(self, queue: Queue, fps=25, video_filename=None, **kwargs):
         super(PyPhysXWindow, self).__init__(**kwargs)
         self.cam_pos_azimuth = np.deg2rad(10)
         self.cam_pos_elevation = np.deg2rad(45)
@@ -20,6 +20,7 @@ class PyPhysXWindow(pyglet.window.Window):
         self.look_at = np.zeros(3)
         self.view_up = np.array([0., 0., 1.])
         self.background_color_rgba = np.array([0.75] * 3 + [1.])
+        self.fps = fps
 
         self.static_batch = pyglet.graphics.Batch()
         add_ground_lines(self.static_batch, color=[0.8] * 3)
@@ -28,13 +29,23 @@ class PyPhysXWindow(pyglet.window.Window):
         add_coordinate_system(self.static_coordinate_system_batch)
 
         self.queue = queue
-        pyglet.clock.schedule_interval(self.update, 1 / fps)
+        pyglet.clock.schedule_interval(self.update, 1 / self.fps)
         self.actors_global_pose, self.actors_batches_and_poses = [], []
 
         self.plot_frames = False
         self.plot_geometry = True
 
+        self.video_filename = video_filename
+        self.vid_imgs = []
+
         glEnable(GL_DEPTH_TEST)
+
+    def on_close(self):
+        import imageio
+        super().on_close()
+        if self.video_filename is not None:
+            print("Saving {}-frames video into: {}".format(len(self.vid_imgs), self.video_filename))
+            imageio.mimsave(self.video_filename, self.vid_imgs, fps=self.fps)
 
     def on_resize(self, width, height):
         glViewport(0, 0, width, height)
@@ -101,10 +112,14 @@ class PyPhysXWindow(pyglet.window.Window):
                     )
             elif cmd == 'poses':
                 self.actors_global_pose = data
-
-            self.on_draw()
         except Empty:
             pass
+
+        self.on_draw()
+        if self.video_filename is not None:
+            ibar = pyglet.image.get_buffer_manager().get_color_buffer().get_image_data()
+            np_img = np.flip(np.asanyarray(ibar.get_data()).reshape(ibar.height, ibar.width, 4), axis=0)
+            self.vid_imgs.append(np_img)
 
     @staticmethod
     def batch_from_shape(shape, color=None):
@@ -141,9 +156,9 @@ class PyPhysXParallelRenderer:
 
     @staticmethod
     def start_rendering_f(queue, render_window_cls, render_window_kwargs):
-        if render_window_kwargs is None:
-            render_window_kwargs = dict(fps=25, caption='PyPhysX Rendering', resizable=True)
-        r = render_window_cls(queue, **render_window_kwargs)
+        default_render_window_kwargs = dict(fps=25, caption='PyPhysX Rendering', resizable=True)
+        default_render_window_kwargs.update(render_window_kwargs)
+        r = render_window_cls(queue, **default_render_window_kwargs)
         pyglet.app.run()
 
     def render_scene(self, scene, recompute_actors=False):
