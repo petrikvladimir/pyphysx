@@ -23,11 +23,18 @@ class PyPhysXWindow(pyglet.window.Window):
 
         self.static_batch = pyglet.graphics.Batch()
         add_ground_lines(self.static_batch, color=[0.8] * 3)
-        add_coordinate_system(self.static_batch)
+
+        self.static_coordinate_system_batch = pyglet.graphics.Batch()
+        add_coordinate_system(self.static_coordinate_system_batch)
 
         self.queue = queue
         pyglet.clock.schedule_interval(self.update, 1 / fps)
         self.actors_global_pose, self.actors_batches_and_poses = [], []
+
+        self.plot_frames = False
+        self.plot_geometry = True
+
+        glEnable(GL_DEPTH_TEST)
 
     def on_resize(self, width, height):
         glViewport(0, 0, width, height)
@@ -43,21 +50,30 @@ class PyPhysXWindow(pyglet.window.Window):
         v = [self.cam_pos_distance, 0, 0]
         return Rotation.from_euler('ZY', [self.cam_pos_azimuth, -self.cam_pos_elevation]).apply(v)
 
+    def plot_coordinate_system(self):
+        glLineWidth(10)
+        self.static_coordinate_system_batch.draw()
+        glLineWidth(1)
+
     def on_draw(self):
         self.clear()
         glLoadIdentity()
         gluLookAt(*self.get_eye_pos(), *self.look_at, *self.view_up)
         self.static_batch.draw()
+        self.plot_coordinate_system()
 
         if len(self.actors_global_pose) == len(self.actors_batches_and_poses):
             for global_pose, batches_and_poses in zip(self.actors_global_pose, self.actors_batches_and_poses):
                 glPushMatrix()
                 gl_transform(*global_pose)
-                for (batch, local_pose) in batches_and_poses:
-                    glPushMatrix()
-                    gl_transform(*local_pose)
-                    batch.draw()
-                    glPopMatrix()
+                if self.plot_frames:
+                    self.plot_coordinate_system()
+                if self.plot_geometry:
+                    for (batch, local_pose) in batches_and_poses:
+                        glPushMatrix()
+                        gl_transform(*local_pose)
+                        batch.draw()
+                        glPopMatrix()
                 glPopMatrix()
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
@@ -70,8 +86,10 @@ class PyPhysXWindow(pyglet.window.Window):
 
     def on_key_press(self, symbol, modifiers):
         super().on_key_press(symbol, modifiers)
-        if symbol & pyglet.window.key.S:
-            self.scene.simulate(0.1, 10)
+        if symbol is pyglet.window.key.F:
+            self.plot_frames = not self.plot_frames
+        if symbol is pyglet.window.key.G:
+            self.plot_geometry = not self.plot_geometry
 
     def update(self, dt):
         try:
@@ -105,10 +123,11 @@ class PyPhysXWindow(pyglet.window.Window):
 
 class PyPhysXParallelRenderer:
 
-    def __init__(self, autostart=True) -> None:
+    def __init__(self, autostart=True, render_window_cls=PyPhysXWindow, render_window_kwargs=None) -> None:
         super().__init__()
         self.queue = Queue()
-        self.process = Process(target=self.start_rendering_f, args=(self.queue,))
+        self.process = Process(target=self.start_rendering_f,
+                               args=(self.queue, render_window_cls, render_window_kwargs))
         self.actors = None
         self.actors_shapes_data_and_local_poses = None
         if autostart:
@@ -121,8 +140,10 @@ class PyPhysXParallelRenderer:
         self.process.start()
 
     @staticmethod
-    def start_rendering_f(queue):
-        r = PyPhysXWindow(queue, fps=25, caption='PyPhysX Rendering')
+    def start_rendering_f(queue, render_window_cls, render_window_kwargs):
+        if render_window_kwargs is None:
+            render_window_kwargs = dict(fps=25, caption='PyPhysX Rendering', resizable=True)
+        r = render_window_cls(queue, **render_window_kwargs)
         pyglet.app.run()
 
     def render_scene(self, scene, recompute_actors=False):

@@ -34,20 +34,24 @@ public:
         if (get_physx_ptr()->getGeometryType() == physx::PxGeometryType::eBOX) {
             physx::PxBoxGeometry geom;
             get_physx_ptr()->getBoxGeometry(geom);
-            const auto x = -geom.halfExtents.x;
-            const auto y = -geom.halfExtents.y;
-            const auto z = -geom.halfExtents.z;
-            const auto xp = geom.halfExtents.x;
-            const auto yp = geom.halfExtents.y;
-            const auto zp = geom.halfExtents.z;
-
+            const auto x = geom.halfExtents.x;
+            const auto y = geom.halfExtents.y;
+            const auto z = geom.halfExtents.z;
+//            v1 = x, -y, z,
+//            v2 = x, y, z,
+//            v3 = x, -y, -z,
+//            v4 = x, y, -z,
+//            v5 = -x, -y, -z,
+//            v6 = -x, y, -z,
+//            v7 = -x, -y, z,
+//            v8 = -x, y, z,
             Eigen::MatrixXf data(6, 4 * 3);
-            data.row(0) << xp, y, z, x, y, z, x, yp, z, xp, yp, z;
-            data.row(1) << x, y, zp, xp, y, zp, xp, yp, zp, x, yp, zp;
-            data.row(2) << x, y, z, x, y, zp, x, yp, zp, x, yp, z;
-            data.row(3) << xp, y, zp, xp, y, z, xp, yp, z, xp, yp, zp;
-            data.row(4) << x, y, z, xp, y, z, xp, y, zp, x, y, zp;
-            data.row(5) << x, yp, zp, xp, yp, zp, xp, yp, z, x, yp, z;
+            data.row(0) << x, y, z, x, -y, z, x, -y, -z, x, y, -z;  // 2-1-3-4
+            data.row(1) << x, y, -z, x, -y, -z, -x, -y, -z, -x, y, -z;  // 4-3-5-6
+            data.row(2) << -x, y, -z, -x, -y, -z, -x, -y, z, -x, y, z;  // 6-5-7-8
+            data.row(3) << -x, y, z, -x, -y, z, x, -y, z, x, y, z;  // 8-7-1-2
+            data.row(4) << -x, y, -z, -x, y, z, x, y, z, x, y, -z;  // 6-8-2-4
+            data.row(5) << -x, -y, z, -x, -y, -z, x, -y, -z, x, -y, z;  // 7-5-3-1
             return data;
         }
         return Eigen::MatrixXf(0, 0);
