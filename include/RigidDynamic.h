@@ -34,6 +34,38 @@ public:
         return get_dyn_ptr()->getMass();
     }
 
+    void set_angular_damping(float damping) {
+        get_dyn_ptr()->setAngularDamping(damping);
+    }
+
+    auto get_angular_damping() {
+        return get_dyn_ptr()->getAngularDamping();
+    }
+
+    void set_angular_velocity(const Eigen::Vector3f &vel) {
+        get_dyn_ptr()->setAngularVelocity(eigen_to_pxvec(vel));
+    }
+
+    auto get_angular_velocity() {
+        return pxvec_to_eigen(get_dyn_ptr()->getAngularVelocity());
+    }
+
+    void set_linear_damping(float damping) {
+        get_dyn_ptr()->setLinearDamping(damping);
+    }
+
+    auto get_linear_damping() {
+        return get_dyn_ptr()->getLinearDamping();
+    }
+
+    void get_linear_velocity() {
+        pxvec_to_eigen(get_dyn_ptr()->getLinearVelocity());
+    }
+
+    auto set_linear_velocity(const Eigen::Vector3f &vel) {
+        return get_dyn_ptr()->setLinearVelocity(eigen_to_pxvec(vel));
+    }
+
 };
 
 #endif //SIM_PHYSX_RIGIDDYNAMIC_H

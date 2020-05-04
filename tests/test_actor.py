@@ -41,6 +41,13 @@ class ActorTest(unittest.TestCase):
         shapes = actor.get_atached_shapes()
         self.assertEqual(2, len(shapes))
 
+    def test_dampings(self):
+        actor = RigidDynamic()
+        actor.set_linear_damping(0.1)
+        actor.set_angular_damping(0.2)
+        self.assertAlmostEqual(0.1, actor.get_linear_damping())
+        self.assertAlmostEqual(0.2, actor.get_angular_damping())
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -68,7 +68,15 @@ PYBIND11_MODULE(pyphysx, m) {
             .def("attach_shape", &RigidDynamic::attach_shape, arg("shape"))
             .def("get_atached_shapes", &RigidDynamic::get_atached_shapes)
             .def("get_mass", &RigidDynamic::get_mass)
-            .def("set_mass", &RigidDynamic::set_mass, arg("mass") = 1.);
+            .def("set_mass", &RigidDynamic::set_mass, arg("mass") = 1.)
+            .def("get_angular_damping", &RigidDynamic::get_angular_damping)
+            .def("set_angular_damping", &RigidDynamic::set_angular_damping, arg("damping") = 0.)
+            .def("get_linear_damping", &RigidDynamic::get_linear_damping)
+            .def("set_linear_damping", &RigidDynamic::set_linear_damping, arg("damping") = 0.)
+            .def("get_angular_velocity", &RigidDynamic::get_angular_velocity)
+            .def("set_angular_velocity", &RigidDynamic::set_angular_velocity, arg("vel"))
+            .def("get_linear_velocity", &RigidDynamic::get_linear_velocity)
+            .def("set_linear_velocity", &RigidDynamic::set_linear_velocity, arg("vel"));
 
     py::class_<RigidStatic>(m, "RigidStatic")
             .def(py::init<>())
