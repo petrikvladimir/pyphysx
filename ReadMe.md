@@ -32,7 +32,7 @@ for i in range(100):
 ```
 Will render and simulate the scene and automatically generate video like this:
 
-![](examples/anim_fall.mp4)
+![](examples/anim_fall.gif)
 
 
 # Features
