@@ -10,6 +10,7 @@
 #include <Physics.h>
 #include <BasePhysxPointer.h>
 #include <RigidDynamic.h>
+#include "RigidStatic.h"
 
 class Scene : public BasePhysxPointer<physx::PxScene> {
 public:
@@ -32,7 +33,11 @@ public:
         }
     }
 
-    void add_actor(const RigidDynamic &actor) {
+    void add_actor(RigidDynamic actor) {
+        get_physx_ptr()->addActor(*actor.get_physx_ptr());
+    }
+
+    void add_actor(RigidStatic actor) {
         get_physx_ptr()->addActor(*actor.get_physx_ptr());
     }
 

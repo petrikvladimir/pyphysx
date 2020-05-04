@@ -25,7 +25,7 @@ class ActorTest(unittest.TestCase):
         actor.set_global_pose([0, 2, 1], [1, 0, 0, 1])
         p, q = actor.get_global_pose()
         np.testing.assert_almost_equal(p, [0, 2, 1])
-        np.testing.assert_almost_equal(q, [1, 0, 0, 1] / np.sqrt(2))  # quaternion is always normalized
+        np.testing.assert_almost_equal(q, np.array([1, 0, 0, 1]) / np.sqrt(2))  # quaternion is always normalized
 
     def test_mass(self):
         actor = RigidDynamic()
