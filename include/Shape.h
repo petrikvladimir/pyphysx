@@ -20,11 +20,17 @@ public:
     explicit Shape(physx::PxShape *pref) : BasePhysxPointer<physx::PxShape>(pref) {}
 
 //    todo:  functions for enabling/disabling flags
-// todo: local pose get/set
 // todo check flag status function
 
+    void set_local_pose(const Eigen::Vector3f &pos, const Eigen::Vector4f &quat) {
+        get_physx_ptr()->setLocalPose(eigen_to_transform(pos, quat));
+    }
+
+    auto get_local_pose() {
+        return transform_to_eigen(get_physx_ptr()->getLocalPose());
+    }
+
     Eigen::MatrixXf get_shape_data() {
-// todo rename to get_visual shape data and filter based on visual flag
         if (get_physx_ptr()->getGeometryType() == physx::PxGeometryType::eBOX) {
             physx::PxBoxGeometry geom;
             get_physx_ptr()->getBoxGeometry(geom);
@@ -63,6 +69,5 @@ private:
     }
 
 };
-
 
 #endif //PYPHYSX_SHAPE_H

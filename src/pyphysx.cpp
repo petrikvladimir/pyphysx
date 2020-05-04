@@ -53,7 +53,10 @@ PYBIND11_MODULE(pyphysx, m) {
                         pybind11::arg("is_exclusive") = true)
             .def_static("create_sphere", &Shape::create_sphere, pybind11::arg("radius"), pybind11::arg("material"),
                         pybind11::arg("is_exclusive") = true)
-            .def("get_shape_data", &Shape::get_shape_data);
+            .def("get_shape_data", &Shape::get_shape_data)
+            .def("set_local_pose", &Shape::set_local_pose, arg("pos"),
+                 arg("quat") = Eigen::Vector4f(0., 0., 0., 1.))
+            .def("get_local_pose", &Shape::get_local_pose);
 
     py::class_<RigidDynamic>(m, "RigidDynamic")
             .def(py::init<>())
