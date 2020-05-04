@@ -4,13 +4,15 @@
 # Created on: 5/3/20
 #     Author: Vladimir Petrik <vladimir.petrik@cvut.cz>
 
+from queue import Empty
+from multiprocessing import Process, Queue
 import pyglet
-from pyphysx_render.utils import *
 from pyglet.gl import *
+from pyphysx_render.utils import *
 
 
 class PyPhysXWindow(pyglet.window.Window):
-    def __init__(self, scene, **kwargs):
+    def __init__(self, queue: Queue, fps=25, **kwargs):
         super(PyPhysXWindow, self).__init__(**kwargs)
         self.cam_pos_azimuth = np.deg2rad(10)
         self.cam_pos_elevation = np.deg2rad(45)
@@ -23,12 +25,9 @@ class PyPhysXWindow(pyglet.window.Window):
         add_ground_lines(self.static_batch, color=[0.8] * 3)
         add_coordinate_system(self.static_batch)
 
-        self.scene = scene
-
-        self.actors = self.scene.get_dynamic_rigid_actors()
-        self.actor_batches_and_poses = []
-        for actor in self.actors:
-            self.actor_batches_and_poses.append(self.batches_and_local_poses_from_actor(actor))
+        self.queue = queue
+        pyglet.clock.schedule_interval(self.update, 1 / fps)
+        self.actors_global_pose, self.actors_batches_and_poses = [], []
 
     def on_resize(self, width, height):
         glViewport(0, 0, width, height)
@@ -40,23 +39,26 @@ class PyPhysXWindow(pyglet.window.Window):
         glClearColor(*self.background_color_rgba)
         return pyglet.event.EVENT_HANDLED
 
+    def get_eye_pos(self):
+        v = [self.cam_pos_distance, 0, 0]
+        return Rotation.from_euler('ZY', [self.cam_pos_azimuth, -self.cam_pos_elevation]).apply(v)
+
     def on_draw(self):
         self.clear()
         glLoadIdentity()
-        eye = Rotation.from_euler('ZY', [self.cam_pos_azimuth, -self.cam_pos_elevation]).apply(
-            [self.cam_pos_distance, 0, 0])
-        gluLookAt(*eye, *self.look_at, *self.view_up)
+        gluLookAt(*self.get_eye_pos(), *self.look_at, *self.view_up)
         self.static_batch.draw()
 
-        for actor, batches_and_poses in zip(self.actors, self.actor_batches_and_poses):
-            glPushMatrix()
-            gl_transform(*actor.get_global_pose())
-            for (batch, pose) in batches_and_poses:
+        if len(self.actors_global_pose) == len(self.actors_batches_and_poses):
+            for global_pose, batches_and_poses in zip(self.actors_global_pose, self.actors_batches_and_poses):
                 glPushMatrix()
-                gl_transform(*pose)
-                batch.draw()
+                gl_transform(*global_pose)
+                for (batch, local_pose) in batches_and_poses:
+                    glPushMatrix()
+                    gl_transform(*local_pose)
+                    batch.draw()
+                    glPopMatrix()
                 glPopMatrix()
-            glPopMatrix()
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
         if buttons & pyglet.window.mouse.LEFT:
@@ -71,24 +73,67 @@ class PyPhysXWindow(pyglet.window.Window):
         if symbol & pyglet.window.key.S:
             self.scene.simulate(0.1, 10)
 
-    @staticmethod
-    def batches_and_local_poses_from_actor(actor, color=None):
-        """ Get batches that can be used to draw actor together with the local poses for all batches. """
-        batches_and_poses = []
-        for shape in actor.get_atached_shapes():
-            batches_and_poses.append(
-                (PyPhysXWindow.batch_from_shape(shape, color), shape.get_local_pose())
-            )
-        return batches_and_poses
+    def update(self, dt):
+        try:
+            cmd, data = self.queue.get(block=False)
+            if cmd == 'geometry':
+                for actor_shapes_and_poses in data:
+                    self.actors_batches_and_poses.append(
+                        [(self.batch_from_shape_data(data), local_pose) for data, local_pose in actor_shapes_and_poses]
+                    )
+            elif cmd == 'poses':
+                self.actors_global_pose = data
+
+            self.on_draw()
+        except Empty:
+            pass
 
     @staticmethod
     def batch_from_shape(shape, color=None):
-        batch = pyglet.graphics.Batch()
-        data = shape.get_shape_data()
+        return PyPhysXWindow.batch_from_shape_data(shape.get_shape_data(), color)
 
+    @staticmethod
+    def batch_from_shape_data(data, color=None):
+        batch = pyglet.graphics.Batch()
         n = data.shape[1] // 3
         rtype = GL_QUADS if n == 4 else GL_TRIANGLES
         c = np.tile(gl_color_from_matplotlib(color), n)
         for d in data:
             batch.add(n, rtype, None, ('v3f', d), ('c3B', c))
         return batch
+
+
+class PyPhysXParallelRenderer:
+
+    def __init__(self, autostart=True) -> None:
+        super().__init__()
+        self.queue = Queue()
+        self.process = Process(target=self.start_rendering_f, args=(self.queue,))
+        self.actors = None
+        self.actors_shapes_data_and_local_poses = None
+        if autostart:
+            self.start()
+
+    def wait_for_finnish(self):
+        self.process.join()
+
+    def start(self):
+        self.process.start()
+
+    @staticmethod
+    def start_rendering_f(queue):
+        r = PyPhysXWindow(queue, fps=25, caption='PyPhysX Rendering')
+        pyglet.app.run()
+
+    def render_scene(self, scene, recompute_actors=False):
+        if recompute_actors or self.actors is None:
+            self.actors = scene.get_dynamic_rigid_actors()
+            actors_shapes_data_and_local_poses = []
+            for actor in self.actors:
+                actors_shapes_data_and_local_poses.append(
+                    [(shape.get_shape_data(), shape.get_local_pose()) for shape in actor.get_atached_shapes()]
+                )
+            self.queue.put(('geometry', actors_shapes_data_and_local_poses))
+
+        actors_global_pose = [a.get_global_pose() for a in self.actors]
+        self.queue.put(('poses', actors_global_pose))
