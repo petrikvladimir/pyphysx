@@ -3,8 +3,12 @@
 [![codecov](https://codecov.io/gh/petrikvladimir/pyphysx/branch/master/graph/badge.svg)](https://codecov.io/gh/petrikvladimir/pyphysx)
 
 ## Installation
+To install for the first time:
 ```
 pip install git+https://github.com/petrikvladimir/pyphysx.git@master
+```
+To update if its already installed: 
+```
 pip install --upgrade git+https://github.com/petrikvladimir/pyphysx.git@master
 ```
 
