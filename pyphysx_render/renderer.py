@@ -148,6 +148,9 @@ class PyPhysXParallelRenderer:
         if autostart:
             self.start()
 
+    def is_running(self):
+        return self.process.is_alive()
+
     def wait_for_finnish(self):
         self.process.join()
 
