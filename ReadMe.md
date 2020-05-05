@@ -9,6 +9,7 @@ pip install --upgrade git+https://github.com/petrikvladimir/pyphysx.git@master
 ```
 
 ## Trivial example
+For more advanced examples, have a look into the folder [examples](examples/examples.md).
 ```python
 from pyphysx_render.renderer import PyPhysXParallelRenderer
 from pyphysx_render.rate import Rate
@@ -30,7 +31,7 @@ for i in range(100):
     render.render_scene(scene)
     rate.sleep()
 ```
-Will render and simulate the scene and automatically generate video like this:
+The code will render and simulate the scene and automatically generate video like this:
 
 ![](examples/anim_fall.gif)
 

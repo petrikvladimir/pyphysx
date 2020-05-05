@@ -76,6 +76,6 @@ setup(
     install_requires=['conan', 'numpy', 'pyglet'],
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
-    packages=['pyphysx_render'],
+    packages=['pyphysx_render', 'pyphysx_utils'],
     zip_safe=False,
 )
