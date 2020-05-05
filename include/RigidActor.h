@@ -33,6 +33,14 @@ public:
         get_physx_ptr()->getShapes(&shapes_ptr[0], shapes_ptr.size());
         return from_vector_of_physx_ptr<Shape>(shapes_ptr);
     }
+
+    void disable_gravity() {
+        get_physx_ptr()->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, true);
+    }
+
+    void enable_gravity() {
+        get_physx_ptr()->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, false);
+    }
 };
 
 

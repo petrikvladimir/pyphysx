@@ -11,6 +11,11 @@ To update if its already installed:
 ```
 pip install --upgrade git+https://github.com/petrikvladimir/pyphysx.git@master
 ```
+If pip install fails, build it from source:
+```
+git clone https://github.com/petrikvladimir/pyphysx.git
+python setup.py install --user
+```
 
 ## Trivial example
 For more advanced examples, have a look into the folder [examples](examples/).

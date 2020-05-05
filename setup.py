@@ -73,7 +73,7 @@ setup(
     long_description='',
     ext_modules=[CMakeExtension('pyphysx')],
     cmdclass=dict(build_ext=CMakeBuild),
-    install_requires=['conan', 'numpy', 'pyglet'],
+    install_requires=['conan', 'numpy', 'pyglet', 'imageio', 'imageio_ffmpeg', 'trimesh'],
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
     packages=['pyphysx_render', 'pyphysx_utils'],

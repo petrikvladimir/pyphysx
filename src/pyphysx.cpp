@@ -70,6 +70,8 @@ PYBIND11_MODULE(pyphysx, m) {
             .def("get_global_pose", &RigidDynamic::get_global_pose)
             .def("attach_shape", &RigidDynamic::attach_shape, arg("shape"))
             .def("get_atached_shapes", &RigidDynamic::get_atached_shapes)
+            .def("disable_gravity", &RigidDynamic::disable_gravity)
+            .def("enable_gravity", &RigidDynamic::enable_gravity)
             .def("get_mass", &RigidDynamic::get_mass)
             .def("set_mass", &RigidDynamic::set_mass, arg("mass") = 1.)
             .def("get_angular_damping", &RigidDynamic::get_angular_damping)
@@ -90,6 +92,8 @@ PYBIND11_MODULE(pyphysx, m) {
             .def("get_global_pose", &RigidStatic::get_global_pose)
             .def("attach_shape", &RigidStatic::attach_shape, arg("shape"))
             .def("get_atached_shapes", &RigidStatic::get_atached_shapes)
+            .def("disable_gravity", &RigidDynamic::disable_gravity)
+            .def("enable_gravity", &RigidDynamic::enable_gravity)
             .def_static("create_plane", &RigidStatic::create_plane, arg("mat"), arg("nx") = 0., arg("ny") = 0.,
                         arg("nz") = 1., arg("distance") = 0.);
 
