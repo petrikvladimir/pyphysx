@@ -58,12 +58,12 @@ public:
         return get_dyn_ptr()->getLinearDamping();
     }
 
-    void get_linear_velocity() {
-        pxvec_to_eigen(get_dyn_ptr()->getLinearVelocity());
+    auto get_linear_velocity() {
+        return pxvec_to_eigen(get_dyn_ptr()->getLinearVelocity());
     }
 
-    auto set_linear_velocity(const Eigen::Vector3f &vel) {
-        return get_dyn_ptr()->setLinearVelocity(eigen_to_pxvec(vel));
+    void set_linear_velocity(const Eigen::Vector3f &vel) {
+        get_dyn_ptr()->setLinearVelocity(eigen_to_pxvec(vel));
     }
 
 };
