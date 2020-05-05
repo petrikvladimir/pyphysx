@@ -79,7 +79,9 @@ PYBIND11_MODULE(pyphysx, m) {
             .def("get_angular_velocity", &RigidDynamic::get_angular_velocity)
             .def("set_angular_velocity", &RigidDynamic::set_angular_velocity, arg("vel"))
             .def("get_linear_velocity", &RigidDynamic::get_linear_velocity)
-            .def("set_linear_velocity", &RigidDynamic::set_linear_velocity, arg("vel"));
+            .def("set_linear_velocity", &RigidDynamic::set_linear_velocity, arg("vel"))
+            .def("set_max_linear_velocity", &RigidDynamic::set_max_linear_velocity, arg("max_vel"))
+            .def("set_max_angular_velocity", &RigidDynamic::set_max_angular_velocity, arg("max_vel"));
 
     py::class_<RigidStatic>(m, "RigidStatic")
             .def(py::init<>())

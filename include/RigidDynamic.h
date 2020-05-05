@@ -66,6 +66,14 @@ public:
         get_dyn_ptr()->setLinearVelocity(eigen_to_pxvec(vel));
     }
 
+    void set_max_linear_velocity(float max_vel) {
+        get_dyn_ptr()->setMaxLinearVelocity(max_vel);
+    }
+
+    void set_max_angular_velocity(float max_vel) {
+        get_dyn_ptr()->setMaxAngularVelocity(max_vel);
+    }
+
 };
 
 #endif //SIM_PHYSX_RIGIDDYNAMIC_H
