@@ -55,6 +55,9 @@ PYBIND11_MODULE(pyphysx, m) {
                         pybind11::arg("is_exclusive") = true)
             .def_static("create_sphere", &Shape::create_sphere, pybind11::arg("radius"), pybind11::arg("material"),
                         pybind11::arg("is_exclusive") = true)
+            .def_static("create_convex_mesh_from_points", &Shape::create_convex_mesh_from_points, arg("points"),
+                        arg("material"), arg("is_exclusive") = true, arg("scale") = 1., arg("quantized_count") = 255,
+                        arg("vertex_limit") = 255)
             .def("get_shape_data", &Shape::get_shape_data)
             .def("set_local_pose", &Shape::set_local_pose, arg("pos"),
                  arg("quat") = Eigen::Vector4f(0., 0., 0., 1.))

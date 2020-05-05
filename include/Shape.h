@@ -35,6 +35,8 @@ public:
             return render_box_geometry();
         } else if (get_physx_ptr()->getGeometryType() == physx::PxGeometryType::eSPHERE) {
             return render_sphere_geometry(12, 12);
+        } else if (get_physx_ptr()->getGeometryType() == physx::PxGeometryType::eCONVEXMESH) {
+            return render_convex_geometry();
         }
         return Eigen::MatrixXf(0, 0);
     }
@@ -45,6 +47,34 @@ public:
 
     static Shape create_sphere(float radius, Material mat, bool is_exclusive) {
         return Shape::from_geometry(physx::PxSphereGeometry(radius), mat, is_exclusive);
+    }
+
+    /** @brief Given sequence of points (nx3 matrix), cook convex mesh and create shape from it. */
+    static Shape create_convex_mesh_from_points(const Eigen::MatrixXf &points, Material mat, bool is_exclusive,
+                                                float scale, size_t quantized_count, size_t vertex_limit) {
+        using namespace physx;
+        std::vector<PxVec3> vertices(points.rows());
+        for (size_t i = 0; i < points.rows(); ++i) {
+            vertices[i] = PxVec3(points(i, 0), points(i, 1), points(i, 2));
+        }
+
+        PxConvexMeshDesc convexDesc;
+        convexDesc.points.count = vertices.size();
+        convexDesc.points.stride = sizeof(PxVec3);
+        convexDesc.points.data = &vertices[0];
+        convexDesc.flags = PxConvexFlag::eCOMPUTE_CONVEX | PxConvexFlag::eQUANTIZE_INPUT;
+        convexDesc.quantizedCount = quantized_count;
+        convexDesc.vertexLimit = vertex_limit;
+
+        PxDefaultMemoryOutputStream buf;
+        PxConvexMeshCookingResult::Enum result;
+        if (!Physics::get().cooking->cookConvexMesh(convexDesc, buf, &result)) {
+            std::cout << "Cannot cook convex mesh from points. Returning unit sphere instead. " << std::endl;
+            return Shape::from_geometry(PxSphereGeometry(1.), mat, is_exclusive);
+        }
+        PxDefaultMemoryInputData input(buf.getData(), buf.getSize());
+        auto geom = PxConvexMeshGeometry(Physics::get_physics()->createConvexMesh(input), PxMeshScale(scale));
+        return Shape::from_geometry(geom, mat, is_exclusive);
     }
 
 private:
@@ -107,6 +137,43 @@ private:
                         std::get<0>(p2), std::get<1>(p2), std::get<2>(p2),
                         std::get<0>(p3), std::get<1>(p3), std::get<2>(p3);
             }
+        }
+        return data;
+    }
+
+#include <array>
+
+    /** @brief Based on SnippetRender from PhysX. */
+    Eigen::MatrixXf render_convex_geometry() const {
+        using namespace physx;
+        PxConvexMeshGeometry geom;
+        get_physx_ptr()->getConvexMeshGeometry(geom);
+
+        PxConvexMesh *mesh = geom.convexMesh;
+        const PxU32 nbPolys = mesh->getNbPolygons();
+        const PxU8 *polygons = mesh->getIndexBuffer();
+        const PxVec3 *verts = mesh->getVertices();
+        std::list<std::array<PxVec3, 3>> triangle_vertices;
+        for (PxU32 i = 0; i < nbPolys; i++) {
+            PxHullPolygon data;
+            mesh->getPolygonData(i, data);
+
+            const PxU32 nbTris = PxU32(data.mNbVerts - 2);
+            const PxU8 vref0 = polygons[data.mIndexBase + 0];
+            for (PxU32 j = 0; j < nbTris; j++) {
+                const PxU32 vref1 = polygons[data.mIndexBase + 0 + j + 1];
+                const PxU32 vref2 = polygons[data.mIndexBase + 0 + j + 2];
+                triangle_vertices.push_back({verts[vref0], verts[vref1], verts[vref2]});
+            }
+        }
+
+        const PxVec3 &scale = geom.scale.scale;
+        Eigen::MatrixXf data(triangle_vertices.size(), 3 * 3);
+        size_t i = 0;
+        for (const auto &triangle : triangle_vertices) {
+            data.row(i++) << scale.x * triangle[0].x, scale.y * triangle[0].y, scale.z * triangle[0].z,
+                    scale.x * triangle[1].x, scale.y * triangle[1].y, scale.z * triangle[1].z,
+                    scale.x * triangle[2].x, scale.y * triangle[2].y, scale.z * triangle[2].z;
         }
         return data;
     }

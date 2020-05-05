@@ -27,6 +27,14 @@ class SceneTestCase(unittest.TestCase):
         np.testing.assert_almost_equal(p, [0, 2, 1])
         np.testing.assert_almost_equal(q, np.array([1, 0, 0, 1]) / np.sqrt(2))  # quaternion is always normalized
 
+    def test_convex_mesh(self):
+        points = np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1]])
+        s = Shape.create_convex_mesh_from_points(points, Material(), scale=0.5)
+        self.assertEqual(s.get_shape_data().shape[0], 4)  # 4 trianglular faces
+        points = np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1], [1, 1, 0.5]])
+        s = Shape.create_convex_mesh_from_points(points, Material(), scale=0.5)
+        self.assertEqual(s.get_shape_data().shape[0], 6)  # additional 3 faces but one is removed from previous shape
+
 
 if __name__ == '__main__':
     unittest.main()
