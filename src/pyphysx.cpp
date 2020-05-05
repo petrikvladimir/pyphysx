@@ -14,6 +14,7 @@
 #include <RigidDynamic.h>
 #include <Shape.h>
 #include <RigidStatic.h>
+#include <D6Joint.h>
 
 namespace py = pybind11;
 using py::arg;
@@ -25,8 +26,7 @@ PYBIND11_MODULE(pyphysx, m) {
     py::class_<Scene>(m, "Scene")
             .def(py::init<>())
             .def("simulate", &Scene::simulate, arg("dt") = 1. / 60., arg("num_substeps") = 1)
-            .def("add_actor", py::overload_cast<RigidDynamic>(&Scene::add_actor), arg("actor"))
-            .def("add_actor", py::overload_cast<RigidStatic>(&Scene::add_actor), arg("actor"))
+            .def("add_actor", &Scene::add_actor, arg("actor"))
             .def("get_static_rigid_actors", &Scene::get_static_rigid_actors)
             .def("get_dynamic_rigid_actors", &Scene::get_dynamic_rigid_actors)
             .def_readwrite("simulation_time", &Scene::simulation_time);
@@ -63,15 +63,17 @@ PYBIND11_MODULE(pyphysx, m) {
                  arg("quat") = Eigen::Vector4f(0., 0., 0., 1.))
             .def("get_local_pose", &Shape::get_local_pose);
 
-    py::class_<RigidDynamic>(m, "RigidDynamic")
-            .def(py::init<>())
+    py::class_<RigidActor>(m, "RigidActor")
             .def("set_global_pose", &RigidDynamic::set_global_pose, arg("pos"),
                  arg("quat") = Eigen::Vector4f(0., 0., 0., 1.))
             .def("get_global_pose", &RigidDynamic::get_global_pose)
             .def("attach_shape", &RigidDynamic::attach_shape, arg("shape"))
             .def("get_atached_shapes", &RigidDynamic::get_atached_shapes)
             .def("disable_gravity", &RigidDynamic::disable_gravity)
-            .def("enable_gravity", &RigidDynamic::enable_gravity)
+            .def("enable_gravity", &RigidDynamic::enable_gravity);
+
+    py::class_<RigidDynamic, RigidActor>(m, "RigidDynamic")
+            .def(py::init<>())
             .def("get_mass", &RigidDynamic::get_mass)
             .def("set_mass", &RigidDynamic::set_mass, arg("mass") = 1.)
             .def("get_angular_damping", &RigidDynamic::get_angular_damping)
@@ -85,17 +87,15 @@ PYBIND11_MODULE(pyphysx, m) {
             .def("set_max_linear_velocity", &RigidDynamic::set_max_linear_velocity, arg("max_vel"))
             .def("set_max_angular_velocity", &RigidDynamic::set_max_angular_velocity, arg("max_vel"));
 
-    py::class_<RigidStatic>(m, "RigidStatic")
+    py::class_<RigidStatic, RigidActor>(m, "RigidStatic")
             .def(py::init<>())
-            .def("set_global_pose", &RigidStatic::set_global_pose, arg("pos"),
-                 arg("quat") = Eigen::Vector4f(0., 0., 0., 1.))
-            .def("get_global_pose", &RigidStatic::get_global_pose)
-            .def("attach_shape", &RigidStatic::attach_shape, arg("shape"))
-            .def("get_atached_shapes", &RigidStatic::get_atached_shapes)
-            .def("disable_gravity", &RigidDynamic::disable_gravity)
-            .def("enable_gravity", &RigidDynamic::enable_gravity)
             .def_static("create_plane", &RigidStatic::create_plane, arg("mat"), arg("nx") = 0., arg("ny") = 0.,
                         arg("nz") = 1., arg("distance") = 0.);
 
-
+    py::class_<D6Joint>(m, "D6Joint")
+            .def(py::init<RigidActor, RigidActor, Eigen::Vector3f, Eigen::Vector4f, Eigen::Vector3f, Eigen::Vector4f>(),
+                 arg("actor0"), arg("actor1"),
+                 arg("local_pos0") = Eigen::Vector3f(0., 0., 0.), arg("local_quat0") = Eigen::Vector4f(0., 0., 0., 1.),
+                 arg("local_pos1") = Eigen::Vector3f(0., 0., 0.), arg("local_quat1") = Eigen::Vector4f(0., 0., 0., 1.)
+            );
 }

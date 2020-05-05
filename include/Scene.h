@@ -33,11 +33,7 @@ public:
         }
     }
 
-    void add_actor(RigidDynamic actor) {
-        get_physx_ptr()->addActor(*actor.get_physx_ptr());
-    }
-
-    void add_actor(RigidStatic actor) {
+    void add_actor(RigidActor actor) {
         get_physx_ptr()->addActor(*actor.get_physx_ptr());
     }
 
