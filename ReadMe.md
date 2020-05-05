@@ -9,7 +9,7 @@ pip install --upgrade git+https://github.com/petrikvladimir/pyphysx.git@master
 ```
 
 ## Trivial example
-For more advanced examples, have a look into the folder [examples](examples/examples.md).
+For more advanced examples, have a look into the folder [examples](examples/).
 ```python
 from pyphysx_render.renderer import PyPhysXParallelRenderer
 from pyphysx_render.rate import Rate
