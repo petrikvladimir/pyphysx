@@ -203,6 +203,8 @@ PYBIND11_MODULE(pyphysx, m) {
                  arg("linear") = Eigen::Vector3f(0., 0., 0.),
                  arg("angular") = Eigen::Vector3f(0., 0., 0.)
             )
+            .def("get_drive_position", &D6Joint::get_drive_position)
+            .def("get_drive_velocity", &D6Joint::get_drive_velocity)
             .def("get_force_torque", &D6Joint::get_force_torque);
 
     py::enum_<physx::PxD6Axis::Enum>(m, "D6Axis")
