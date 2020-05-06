@@ -142,7 +142,7 @@ class PyPhysXParallelRenderer:
 
     def __init__(self, autostart=True, render_window_cls=PyPhysXWindow, render_window_kwargs=None) -> None:
         super().__init__()
-        self.queue = Queue()
+        self.queue = Queue(10)
         self.process = Process(target=self.start_rendering_f,
                                args=(self.queue, render_window_cls, render_window_kwargs))
         self.actors = None
