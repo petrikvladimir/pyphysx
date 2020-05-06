@@ -23,8 +23,17 @@ PYBIND11_MODULE(pyphysx, m) {
     py::class_<Physics>(m, "Physics")
             .def_static("set_num_cpu", &Physics::set_num_cpu, pybind11::arg("num_cpu") = 0);
 
+    py::enum_<physx::PxFrictionType::Enum>(m, "FrictionType")
+            .value("PATCH", physx::PxFrictionType::ePATCH)
+            .value("ONE_DIRECTIONAL", physx::PxFrictionType::eONE_DIRECTIONAL)
+            .value("TWO_DIRECTIONAL", physx::PxFrictionType::eTWO_DIRECTIONAL)
+            .export_values();
+
     py::class_<Scene>(m, "Scene")
-            .def(py::init<>())
+            .def(py::init<physx::PxFrictionType::Enum, bool>(),
+                    arg("friction_type") = physx::PxFrictionType::ePATCH,
+                    arg("friction_every_iteration") = false
+            )
             .def("simulate", &Scene::simulate, arg("dt") = 1. / 60., arg("num_substeps") = 1)
             .def("add_actor", &Scene::add_actor, arg("actor"))
             .def("get_static_rigid_actors", &Scene::get_static_rigid_actors)

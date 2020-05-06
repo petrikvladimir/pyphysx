@@ -14,11 +14,16 @@
 
 class Scene : public BasePhysxPointer<physx::PxScene> {
 public:
-    Scene() : BasePhysxPointer() {
+    Scene(const physx::PxFrictionType::Enum &friction_type, bool friction_every_iteration)
+            : BasePhysxPointer() {
         physx::PxSceneDesc sceneDesc(Physics::get().physics->getTolerancesScale());
         sceneDesc.cpuDispatcher = Physics::get().dispatcher;
         sceneDesc.filterShader = physx::PxDefaultSimulationFilterShader;
         sceneDesc.gravity = physx::PxVec3(0.0f, 0.0f, -9.81f);
+        if (friction_every_iteration) {
+            sceneDesc.flags = physx::PxSceneFlag::eENABLE_FRICTION_EVERY_ITERATION;
+        }
+        sceneDesc.frictionType = friction_type;
         set_physx_ptr(Physics::get().physics->createScene(sceneDesc));
     }
 
