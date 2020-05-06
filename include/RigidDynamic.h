@@ -82,6 +82,14 @@ public:
         get_dyn_ptr()->addTorque(eigen_to_pxvec(torque), force_mode);
     }
 
+    void set_rigid_body_flag(const physx::PxRigidBodyFlag::Enum &flag, bool value) {
+        get_dyn_ptr()->setRigidBodyFlag(flag, value);
+    }
+
+    void set_kinematic_target(const Eigen::Vector3f &pos, const Eigen::Vector4f &quat) {
+        get_dyn_ptr()->setKinematicTarget(eigen_to_transform(pos, quat));
+    }
+
 };
 
 #endif //SIM_PHYSX_RIGIDDYNAMIC_H
