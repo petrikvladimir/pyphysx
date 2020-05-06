@@ -7,7 +7,10 @@ The examples show usage of the wrapper. After running the code, you should see o
 ## Mesh loading example
 ![](anim_spade.gif)
 
-## Fixed joint example
-On the left are two cubes without any joint and on the right are two cubes connected by fixed joint.
+## Joints example
+Two rigid bodies connected by joints: 
+(i) no joint on the left,
+(ii) Fixed joint in the middle,
+and (iii) Linear joint with damping on the right.
 
-![](anim_fixed_joint.gif)
+![](anim_joints.gif)

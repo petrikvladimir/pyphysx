@@ -97,5 +97,91 @@ PYBIND11_MODULE(pyphysx, m) {
                  arg("actor0"), arg("actor1"),
                  arg("local_pos0") = Eigen::Vector3f(0., 0., 0.), arg("local_quat0") = Eigen::Vector4f(0., 0., 0., 1.),
                  arg("local_pos1") = Eigen::Vector3f(0., 0., 0.), arg("local_quat1") = Eigen::Vector4f(0., 0., 0., 1.)
-            );
+            )
+            .def("set_motion", &D6Joint::set_motion,
+                 arg("axis"),
+                 arg("motion")
+            )
+            .def("set_linear_limit", &D6Joint::set_linear_limit,
+                 arg("axis"),
+                 arg("lower_limit"),
+                 arg("upper_limit"),
+                 arg("contact_dist") = -1
+            )
+            .def("set_linear_limit_soft", &D6Joint::set_linear_limit_soft,
+                 arg("axis"),
+                 arg("lower_limit"),
+                 arg("upper_limit"),
+                 arg("spring_stiffness"),
+                 arg("spring_damping")
+            )
+            .def("set_twist_limit", &D6Joint::set_twist_limit,
+                 arg("lower_limit"),
+                 arg("upper_limit"),
+                 arg("contact_dist") = -1
+            )
+            .def("set_twist_limit_soft", &D6Joint::set_twist_limit_soft,
+                 arg("lower_limit"),
+                 arg("upper_limit"),
+                 arg("spring_stiffness"),
+                 arg("spring_damping")
+            )
+            .def("set_swing_limit", &D6Joint::set_swing_limit,
+                 arg("y_limit_angle"),
+                 arg("z_limit_angle"),
+                 arg("contact_dist") = -1
+            )
+            .def("set_swing_limit_soft", &D6Joint::set_swing_limit_soft,
+                 arg("y_limit_angle"),
+                 arg("z_limit_angle"),
+                 arg("spring_stiffness"),
+                 arg("spring_damping")
+            )
+            .def("set_break_force", &D6Joint::set_break_force,
+                 arg("force"),
+                 arg("torque")
+            )
+            .def("set_drive", &D6Joint::set_drive,
+                 arg("axis"),
+                 arg("stiffness"),
+                 arg("damping"),
+                 arg("force_limit"),
+                 arg("is_acceleration") = false
+            )
+            .def("set_drive_position", &D6Joint::set_drive_position,
+                 arg("pos") = Eigen::Vector3f(0., 0., 0.),
+                 arg("quat") = Eigen::Vector4f(0., 0., 0., 1.)
+            )
+            .def("set_drive_velocity", &D6Joint::set_drive_velocity,
+                 arg("linear") = Eigen::Vector3f(0., 0., 0.),
+                 arg("angular") = Eigen::Vector3f(0., 0., 0.)
+            )
+            .def("get_force_torque", &D6Joint::get_force_torque);
+
+    py::enum_<physx::PxD6Axis::Enum>(m, "D6Axis")
+            .value("X", physx::PxD6Axis::eX)
+            .value("Y", physx::PxD6Axis::eY)
+            .value("Z", physx::PxD6Axis::eZ)
+            .value("SWING1", physx::PxD6Axis::eSWING1)
+            .value("SWING2", physx::PxD6Axis::eSWING2)
+            .value("TWIST", physx::PxD6Axis::eTWIST)
+            .export_values();
+
+    py::enum_<physx::PxD6Motion::Enum>(m, "D6Motion")
+            .value("FREE", physx::PxD6Motion::eFREE)
+            .value("LIMITED", physx::PxD6Motion::eLIMITED)
+            .value("LOCKED", physx::PxD6Motion::eLOCKED)
+            .export_values();
+
+
+    py::enum_<physx::PxD6Drive::Enum>(m, "D6Drive")
+            .value("X", physx::PxD6Drive::eX)
+            .value("Y", physx::PxD6Drive::eY)
+            .value("Z", physx::PxD6Drive::eZ)
+            .value("SWING", physx::PxD6Drive::eSWING)
+            .value("TWIST", physx::PxD6Drive::eTWIST)
+            .value("SLERP", physx::PxD6Drive::eSLERP)
+            .export_values();
+
+
 }
