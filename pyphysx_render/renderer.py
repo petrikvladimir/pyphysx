@@ -9,6 +9,7 @@ from multiprocessing import Process, Queue
 import pyglet
 from pyglet.gl import *
 from pyphysx_render.utils import *
+import imageio
 
 
 class PyPhysXWindow(pyglet.window.Window):
@@ -44,7 +45,6 @@ class PyPhysXWindow(pyglet.window.Window):
         glEnable(GL_DEPTH_TEST)
 
     def on_close(self):
-        import imageio
         super().on_close()
         if self.video_filename is not None:
             print("Saving {}-frames video into: {}".format(len(self.vid_imgs), self.video_filename))
@@ -118,6 +118,7 @@ class PyPhysXWindow(pyglet.window.Window):
                 elif cmd == 'poses':
                     self.actors_global_pose = data
                 elif cmd == 'close':
+                    self.on_close()
                     self.close()
         except Empty:
             pass
