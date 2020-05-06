@@ -85,7 +85,23 @@ PYBIND11_MODULE(pyphysx, m) {
             .def("get_linear_velocity", &RigidDynamic::get_linear_velocity)
             .def("set_linear_velocity", &RigidDynamic::set_linear_velocity, arg("vel"))
             .def("set_max_linear_velocity", &RigidDynamic::set_max_linear_velocity, arg("max_vel"))
-            .def("set_max_angular_velocity", &RigidDynamic::set_max_angular_velocity, arg("max_vel"));
+            .def("set_max_angular_velocity", &RigidDynamic::set_max_angular_velocity, arg("max_vel"))
+            .def("add_force", &RigidDynamic::add_force,
+                 arg("force"),
+                 arg("force_mode") = physx::PxForceMode::eFORCE
+            )
+            .def("add_torque", &RigidDynamic::add_torque,
+                 arg("torque"),
+                 arg("torque_mode") = physx::PxForceMode::eFORCE
+            );
+
+    py::enum_<physx::PxForceMode::Enum>(m, "ForceMode")
+            .value("FORCE", physx::PxForceMode::eFORCE)
+            .value("ACCELERATION", physx::PxForceMode::eACCELERATION)
+            .value("IMPULSE", physx::PxForceMode::eIMPULSE)
+            .value("VELOCITY_CHANGE", physx::PxForceMode::eVELOCITY_CHANGE)
+            .export_values();
+
 
     py::class_<RigidStatic, RigidActor>(m, "RigidStatic")
             .def(py::init<>())

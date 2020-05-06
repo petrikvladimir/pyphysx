@@ -74,6 +74,14 @@ public:
         get_dyn_ptr()->setMaxAngularVelocity(max_vel);
     }
 
+    void add_force(const Eigen::Vector3f &force, physx::PxForceMode::Enum &force_mode) {
+        get_dyn_ptr()->addForce(eigen_to_pxvec(force), force_mode);
+    }
+
+    void add_torque(const Eigen::Vector3f &torque, physx::PxForceMode::Enum &force_mode) {
+        get_dyn_ptr()->addTorque(eigen_to_pxvec(torque), force_mode);
+    }
+
 };
 
 #endif //SIM_PHYSX_RIGIDDYNAMIC_H
