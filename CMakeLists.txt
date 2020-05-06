@@ -11,7 +11,7 @@ include(${CMAKE_BINARY_DIR}/conan.cmake)
 
 conan_cmake_run(REQUIRES
         tinyobjloader/1.0.6
-        pybind11/2.3.0@conan/stable
+        pybind11/2.4.3
         eigen/3.3.7@conan/stable
         physx/4.1.1
         BASIC_SETUP BUILD missing)
@@ -19,7 +19,6 @@ conan_cmake_run(REQUIRES
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-find_package(pybind11 REQUIRED)
 find_package(codecov)
 
 include_directories(include)
