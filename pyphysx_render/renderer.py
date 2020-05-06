@@ -106,14 +106,15 @@ class PyPhysXWindow(pyglet.window.Window):
 
     def update(self, dt):
         try:
-            cmd, data = self.queue.get(block=False)
-            if cmd == 'geometry':
-                for actor_shapes_and_poses in data:
-                    self.actors_batches_and_poses.append(
-                        [(self.batch_from_shape_data(data), local_pose) for data, local_pose in actor_shapes_and_poses]
-                    )
-            elif cmd == 'poses':
-                self.actors_global_pose = data
+            while True:  # get all data from the queue before rendering
+                cmd, data = self.queue.get(block=False)
+                if cmd == 'geometry':
+                    for actor_shapes_and_poses in data:
+                        self.actors_batches_and_poses.append(
+                            [(self.batch_from_shape_data(data), local_pose) for data, local_pose in actor_shapes_and_poses]
+                        )
+                elif cmd == 'poses':
+                    self.actors_global_pose = data
         except Empty:
             pass
 
@@ -142,7 +143,7 @@ class PyPhysXParallelRenderer:
 
     def __init__(self, autostart=True, render_window_cls=PyPhysXWindow, render_window_kwargs=None) -> None:
         super().__init__()
-        self.queue = Queue(10)
+        self.queue = Queue()
         self.process = Process(target=self.start_rendering_f,
                                args=(self.queue, render_window_cls, render_window_kwargs))
         self.actors = None
