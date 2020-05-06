@@ -117,6 +117,8 @@ class PyPhysXWindow(pyglet.window.Window):
                         )
                 elif cmd == 'poses':
                     self.actors_global_pose = data
+                elif cmd == 'close':
+                    self.close()
         except Empty:
             pass
 
@@ -168,6 +170,9 @@ class PyPhysXParallelRenderer:
         default_render_window_kwargs.update(render_window_kwargs)
         r = render_window_cls(queue, **default_render_window_kwargs)
         pyglet.app.run()
+
+    def close(self):
+        self.queue.put(('close', None))
 
     def render_scene(self, scene, recompute_actors=False):
         if recompute_actors or self.actors is None:
