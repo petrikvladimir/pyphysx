@@ -72,6 +72,13 @@ PYBIND11_MODULE(pyphysx, m) {
             .def("disable_gravity", &RigidDynamic::disable_gravity)
             .def("enable_gravity", &RigidDynamic::enable_gravity);
 
+    py::enum_<physx::PxForceMode::Enum>(m, "ForceMode")
+            .value("FORCE", physx::PxForceMode::eFORCE)
+            .value("ACCELERATION", physx::PxForceMode::eACCELERATION)
+            .value("IMPULSE", physx::PxForceMode::eIMPULSE)
+            .value("VELOCITY_CHANGE", physx::PxForceMode::eVELOCITY_CHANGE)
+            .export_values();
+
     py::class_<RigidDynamic, RigidActor>(m, "RigidDynamic")
             .def(py::init<>())
             .def("get_mass", &RigidDynamic::get_mass)
@@ -94,14 +101,6 @@ PYBIND11_MODULE(pyphysx, m) {
                  arg("torque"),
                  arg("torque_mode") = physx::PxForceMode::eFORCE
             );
-
-    py::enum_<physx::PxForceMode::Enum>(m, "ForceMode")
-            .value("FORCE", physx::PxForceMode::eFORCE)
-            .value("ACCELERATION", physx::PxForceMode::eACCELERATION)
-            .value("IMPULSE", physx::PxForceMode::eIMPULSE)
-            .value("VELOCITY_CHANGE", physx::PxForceMode::eVELOCITY_CHANGE)
-            .export_values();
-
 
     py::class_<RigidStatic, RigidActor>(m, "RigidStatic")
             .def(py::init<>())
