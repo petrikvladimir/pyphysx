@@ -12,7 +12,7 @@ from pyphysx_render.utils import *
 
 
 class PyPhysXWindow(pyglet.window.Window):
-    def __init__(self, queue: Queue, fps=25, video_filename=None, **kwargs):
+    def __init__(self, queue: Queue, fps=25, video_filename=None, coordinates_scale=1., coordinate_lw=10., **kwargs):
         super(PyPhysXWindow, self).__init__(**kwargs)
         self.cam_pos_azimuth = np.deg2rad(10)
         self.cam_pos_elevation = np.deg2rad(45)
@@ -26,7 +26,9 @@ class PyPhysXWindow(pyglet.window.Window):
         add_ground_lines(self.static_batch, color=[0.8] * 3)
 
         self.static_coordinate_system_batch = pyglet.graphics.Batch()
-        add_coordinate_system(self.static_coordinate_system_batch)
+        if coordinates_scale > 0:
+            add_coordinate_system(self.static_coordinate_system_batch, scale=coordinates_scale)
+        self.coordinate_lw = coordinate_lw
 
         self.queue = queue
         pyglet.clock.schedule_interval(self.update, 1 / self.fps)
@@ -62,7 +64,7 @@ class PyPhysXWindow(pyglet.window.Window):
         return Rotation.from_euler('ZY', [self.cam_pos_azimuth, -self.cam_pos_elevation]).apply(v)
 
     def plot_coordinate_system(self):
-        glLineWidth(10)
+        glLineWidth(self.coordinate_lw)
         self.static_coordinate_system_batch.draw()
         glLineWidth(1)
 
