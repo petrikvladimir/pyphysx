@@ -92,6 +92,9 @@ PYBIND11_MODULE(pyphysx, m) {
                  arg("quat") = Eigen::Vector4f(0., 0., 0., 1.))
             .def("get_global_pose", &RigidDynamic::get_global_pose)
             .def("attach_shape", &RigidDynamic::attach_shape, arg("shape"))
+            .def("detach_shape", &RigidDynamic::detach_shape,
+                 arg("shape")
+            )
             .def("get_atached_shapes", &RigidDynamic::get_atached_shapes)
             .def("disable_gravity", &RigidDynamic::disable_gravity)
             .def("enable_gravity", &RigidDynamic::enable_gravity);
