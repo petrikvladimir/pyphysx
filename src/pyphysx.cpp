@@ -20,11 +20,35 @@ namespace py = pybind11;
 using py::arg;
 
 PYBIND11_MODULE(pyphysx, m) {
+/// Define Enums
+
+    py::enum_<physx::PxRigidBodyFlag::Enum>(m, "RigidBodyFlag")
+            .value("KINEMATIC", physx::PxRigidBodyFlag::eKINEMATIC)
+            .value("USE_KINEMATIC_TARGET_FOR_SCENE_QUERIES",
+                   physx::PxRigidBodyFlag::eUSE_KINEMATIC_TARGET_FOR_SCENE_QUERIES)
+            .value("RETAIN_ACCELERATIONS", physx::PxRigidBodyFlag::eRETAIN_ACCELERATIONS)
+            .value("ENABLE_CCD", physx::PxRigidBodyFlag::eENABLE_CCD)
+            .value("ENABLE_CCD_FRICTION", physx::PxRigidBodyFlag::eENABLE_CCD_FRICTION)
+            .value("ENABLE_CCD_MAX_CONTACT_IMPULSE", physx::PxRigidBodyFlag::eENABLE_CCD_MAX_CONTACT_IMPULSE)
+            .value("ENABLE_SPECULATIVE_CCD", physx::PxRigidBodyFlag::eENABLE_SPECULATIVE_CCD)
+            .value("ENABLE_POSE_INTEGRATION_PREVIEW", physx::PxRigidBodyFlag::eENABLE_POSE_INTEGRATION_PREVIEW)
+            .export_values();
+
+
     py::class_<Physics>(m, "Physics")
             .def_static("set_num_cpu", &Physics::set_num_cpu, pybind11::arg("num_cpu") = 0);
 
+    py::enum_<physx::PxFrictionType::Enum>(m, "FrictionType")
+            .value("PATCH", physx::PxFrictionType::ePATCH)
+            .value("ONE_DIRECTIONAL", physx::PxFrictionType::eONE_DIRECTIONAL)
+            .value("TWO_DIRECTIONAL", physx::PxFrictionType::eTWO_DIRECTIONAL)
+            .export_values();
+
     py::class_<Scene>(m, "Scene")
-            .def(py::init<>())
+            .def(py::init<physx::PxFrictionType::Enum, bool>(),
+                 arg("friction_type") = physx::PxFrictionType::ePATCH,
+                 arg("friction_every_iteration") = false
+            )
             .def("simulate", &Scene::simulate, arg("dt") = 1. / 60., arg("num_substeps") = 1)
             .def("add_actor", &Scene::add_actor, arg("actor"))
             .def("get_static_rigid_actors", &Scene::get_static_rigid_actors)
@@ -68,6 +92,9 @@ PYBIND11_MODULE(pyphysx, m) {
                  arg("quat") = Eigen::Vector4f(0., 0., 0., 1.))
             .def("get_global_pose", &RigidDynamic::get_global_pose)
             .def("attach_shape", &RigidDynamic::attach_shape, arg("shape"))
+            .def("detach_shape", &RigidDynamic::detach_shape,
+                 arg("shape")
+            )
             .def("get_atached_shapes", &RigidDynamic::get_atached_shapes)
             .def("disable_gravity", &RigidDynamic::disable_gravity)
             .def("enable_gravity", &RigidDynamic::enable_gravity);
@@ -100,6 +127,14 @@ PYBIND11_MODULE(pyphysx, m) {
             .def("add_torque", &RigidDynamic::add_torque,
                  arg("torque"),
                  arg("torque_mode") = physx::PxForceMode::eFORCE
+            )
+            .def("set_rigid_body_flag", &RigidDynamic::set_rigid_body_flag,
+                 arg("flag"),
+                 arg("value")
+            )
+            .def("set_kinematic_target", &RigidDynamic::set_kinematic_target,
+                 arg("pos") = Eigen::Vector3f(0., 0., 0.),
+                 arg("quat") = Eigen::Vector4f(0., 0., 0., 1.)
             );
 
     py::class_<RigidStatic, RigidActor>(m, "RigidStatic")
@@ -171,6 +206,8 @@ PYBIND11_MODULE(pyphysx, m) {
                  arg("linear") = Eigen::Vector3f(0., 0., 0.),
                  arg("angular") = Eigen::Vector3f(0., 0., 0.)
             )
+            .def("get_drive_position", &D6Joint::get_drive_position)
+            .def("get_drive_velocity", &D6Joint::get_drive_velocity)
             .def("get_force_torque", &D6Joint::get_force_torque);
 
     py::enum_<physx::PxD6Axis::Enum>(m, "D6Axis")

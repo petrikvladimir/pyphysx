@@ -28,6 +28,10 @@ public:
         get_physx_ptr()->attachShape(*shape.get_physx_ptr());
     }
 
+    void detach_shape(const Shape &shape) {
+        get_physx_ptr()->detachShape(*shape.get_physx_ptr());
+    }
+
     auto get_atached_shapes() {
         std::vector<physx::PxShape *> shapes_ptr(get_physx_ptr()->getNbShapes());
         get_physx_ptr()->getShapes(&shapes_ptr[0], shapes_ptr.size());

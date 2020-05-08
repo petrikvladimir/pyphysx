@@ -9,14 +9,16 @@ from multiprocessing import Process, Queue
 import pyglet
 from pyglet.gl import *
 from pyphysx_render.utils import *
+import imageio
 
 
 class PyPhysXWindow(pyglet.window.Window):
-    def __init__(self, queue: Queue, fps=25, video_filename=None, coordinates_scale=1., coordinate_lw=10., **kwargs):
+    def __init__(self, queue: Queue, fps=25, video_filename=None, coordinates_scale=1., coordinate_lw=10.,
+                 cam_pos_azimuth=np.deg2rad(10), cam_pos_elevation=np.deg2rad(45), cam_pos_distance=2.,
+                 **kwargs):
         super(PyPhysXWindow, self).__init__(**kwargs)
-        self.cam_pos_azimuth = np.deg2rad(10)
-        self.cam_pos_elevation = np.deg2rad(45)
-        self.cam_pos_distance = 2.
+        self.cam_pos_azimuth, self.cam_pos_elevation = cam_pos_azimuth, cam_pos_elevation,
+        self.cam_pos_distance = cam_pos_distance
         self.look_at = np.zeros(3)
         self.view_up = np.array([0., 0., 1.])
         self.background_color_rgba = np.array([0.75] * 3 + [1.])
@@ -43,7 +45,6 @@ class PyPhysXWindow(pyglet.window.Window):
         glEnable(GL_DEPTH_TEST)
 
     def on_close(self):
-        import imageio
         super().on_close()
         if self.video_filename is not None:
             print("Saving {}-frames video into: {}".format(len(self.vid_imgs), self.video_filename))
@@ -106,14 +107,20 @@ class PyPhysXWindow(pyglet.window.Window):
 
     def update(self, dt):
         try:
-            cmd, data = self.queue.get(block=False)
-            if cmd == 'geometry':
-                for actor_shapes_and_poses in data:
-                    self.actors_batches_and_poses.append(
-                        [(self.batch_from_shape_data(data), local_pose) for data, local_pose in actor_shapes_and_poses]
-                    )
-            elif cmd == 'poses':
-                self.actors_global_pose = data
+            while True:  # get all data from the queue before rendering
+                cmd, data = self.queue.get(block=False)
+                if cmd == 'geometry':
+                    self.actors_batches_and_poses = []
+                    for actor_shapes_and_poses in data:
+                        self.actors_batches_and_poses.append(
+                            [(self.batch_from_shape_data(data), local_pose) for data, local_pose in
+                             actor_shapes_and_poses]
+                        )
+                elif cmd == 'poses':
+                    self.actors_global_pose = data
+                elif cmd == 'close':
+                    self.on_close()
+                    self.close()
         except Empty:
             pass
 
@@ -165,6 +172,9 @@ class PyPhysXParallelRenderer:
         default_render_window_kwargs.update(render_window_kwargs)
         r = render_window_cls(queue, **default_render_window_kwargs)
         pyglet.app.run()
+
+    def close(self):
+        self.queue.put(('close', None))
 
     def render_scene(self, scene, recompute_actors=False):
         if recompute_actors or self.actors is None:

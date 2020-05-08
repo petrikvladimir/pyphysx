@@ -16,6 +16,13 @@ If pip install fails, build it from source:
 git clone https://github.com/petrikvladimir/pyphysx.git
 python setup.py install --user
 ```
+Optionally, you can install in anaconda
+```
+conda create -n py38 python=3.8
+conda activate py38
+conda install -c anaconda gcc_linux-64 gxx_linux-64
+pip install git+https://github.com/petrikvladimir/pyphysx.git@master
+```
 
 ## Trivial example
 For more advanced examples, have a look into the folder [examples](examples/).

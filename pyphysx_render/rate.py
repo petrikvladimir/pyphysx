@@ -8,15 +8,18 @@ import time
 
 
 class Rate:
-    def __init__(self, freq) -> None:
-        self.sleep_duration = 1. / freq
+    def __init__(self, frequency) -> None:
+        self._frequency = frequency
         self.last_time = time.time()
 
+    def frequency(self):
+        return self._frequency
+
     def period(self):
-        return self.sleep_duration
+        return 1. / self._frequency
 
     def sleep(self):
         elapsed = time.time() - self.last_time
-        remaining = self.sleep_duration - elapsed
+        remaining = self.period() - elapsed
         time.sleep(max(remaining, 0))
         self.last_time = time.time()
