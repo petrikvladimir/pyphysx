@@ -39,6 +39,9 @@ class PyPhysXParallelRenderer:
         r = render_window_cls(queue, **default_render_window_kwargs)
         pyglet.app.run()
 
+    def close(self):
+        self.queue.put(('close', None))
+
     def render_scene(self, scene, recompute_actors=False):
         if recompute_actors or self.actors is None:
             self.actors = scene.get_dynamic_rigid_actors()

@@ -73,6 +73,16 @@ public:
         get_physx_ptr()->setDriveVelocity(eigen_to_pxvec(linear), eigen_to_pxvec(angular));
     }
 
+    auto get_drive_position() {
+        return transform_to_eigen(get_physx_ptr()->getDrivePosition());
+    }
+
+    auto get_drive_velocity() {
+        physx::PxVec3 lin, ang;
+        get_physx_ptr()->getDriveVelocity(lin, ang);
+        return std::make_tuple(pxvec_to_eigen(lin), pxvec_to_eigen(ang));
+    }
+
     auto get_force_torque() {
         physx::PxVec3 force, torque;
         get_physx_ptr()->getConstraint()->getForce(force, torque);
