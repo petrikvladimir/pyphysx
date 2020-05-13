@@ -53,8 +53,25 @@ The code will render and simulate the scene and automatically generate video lik
 
 
 # Features
-## Automatic video saving
-Record the rendered screen and save it as a video automatically after the window is closed.
-```
-render = PyPhysXParallelRenderer(render_window_kwargs=dict(video_filename='out.mp4', fullscreen=True))
-```
+## PhysX interface
+- scene
+  - create scene and actors that will be simulated
+  - multiple scenes can be created in parallel
+- rigid actors (both static and dynamic)
+  - create/attach/detach geometries (box, sphere, convex mesh)
+  - create/update materials
+  - set/update flags or actor properties (velocity, kinematic target, mass)
+- D6Joint
+  - specify per axis limits and drives
+
+## Rendering
+- the library uses `pyglet` library to render 3d scene in parallel process
+- you decide when you want to update your scene by using function `render_scene(scene)`
+- renderer can save video automatically after the window is closed `render = PyPhysXParallelRenderer(render_window_kwargs=dict(video_filename='out.mp4', fullscreen=True))`
+- window control:
+  - mouse:
+    - right button drag to rotate the scene
+  - keys:
+    - esc to close the window
+    - f to show on/off coordinates frame
+    - g to show on/off geometries
