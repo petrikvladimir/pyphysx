@@ -7,6 +7,7 @@ before_install:
   - pip install -U pip
   - pip install -U conan
   - pip install codecov
+  - pip install scipy
   - export PYPHYSX_COV=true
 install:
   - python setup.py build
