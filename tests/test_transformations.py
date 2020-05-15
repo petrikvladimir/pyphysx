@@ -44,6 +44,5 @@ class TransformationTestCase(unittest.TestCase):
         self.assertAlmostEqual(0., np.linalg.norm(identity - np.eye(4)))
 
 
-
 if __name__ == '__main__':
     unittest.main()

@@ -11,6 +11,7 @@ before_install:
 install:
   - python setup.py build
 script:
+  - $(shell export PYTHONPATH=$PYTHONPATH:$(pwd)/build/lib.linux-x86_64-$TRAVIS_PYTHON_VERSION)
   - cd build/temp.linux-x86_64-$TRAVIS_PYTHON_VERSION
   - pytest tests
   - make gcov
