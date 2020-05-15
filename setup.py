@@ -76,7 +76,7 @@ setup(
     install_requires=['conan', 'numpy', 'pyglet', 'imageio', 'imageio_ffmpeg', 'trimesh', 'networkx', 'scipy',
                       'matplotlib'],
     setup_requires=['pytest-runner'],
-    tests_require=['pytest'],
+    tests_require=['pytest', 'scipy'],
     packages=['pyphysx_render', 'pyphysx_utils'],
     zip_safe=False,
 )
