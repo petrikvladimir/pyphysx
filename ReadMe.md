@@ -75,3 +75,4 @@ The code will render and simulate the scene and automatically generate video lik
     - esc to close the window
     - f to show on/off coordinates frame
     - g to show on/off geometries
+    - l to show on/off text labels

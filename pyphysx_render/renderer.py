@@ -5,13 +5,14 @@
 #     Author: Vladimir Petrik <vladimir.petrik@cvut.cz>
 
 from multiprocessing import Process, Queue
+from pyphysx_render.render_windows_interface import PyPhysXWindowInterface
 
 
-class PyPhysXParallelRenderer:
+class PyPhysXParallelRenderer(PyPhysXWindowInterface):
 
     def __init__(self, autostart=True, render_window_cls=None, render_window_kwargs=None) -> None:
-        super().__init__()
         self.queue = Queue()
+        super(PyPhysXParallelRenderer, self).__init__(sending_queue=self.queue)
         self.process = Process(target=self.start_rendering_f,
                                args=(self.queue, render_window_cls, render_window_kwargs))
         self.actors = None
@@ -38,9 +39,6 @@ class PyPhysXParallelRenderer:
         default_render_window_kwargs.update(render_window_kwargs)
         r = render_window_cls(queue, **default_render_window_kwargs)
         pyglet.app.run()
-
-    def close(self):
-        self.queue.put(('close', None))
 
     def render_scene(self, scene, recompute_actors=False):
         if recompute_actors or self.actors is None:
