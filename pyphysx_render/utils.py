@@ -11,11 +11,12 @@ import matplotlib.colors as mcolors
 from scipy.spatial.transform import Rotation
 
 
-def gl_color_from_matplotlib(color=None):
+def gl_color_from_matplotlib(color=None, alpha=None, return_rgba=False):
     """ Get color from matplotlib color. If color is none, use random from tab palette."""
     color = random.choice(list(mcolors.TABLEAU_COLORS.items()))[0] if color is None else color
-    sv = (np.array(mcolors.to_rgb(color)) * 255.).astype(np.int)
-    return sv
+    if return_rgba:
+        return (np.array(mcolors.to_rgba(color, alpha=alpha)) * 255.).astype(np.int)
+    return (np.array(mcolors.to_rgb(color)) * 255.).astype(np.int)
 
 
 def add_ground_lines(batch, dist=1., min_v=-10., max_v=10., color='tab:gray'):
@@ -50,10 +51,13 @@ def add_coordinate_system(batch, pos=None, quat=None, scale=1.):
     batch.add(2, GL_LINES, None, ('v3f', (*pos, *gz)), ('c3B', (*cz, *cz)))
 
 
-def gl_transform(pos, quat):
-    """ Apply gl transform (glMultMatrixf) from position and quaternion """
+def gl_transform(pos, quat, scale=None):
+    """ Apply gl transform (glMultMatrixf) from position, quaternion, and optional xyz scale [sx,sy,sz] or [s] """
     mat = np.zeros((4, 4))
     mat[:3, :3] = np.array(Rotation.from_quat(quat).as_matrix())
     mat[:3, 3] = np.array(pos)
     mat[3, 3] = 1
     glMultMatrixf((GLfloat * 16)(*mat.T.flatten()))
+    if scale is not None:
+        mat = np.diag(np.append(np.ones(3) * scale, 1))
+        glMultMatrixf((GLfloat * 16)(*mat.T.flatten()))

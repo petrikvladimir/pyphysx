@@ -8,10 +8,13 @@ import pyglet
 from pyglet.gl import *
 from queue import Empty
 from multiprocessing import Queue
+import imageio
+
+from pyphysx_render.render_windows_interface import PyPhysXWindowInterface
 from pyphysx_render.utils import *
 
 
-class PyPhysXWindow(pyglet.window.Window):
+class PyPhysXWindow(pyglet.window.Window, PyPhysXWindowInterface):
     def __init__(self, queue: Queue, fps=25, video_filename=None, coordinates_scale=1., coordinate_lw=10., **kwargs):
         super(PyPhysXWindow, self).__init__(**kwargs)
         self.cam_pos_azimuth = np.deg2rad(10)
@@ -36,18 +39,14 @@ class PyPhysXWindow(pyglet.window.Window):
 
         self.plot_frames = False
         self.plot_geometry = True
+        self.plot_labels = True
+
+        self.labels = []
 
         self.video_filename = video_filename
         self.vid_imgs = []
 
         glEnable(GL_DEPTH_TEST)
-
-    def on_close(self):
-        import imageio
-        super().on_close()
-        if self.video_filename is not None:
-            print("Saving {}-frames video into: {}".format(len(self.vid_imgs), self.video_filename))
-            imageio.mimsave(self.video_filename, self.vid_imgs, fps=self.fps)
 
     def on_resize(self, width, height):
         glViewport(0, 0, width, height)
@@ -75,6 +74,13 @@ class PyPhysXWindow(pyglet.window.Window):
         self.static_batch.draw()
         self.plot_coordinate_system()
 
+        if self.plot_labels:
+            for (pos, quat, scale, batch) in self.labels:
+                glPushMatrix()
+                gl_transform(pos, quat, scale)
+                batch.draw()
+                glPopMatrix()
+
         if len(self.actors_global_pose) == len(self.actors_batches_and_poses):
             for global_pose, batches_and_poses in zip(self.actors_global_pose, self.actors_batches_and_poses):
                 glPushMatrix()
@@ -101,8 +107,10 @@ class PyPhysXWindow(pyglet.window.Window):
         super().on_key_press(symbol, modifiers)
         if symbol is pyglet.window.key.F:
             self.plot_frames = not self.plot_frames
-        if symbol is pyglet.window.key.G:
+        elif symbol is pyglet.window.key.G:
             self.plot_geometry = not self.plot_geometry
+        elif symbol is pyglet.window.key.L:
+            self.plot_labels = not self.plot_labels
 
     def update(self, dt):
         try:
@@ -114,6 +122,8 @@ class PyPhysXWindow(pyglet.window.Window):
                     )
             elif cmd == 'poses':
                 self.actors_global_pose = data
+            else:
+                getattr(self, cmd)(*data[0], **data[1])
         except Empty:
             pass
 
@@ -136,3 +146,27 @@ class PyPhysXWindow(pyglet.window.Window):
         for d in data:
             batch.add(n, rtype, None, ('v3f', d), ('c3B', c))
         return batch
+
+    def add_label(self, pos=(0, 0, 0), quat=(0, 0, 0, 1), scale=1., text='', font_name=None, font_size=None,
+                  bold=False, italic=False, color='green', alpha=1., x=0, y=0, width=None, height=None, anchor_x='left',
+                  anchor_y='baseline', align='left'):
+        label = pyglet.text.Label(text, font_name, font_size, bold, italic,
+                                  tuple(gl_color_from_matplotlib(color, return_rgba=True, alpha=alpha)),
+                                  x, y, width, height, anchor_x, anchor_y, align)
+        self.labels.append((pos, quat, np.array(scale) * 1e-2, label))
+
+    def clear_labels(self):
+        self.labels.clear()
+
+    def update_labels_text(self, texts):
+        assert len(texts) == len(self.labels)
+        label: pyglet.text.Label
+        for (pos, quat, scale, label), text in zip(self.labels, texts):
+            if text is not None:
+                label.text = text
+
+    def close(self):
+        super().close()
+        if self.video_filename is not None:
+            print("Saving {}-frames video into: {}".format(len(self.vid_imgs), self.video_filename))
+            imageio.mimsave(self.video_filename, self.vid_imgs, fps=self.fps)
