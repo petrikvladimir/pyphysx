@@ -21,7 +21,7 @@ scene = Scene()
 scene.add_actor(RigidStatic.create_plane(mat=Material(static_friction=0.1, dynamic_friction=0.1, restitution=0.5)))
 scene.add_actor(actor)
 
-render = PyPhysXParallelRenderer(render_window_kwargs=dict(video_filename='anim_spade.gif'))
+render = PyPhysXParallelRenderer(render_window_kwargs=dict(video_filename='spade.gif'))
 
 rate = Rate(25)
 while render.is_running():
