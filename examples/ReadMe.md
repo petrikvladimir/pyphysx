@@ -14,3 +14,16 @@ Two rigid bodies connected by joints:
 and (iii) Linear joint with damping on the right.
 
 ![](anim_joints.gif)
+
+
+## Labels example
+Shows how to add/update labels into the scene.
+
+![](anim_labels.gif)
+
+
+# Notes
+Rendered videos were compressed using:
+```
+gifsicle -i labels.gif -O3 --resize-width 256 --colors 32 --lossy -o anim_labels.gif
+```
