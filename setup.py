@@ -75,8 +75,8 @@ setup(
     cmdclass=dict(build_ext=CMakeBuild),
     install_requires=['conan', 'numpy', 'pyglet', 'imageio', 'imageio_ffmpeg', 'trimesh', 'networkx', 'scipy',
                       'matplotlib'],
-    setup_requires=['pytest-runner'],
-    tests_require=['pytest', 'scipy'],
+    setup_requires=['pytest-runner', 'scipy'],
+    tests_require=['pytest'],
     packages=['pyphysx_render', 'pyphysx_utils'],
     zip_safe=False,
 )
