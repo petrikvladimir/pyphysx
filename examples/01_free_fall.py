@@ -18,7 +18,7 @@ actor.set_global_pose([0.5, 0.5, 1.0])
 actor.set_mass(1.)
 scene.add_actor(actor)
 
-render = PyPhysXParallelRenderer(render_window_kwargs=dict(video_filename='out.gif'))
+render = PyPhysXParallelRenderer(render_window_kwargs=dict(video_filename='free_fall.gif'))
 
 rate = Rate(25)
 for i in range(55):
