@@ -15,6 +15,7 @@
 #include <Shape.h>
 #include <RigidStatic.h>
 #include <D6Joint.h>
+#include <Aggregate.h>
 
 namespace py = pybind11;
 using py::arg;
@@ -54,6 +55,15 @@ PYBIND11_MODULE(pyphysx, m) {
             .def("get_static_rigid_actors", &Scene::get_static_rigid_actors)
             .def("get_dynamic_rigid_actors", &Scene::get_dynamic_rigid_actors)
             .def_readwrite("simulation_time", &Scene::simulation_time);
+
+    py::class_<Aggregate>(m, "Aggregate")
+            .def(py::init<size_t, bool>(),
+                 arg("max_size") = 256,
+                 arg("enable_self_collision") = false
+            )
+            .def("add_actor", &Aggregate::add_actor, arg("actor"))
+            .def("remove_actor", &Aggregate::remove_actor, arg("actor"))
+            .def("get_actors", &Aggregate::get_actors);
 
     py::class_<Material>(m, "Material")
             .def(py::init<float, float, float>(),
