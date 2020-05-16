@@ -33,6 +33,9 @@ public:
         }
     }
 
+    auto get_relative_transform() {
+        return transform_to_eigen(get_physx_ptr()->getRelativeTransform());
+    }
 
     /** @brief Set hard joint limit. */
     void set_linear_limit(physx::PxD6Axis::Enum axis, float lower_limit, float upper_limit, float contact_dist) {
