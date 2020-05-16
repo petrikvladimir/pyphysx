@@ -152,6 +152,9 @@ PYBIND11_MODULE(pyphysx, m) {
                  arg("axis"),
                  arg("motion")
             )
+            .def("get_local_pose", &D6Joint::get_local_pose,
+                 arg("actor_id") = 0
+            )
             .def("set_linear_limit", &D6Joint::set_linear_limit,
                  arg("axis"),
                  arg("lower_limit"),

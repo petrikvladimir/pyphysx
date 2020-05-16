@@ -22,7 +22,17 @@ public:
 
     void set_motion(physx::PxD6Axis::Enum axis, physx::PxD6Motion::Enum type) {
         get_physx_ptr()->setMotion(axis, type);
+
     }
+
+    auto get_local_pose(size_t actor_id) {
+        if (actor_id == 0) {
+            return transform_to_eigen(get_physx_ptr()->getLocalPose(physx::PxJointActorIndex::eACTOR0));
+        } else {
+            return transform_to_eigen(get_physx_ptr()->getLocalPose(physx::PxJointActorIndex::eACTOR1));
+        }
+    }
+
 
     /** @brief Set hard joint limit. */
     void set_linear_limit(physx::PxD6Axis::Enum axis, float lower_limit, float upper_limit, float contact_dist) {
