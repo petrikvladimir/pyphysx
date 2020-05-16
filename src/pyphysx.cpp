@@ -54,6 +54,10 @@ PYBIND11_MODULE(pyphysx, m) {
             .def("add_actor", &Scene::add_actor, arg("actor"))
             .def("get_static_rigid_actors", &Scene::get_static_rigid_actors)
             .def("get_dynamic_rigid_actors", &Scene::get_dynamic_rigid_actors)
+            .def("add_aggregate", &Scene::add_aggregate,
+                 arg("agg")
+            )
+            .def("get_aggregates", &Scene::get_aggregates)
             .def_readwrite("simulation_time", &Scene::simulation_time);
 
     py::class_<Aggregate>(m, "Aggregate")
