@@ -42,7 +42,7 @@ class PyPhysXParallelRenderer(PyPhysXWindowInterface):
 
     def render_scene(self, scene, recompute_actors=False):
         if recompute_actors or self.actors is None:
-            self.actors = scene.get_dynamic_rigid_actors()
+            self.actors = scene.get_dynamic_rigid_actors() + scene.get_static_rigid_actors()
             actors_shapes_data_and_local_poses = []
             for actor in self.actors:
                 actors_shapes_data_and_local_poses.append(
