@@ -257,7 +257,8 @@ PYBIND11_MODULE(pyphysx, m) {
             )
             .def("get_drive_position", &D6Joint::get_drive_position)
             .def("get_drive_velocity", &D6Joint::get_drive_velocity)
-            .def("get_force_torque", &D6Joint::get_force_torque);
+            .def("get_force_torque", &D6Joint::get_force_torque)
+            .def("release", &D6Joint::release);
 
     py::enum_<physx::PxD6Axis::Enum>(m, "D6Axis")
             .value("X", physx::PxD6Axis::eX)

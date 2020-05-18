@@ -22,7 +22,10 @@ public:
 
     void set_motion(physx::PxD6Axis::Enum axis, physx::PxD6Motion::Enum type) {
         get_physx_ptr()->setMotion(axis, type);
+    }
 
+    void release() {
+        get_physx_ptr()->release();
     }
 
     auto get_local_pose(size_t actor_id) {
