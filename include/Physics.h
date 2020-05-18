@@ -24,6 +24,18 @@ public:
         return Physics::get().physics;
     }
 
+    static auto init_gpu() {
+        physx::PxCudaContextManagerDesc desc;
+        desc.interopMode = physx::PxCudaInteropMode::NO_INTEROP;
+        Physics::get().cuda_context_manager = PxCreateCudaContextManager(*Physics::get().foundation, desc);
+        if (Physics::get().cuda_context_manager) {
+            if (!Physics::get().cuda_context_manager->contextIsValid()) {
+                Physics::get().cuda_context_manager->release();
+                Physics::get().cuda_context_manager = nullptr;
+            }
+        }
+    }
+
     /** @brief Set number of CPU used for all scenes computation. */
     static void set_num_cpu(int num_cpu) {
         Physics::get().dispatcher = physx::PxDefaultCpuDispatcherCreate(num_cpu);
@@ -37,6 +49,7 @@ public:
 #define SAFE_RELEASE(x)    if(x)    { x->release(); x = nullptr;    }
         release_all_scenes();
         SAFE_RELEASE(dispatcher);
+        SAFE_RELEASE(cuda_context_manager);
         SAFE_RELEASE(cooking);
         SAFE_RELEASE(physics);
         SAFE_RELEASE(foundation);
@@ -47,7 +60,9 @@ private:
         using namespace physx;
         foundation = PxCreateFoundation(PX_PHYSICS_VERSION, allocator, error_callback);
         physics = PxCreatePhysics(PX_PHYSICS_VERSION, *foundation, PxTolerancesScale());
-        cooking = PxCreateCooking(PX_PHYSICS_VERSION, *foundation, PxCookingParams(PxTolerancesScale()));
+        auto params = PxCookingParams(PxTolerancesScale());
+        params.buildGPUData = true;
+        cooking = PxCreateCooking(PX_PHYSICS_VERSION, *foundation, params);
         dispatcher = physx::PxDefaultCpuDispatcherCreate(0);
     }
 
@@ -67,6 +82,7 @@ public:
     physx::PxCooking *cooking = nullptr;
 
     physx::PxDefaultCpuDispatcher *dispatcher = nullptr;
+    physx::PxCudaContextManager *cuda_context_manager = nullptr;
 
 };
 

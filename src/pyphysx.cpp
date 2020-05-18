@@ -34,9 +34,29 @@ PYBIND11_MODULE(pyphysx, m) {
             .value("ENABLE_POSE_INTEGRATION_PREVIEW", physx::PxRigidBodyFlag::eENABLE_POSE_INTEGRATION_PREVIEW)
             .export_values();
 
+    py::enum_<physx::PxSceneFlag::Enum>(m, "SceneFlag")
+            .value("ENABLE_CCD", physx::PxSceneFlag::eENABLE_CCD)
+            .value("DISABLE_CCD_RESWEEP", physx::PxSceneFlag::eDISABLE_CCD_RESWEEP)
+            .value("ADAPTIVE_FORCE", physx::PxSceneFlag::eADAPTIVE_FORCE)
+            .value("ENABLE_PCM", physx::PxSceneFlag::eENABLE_PCM)
+            .value("DISABLE_CONTACT_REPORT_BUFFER_RESIZE", physx::PxSceneFlag::eDISABLE_CONTACT_REPORT_BUFFER_RESIZE)
+            .value("DISABLE_CONTACT_CACHE", physx::PxSceneFlag::eDISABLE_CONTACT_CACHE)
+            .value("REQUIRE_RW_LOCK", physx::PxSceneFlag::eREQUIRE_RW_LOCK)
+            .value("ENABLE_STABILIZATION", physx::PxSceneFlag::eENABLE_STABILIZATION)
+            .value("ENABLE_AVERAGE_POINT", physx::PxSceneFlag::eENABLE_AVERAGE_POINT)
+            .value("EXCLUDE_KINEMATICS_FROM_ACTIVE_ACTORS", physx::PxSceneFlag::eEXCLUDE_KINEMATICS_FROM_ACTIVE_ACTORS)
+            .value("ENABLE_GPU_DYNAMICS", physx::PxSceneFlag::eENABLE_GPU_DYNAMICS)
+            .value("ENABLE_ENHANCED_DETERMINISM", physx::PxSceneFlag::eENABLE_ENHANCED_DETERMINISM)
+            .value("ENABLE_FRICTION_EVERY_ITERATION", physx::PxSceneFlag::eENABLE_FRICTION_EVERY_ITERATION)
+            .value("MUTABLE_FLAGS", physx::PxSceneFlag::eMUTABLE_FLAGS)
+            .export_values();
 
-    py::class_<Physics>(m, "Physics")
-            .def_static("set_num_cpu", &Physics::set_num_cpu, pybind11::arg("num_cpu") = 0);
+    py::enum_<physx::PxBroadPhaseType::Enum>(m, "BroadPhaseType")
+            .value("SAP", physx::PxBroadPhaseType::eSAP)
+            .value("MBP", physx::PxBroadPhaseType::eMBP)
+            .value("ABP", physx::PxBroadPhaseType::eABP)
+            .value("GPU", physx::PxBroadPhaseType::eGPU)
+            .export_values();
 
     py::enum_<physx::PxFrictionType::Enum>(m, "FrictionType")
             .value("PATCH", physx::PxFrictionType::ePATCH)
@@ -44,10 +64,17 @@ PYBIND11_MODULE(pyphysx, m) {
             .value("TWO_DIRECTIONAL", physx::PxFrictionType::eTWO_DIRECTIONAL)
             .export_values();
 
+    py::class_<Physics>(m, "Physics")
+            .def_static("set_num_cpu", &Physics::set_num_cpu, pybind11::arg("num_cpu") = 0)
+            .def_static("init_gpu", &Physics::init_gpu);
+
     py::class_<Scene>(m, "Scene")
-            .def(py::init<physx::PxFrictionType::Enum, bool>(),
+            .def(py::init<physx::PxFrictionType::Enum, physx::PxBroadPhaseType::Enum, std::vector<physx::PxSceneFlag::Enum>, size_t, float>(),
                  arg("friction_type") = physx::PxFrictionType::ePATCH,
-                 arg("friction_every_iteration") = false
+                 arg("broad_phase_type") = physx::PxBroadPhaseType::eABP,
+                 arg("scene_flags") = std::vector<physx::PxSceneFlag::Enum>(),
+                 arg("gpu_max_num_partitions") = 8,
+                 arg("gpu_dynamic_allocation_scale") = 1.
             )
             .def("simulate", &Scene::simulate, arg("dt") = 1. / 60., arg("num_substeps") = 1)
             .def("add_actor", &Scene::add_actor, arg("actor"))
