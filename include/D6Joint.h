@@ -75,6 +75,10 @@ public:
         get_physx_ptr()->setBreakForce(force, torque);
     }
 
+    bool is_broken() {
+        return get_physx_ptr()->getConstraintFlags().isSet(physx::PxConstraintFlag::eBROKEN);
+    }
+
     void set_drive(physx::PxD6Drive::Enum axis, float stiffness, float damping, float force_limit,
                    bool is_acceleration) {
         get_physx_ptr()->setDrive(axis, physx::PxD6JointDrive(
