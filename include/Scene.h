@@ -14,16 +14,32 @@
 
 class Scene : public BasePhysxPointer<physx::PxScene> {
 public:
-    Scene(const physx::PxFrictionType::Enum &friction_type, bool friction_every_iteration)
-            : BasePhysxPointer() {
+    Scene(const physx::PxFrictionType::Enum &friction_type,
+          const physx::PxBroadPhaseType::Enum &broad_phase_type,
+          const std::vector<physx::PxSceneFlag::Enum> &scene_flags,
+          size_t gpu_max_num_partitions,
+          float gpu_dynamic_allocation_scale
+    ) : BasePhysxPointer() {
         physx::PxSceneDesc sceneDesc(Physics::get().physics->getTolerancesScale());
         sceneDesc.cpuDispatcher = Physics::get().dispatcher;
+        sceneDesc.cudaContextManager = Physics::get().cuda_context_manager;
         sceneDesc.filterShader = physx::PxDefaultSimulationFilterShader;
         sceneDesc.gravity = physx::PxVec3(0.0f, 0.0f, -9.81f);
-        if (friction_every_iteration) {
-            sceneDesc.flags = physx::PxSceneFlag::eENABLE_FRICTION_EVERY_ITERATION;
+        for (const auto &flag : scene_flags) {
+            sceneDesc.flags |= flag;
         }
         sceneDesc.frictionType = friction_type;
+        sceneDesc.broadPhaseType = broad_phase_type;
+        sceneDesc.gpuMaxNumPartitions = gpu_max_num_partitions;
+        sceneDesc.gpuDynamicsConfig.patchStreamSize *= gpu_dynamic_allocation_scale;
+        sceneDesc.gpuDynamicsConfig.forceStreamCapacity *= gpu_dynamic_allocation_scale;
+        sceneDesc.gpuDynamicsConfig.contactBufferCapacity *= gpu_dynamic_allocation_scale;
+        sceneDesc.gpuDynamicsConfig.contactStreamSize *= gpu_dynamic_allocation_scale;
+        sceneDesc.gpuDynamicsConfig.foundLostPairsCapacity *= gpu_dynamic_allocation_scale;
+        sceneDesc.gpuDynamicsConfig.constraintBufferCapacity *= gpu_dynamic_allocation_scale;
+        sceneDesc.gpuDynamicsConfig.heapCapacity *= gpu_dynamic_allocation_scale;
+        sceneDesc.gpuDynamicsConfig.tempBufferCapacity *= gpu_dynamic_allocation_scale;
+
         set_physx_ptr(Physics::get().physics->createScene(sceneDesc));
     }
 
