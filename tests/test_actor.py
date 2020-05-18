@@ -48,6 +48,20 @@ class ActorTest(unittest.TestCase):
         self.assertAlmostEqual(0.1, actor.get_linear_damping())
         self.assertAlmostEqual(0.2, actor.get_angular_damping())
 
+    def test_userdata(self):
+        name1 = "asdf"
+        actor = RigidDynamic()
+        actor.set_user_data(name1)
+        self.assertEqual("asdf", actor.get_user_data())
+        del name1
+        self.assertEqual("asdf", actor.get_user_data())
+        actor.set_user_data("2")
+        other_actors = [RigidDynamic() for _ in range(10)]
+        other_actors2 = [RigidStatic() for _ in range(10)]
+        other_actors2[2].set_user_data('51')
+        self.assertEqual("2", actor.get_user_data())
+        self.assertEqual("51", other_actors2[2].get_user_data())
+
 
 if __name__ == '__main__':
     unittest.main()

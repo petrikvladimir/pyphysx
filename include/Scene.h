@@ -11,6 +11,7 @@
 #include <BasePhysxPointer.h>
 #include <RigidDynamic.h>
 #include "RigidStatic.h"
+#include "Aggregate.h"
 
 class Scene : public BasePhysxPointer<physx::PxScene> {
 public:
@@ -59,7 +60,7 @@ public:
     }
 
     auto get_static_rigid_actors() {
-        auto n = get_physx_ptr()->getNbActors(physx::PxActorTypeFlag::eRIGID_STATIC);
+        const auto n = get_physx_ptr()->getNbActors(physx::PxActorTypeFlag::eRIGID_STATIC);
         std::vector<physx::PxRigidActor *> actors(n);
         get_physx_ptr()->getActors(physx::PxActorTypeFlag::eRIGID_STATIC,
                                    reinterpret_cast<physx::PxActor **>(&actors[0]), n);
@@ -67,11 +68,22 @@ public:
     }
 
     auto get_dynamic_rigid_actors() {
-        auto n = get_physx_ptr()->getNbActors(physx::PxActorTypeFlag::eRIGID_DYNAMIC);
+        const auto n = get_physx_ptr()->getNbActors(physx::PxActorTypeFlag::eRIGID_DYNAMIC);
         std::vector<physx::PxRigidDynamic *> actors(n);
         get_physx_ptr()->getActors(physx::PxActorTypeFlag::eRIGID_DYNAMIC,
                                    reinterpret_cast<physx::PxActor **>(&actors[0]), n);
         return from_vector_of_physx_ptr<RigidDynamic, physx::PxRigidDynamic>(actors);
+    }
+
+    void add_aggregate(Aggregate agg) {
+        get_physx_ptr()->addAggregate(*agg.get_physx_ptr());
+    }
+
+    auto get_aggregates() {
+        const auto n = get_physx_ptr()->getNbAggregates();
+        std::vector<physx::PxAggregate *> aggs(n);
+        get_physx_ptr()->getAggregates(&aggs[0], n);
+        return from_vector_of_physx_ptr<Aggregate>(aggs);
     }
 
 public:

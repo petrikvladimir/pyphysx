@@ -15,6 +15,7 @@
 #include <Shape.h>
 #include <RigidStatic.h>
 #include <D6Joint.h>
+#include <Aggregate.h>
 
 namespace py = pybind11;
 using py::arg;
@@ -80,7 +81,20 @@ PYBIND11_MODULE(pyphysx, m) {
             .def("add_actor", &Scene::add_actor, arg("actor"))
             .def("get_static_rigid_actors", &Scene::get_static_rigid_actors)
             .def("get_dynamic_rigid_actors", &Scene::get_dynamic_rigid_actors)
+            .def("add_aggregate", &Scene::add_aggregate,
+                 arg("agg")
+            )
+            .def("get_aggregates", &Scene::get_aggregates)
             .def_readwrite("simulation_time", &Scene::simulation_time);
+
+    py::class_<Aggregate>(m, "Aggregate")
+            .def(py::init<size_t, bool>(),
+                 arg("max_size") = 256,
+                 arg("enable_self_collision") = false
+            )
+            .def("add_actor", &Aggregate::add_actor, arg("actor"))
+            .def("remove_actor", &Aggregate::remove_actor, arg("actor"))
+            .def("get_actors", &Aggregate::get_actors);
 
     py::class_<Material>(m, "Material")
             .def(py::init<float, float, float>(),
@@ -115,16 +129,20 @@ PYBIND11_MODULE(pyphysx, m) {
             .def("get_local_pose", &Shape::get_local_pose);
 
     py::class_<RigidActor>(m, "RigidActor")
-            .def("set_global_pose", &RigidDynamic::set_global_pose, arg("pos"),
+            .def("set_global_pose", &RigidActor::set_global_pose, arg("pos"),
                  arg("quat") = Eigen::Vector4f(0., 0., 0., 1.))
-            .def("get_global_pose", &RigidDynamic::get_global_pose)
-            .def("attach_shape", &RigidDynamic::attach_shape, arg("shape"))
-            .def("detach_shape", &RigidDynamic::detach_shape,
+            .def("get_global_pose", &RigidActor::get_global_pose)
+            .def("attach_shape", &RigidActor::attach_shape, arg("shape"))
+            .def("detach_shape", &RigidActor::detach_shape,
                  arg("shape")
             )
-            .def("get_atached_shapes", &RigidDynamic::get_atached_shapes)
-            .def("disable_gravity", &RigidDynamic::disable_gravity)
-            .def("enable_gravity", &RigidDynamic::enable_gravity);
+            .def("get_atached_shapes", &RigidActor::get_atached_shapes)
+            .def("disable_gravity", &RigidActor::disable_gravity)
+            .def("enable_gravity", &RigidActor::enable_gravity)
+            .def("set_user_data", &RigidActor::set_user_data,
+                 arg("o")
+            )
+            .def("get_user_data", &RigidActor::get_user_data);
 
     py::enum_<physx::PxForceMode::Enum>(m, "ForceMode")
             .value("FORCE", physx::PxForceMode::eFORCE)
@@ -179,6 +197,10 @@ PYBIND11_MODULE(pyphysx, m) {
                  arg("axis"),
                  arg("motion")
             )
+            .def("get_local_pose", &D6Joint::get_local_pose,
+                 arg("actor_id") = 0
+            )
+            .def("get_relative_transform", &D6Joint::get_relative_transform)
             .def("set_linear_limit", &D6Joint::set_linear_limit,
                  arg("axis"),
                  arg("lower_limit"),

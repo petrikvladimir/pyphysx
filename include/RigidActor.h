@@ -45,6 +45,19 @@ public:
     void enable_gravity() {
         get_physx_ptr()->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, false);
     }
+
+    void set_user_data(const pybind11::object &o) {
+        get_physx_ptr()->userData = o.ptr();
+    }
+
+    auto get_user_data() {
+        return pybind11::reinterpret_borrow<pybind11::object>(
+                pybind11::handle(
+                        static_cast<PyObject *>(get_physx_ptr()->userData)
+                )
+        );
+    }
+
 };
 
 

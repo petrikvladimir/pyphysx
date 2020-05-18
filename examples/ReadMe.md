@@ -15,7 +15,6 @@ and (iii) Linear joint with damping on the right.
 
 ![](anim_joints.gif)
 
-
 ## Labels example
 Shows how to add/update labels into the scene.
 

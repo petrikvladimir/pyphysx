@@ -40,6 +40,21 @@ class SceneTestCase(unittest.TestCase):
         self.assertAlmostEqual(2., actors[1].get_mass())
         self.assertAlmostEqual(3., actors[2].get_mass())
 
+    def test_get_aggregates(self):
+        scene = Scene()
+        agg = Aggregate()
+        agg.add_actor(RigidDynamic())
+        agg.add_actor(RigidDynamic())
+        agg.add_actor(RigidDynamic())
+        scene.add_aggregate(agg)
+        agg = Aggregate()
+        agg.add_actor(RigidDynamic())
+        agg.add_actor(RigidDynamic())
+        agg.add_actor(RigidDynamic())
+        scene.add_aggregate(agg)
+
+        self.assertEqual(2, len(scene.get_aggregates()))
+
 
 if __name__ == '__main__':
     unittest.main()
