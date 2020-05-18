@@ -15,11 +15,12 @@ from pyphysx_render.utils import *
 
 
 class PyPhysXWindow(pyglet.window.Window, PyPhysXWindowInterface):
-    def __init__(self, queue: Queue, fps=25, video_filename=None, coordinates_scale=1., coordinate_lw=10., **kwargs):
+    def __init__(self, queue: Queue, fps=25, video_filename=None, coordinates_scale=1., coordinate_lw=10.,
+                 cam_pos_azimuth=np.deg2rad(10), cam_pos_elevation=np.deg2rad(45), cam_pos_distance=2., **kwargs):
         super(PyPhysXWindow, self).__init__(**kwargs)
-        self.cam_pos_azimuth = np.deg2rad(10)
-        self.cam_pos_elevation = np.deg2rad(45)
-        self.cam_pos_distance = 2.
+        self.cam_pos_azimuth = cam_pos_azimuth
+        self.cam_pos_elevation = cam_pos_elevation
+        self.cam_pos_distance = cam_pos_distance
         self.look_at = np.zeros(3)
         self.view_up = np.array([0., 0., 1.])
         self.background_color_rgba = np.array([0.75] * 3 + [1.])
