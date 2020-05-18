@@ -62,7 +62,7 @@ public:
         convexDesc.points.count = vertices.size();
         convexDesc.points.stride = sizeof(PxVec3);
         convexDesc.points.data = &vertices[0];
-        convexDesc.flags = PxConvexFlag::eCOMPUTE_CONVEX | PxConvexFlag::eQUANTIZE_INPUT;
+        convexDesc.flags = PxConvexFlag::eCOMPUTE_CONVEX | PxConvexFlag::eQUANTIZE_INPUT | PxConvexFlag::eGPU_COMPATIBLE;
         convexDesc.quantizedCount = quantized_count;
         convexDesc.vertexLimit = vertex_limit;
 

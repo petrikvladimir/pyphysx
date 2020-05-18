@@ -54,6 +54,11 @@ The code will render and simulate the scene and automatically generate video lik
 
 # Features
 ## PhysX interface
+- physics
+  - PhysX allows only one instance of Physics object per process - we enforce it in PyPhysX by using singleton that is initialized on the first use
+  - parallel computation control:
+    - `Physics.set_num_cpu(N)` - creates CPU dispatcher with N threads
+    - `Physics.init_gpu()` - initialize GPU computation
 - scene
   - create scene and actors that will be simulated
   - multiple scenes can be created in parallel
