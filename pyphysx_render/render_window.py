@@ -117,6 +117,7 @@ class PyPhysXWindow(pyglet.window.Window, PyPhysXWindowInterface):
         try:
             cmd, data = self.queue.get(block=False)
             if cmd == 'geometry':
+                self.actors_batches_and_poses = []
                 for actor_shapes_and_poses in data:
                     self.actors_batches_and_poses.append(
                         [(self.batch_from_shape_data(data), local_pose) for data, local_pose in actor_shapes_and_poses]
