@@ -50,6 +50,27 @@ class SceneTestCase(unittest.TestCase):
         self.assertEqual("2", shape.get_user_data())
         self.assertEqual("51", other_actors2[2].get_user_data())
 
+    def test_userdata_mutable(self):
+        import sys
+        data = {'color': 0, 'auto': 'no'}
+        shape = Shape.create_sphere(1., Material())
+        self.assertEqual(shape.get_user_data(), None)
+        self.assertEqual(sys.getrefcount(data), 2)  # original data + one in refcount
+        shape.set_user_data(data)
+        self.assertEqual(sys.getrefcount(data), 3)  # original data + one in refcount + one in shape
+        del data
+        self.assertEqual(sys.getrefcount(shape.get_user_data()), 2)  # one in refcount + one in shape
+        new_data = shape.get_user_data()
+        self.assertEqual(sys.getrefcount(new_data), 3)  # new data + one in refcount + one in shape
+        self.assertFalse(new_data is None)
+        self.assertEqual("no", new_data['auto'])
+        self.assertEqual(0, new_data['color'])
+        new_data['color'] = 1
+        self.assertEqual(1, shape.get_user_data()['color'])
+
+        shape.set_user_data(None)
+        self.assertEqual(sys.getrefcount(new_data), 2)  # new data + one in refcount
+
     def test_flags(self):
         shape = Shape.create_sphere(1., Material())
         self.assertTrue(shape.get_flag_value(ShapeFlag.SIMULATION_SHAPE))

@@ -47,6 +47,10 @@ public:
     }
 
     void set_user_data(const pybind11::object &o) {
+        if (get_physx_ptr()->userData != nullptr) { // release the old object first
+            pybind11::handle(static_cast<PyObject *>(get_physx_ptr()->userData)).dec_ref();
+        }
+        o.inc_ref(); // make object safe from garbage collector
         get_physx_ptr()->userData = o.ptr();
     }
 
