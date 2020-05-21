@@ -126,7 +126,11 @@ PYBIND11_MODULE(pyphysx, m) {
             .def("get_shape_data", &Shape::get_shape_data)
             .def("set_local_pose", &Shape::set_local_pose, arg("pos"),
                  arg("quat") = Eigen::Vector4f(0., 0., 0., 1.))
-            .def("get_local_pose", &Shape::get_local_pose);
+            .def("get_local_pose", &Shape::get_local_pose)
+            .def("set_user_data", &Shape::set_user_data,
+                 arg("o")
+            )
+            .def("get_user_data", &Shape::get_user_data);
 
     py::class_<RigidActor>(m, "RigidActor")
             .def("set_global_pose", &RigidActor::set_global_pose, arg("pos"),

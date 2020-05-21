@@ -13,6 +13,7 @@
 #include <Material.h>
 #include <Physics.h>
 #include <transformation_utils.h>
+#include <array>
 
 class Shape : public BasePhysxPointer<physx::PxShape> {
 
@@ -41,6 +42,18 @@ public:
         return Eigen::MatrixXf(0, 0);
     }
 
+    void set_user_data(const pybind11::object &o) {
+        get_physx_ptr()->userData = o.ptr();
+    }
+
+    auto get_user_data() {
+        return pybind11::reinterpret_borrow<pybind11::object>(
+                pybind11::handle(
+                        static_cast<PyObject *>(get_physx_ptr()->userData)
+                )
+        );
+    }
+
     static Shape create_box(const Eigen::Vector3f &sz, Material mat, bool is_exclusive) {
         return Shape::from_geometry(physx::PxBoxGeometry(0.5 * sz[0], 0.5 * sz[1], 0.5 * sz[2]), mat, is_exclusive);
     }
@@ -62,7 +75,8 @@ public:
         convexDesc.points.count = vertices.size();
         convexDesc.points.stride = sizeof(PxVec3);
         convexDesc.points.data = &vertices[0];
-        convexDesc.flags = PxConvexFlag::eCOMPUTE_CONVEX | PxConvexFlag::eQUANTIZE_INPUT | PxConvexFlag::eGPU_COMPATIBLE;
+        convexDesc.flags =
+                PxConvexFlag::eCOMPUTE_CONVEX | PxConvexFlag::eQUANTIZE_INPUT | PxConvexFlag::eGPU_COMPATIBLE;
         convexDesc.quantizedCount = quantized_count;
         convexDesc.vertexLimit = vertex_limit;
 
@@ -140,8 +154,6 @@ private:
         }
         return data;
     }
-
-#include <array>
 
     /** @brief Based on SnippetRender from PhysX. */
     Eigen::MatrixXf render_convex_geometry() const {
