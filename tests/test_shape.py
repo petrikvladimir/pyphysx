@@ -35,7 +35,6 @@ class SceneTestCase(unittest.TestCase):
         s = Shape.create_convex_mesh_from_points(points, Material(), scale=0.5)
         self.assertEqual(s.get_shape_data().shape[0], 6)  # additional 3 faces but one is removed from previous shape
 
-
     def test_userdata(self):
         name1 = "asdf"
         shape = Shape.create_sphere(1., Material())
@@ -49,6 +48,16 @@ class SceneTestCase(unittest.TestCase):
         other_actors2[2].set_user_data('51')
         self.assertEqual("2", shape.get_user_data())
         self.assertEqual("51", other_actors2[2].get_user_data())
+
+    def test_flags(self):
+        shape = Shape.create_sphere(1., Material())
+        self.assertTrue(shape.get_flag_value(ShapeFlag.SIMULATION_SHAPE))
+        self.assertTrue(shape.get_flag_value(ShapeFlag.VISUALIZATION))
+        self.assertFalse(shape.get_flag_value(ShapeFlag.TRIGGER_SHAPE))
+        self.assertFalse(shape.get_flag_value(ShapeFlag.SCENE_QUERY_SHAPE))
+
+        shape.set_flag(ShapeFlag.VISUALIZATION, False)
+        self.assertFalse(shape.get_flag_value(ShapeFlag.VISUALIZATION))
 
 
 if __name__ == '__main__':

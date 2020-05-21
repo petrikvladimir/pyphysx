@@ -20,8 +20,13 @@ class Shape : public BasePhysxPointer<physx::PxShape> {
 public:
     explicit Shape(physx::PxShape *pref) : BasePhysxPointer<physx::PxShape>(pref) {}
 
-//    todo:  functions for enabling/disabling flags
-// todo check flag status function
+    void set_flag(physx::PxShapeFlag::Enum flag, bool value) {
+        get_physx_ptr()->setFlag(flag, value);
+    }
+
+    bool get_flag_value(physx::PxShapeFlag::Enum flag) {
+        return get_physx_ptr()->getFlags().isSet(flag);
+    }
 
     void set_local_pose(const Eigen::Vector3f &pos, const Eigen::Vector4f &quat) {
         get_physx_ptr()->setLocalPose(eigen_to_transform(pos, quat));
