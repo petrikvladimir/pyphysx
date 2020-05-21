@@ -63,6 +63,24 @@ class ActorTest(unittest.TestCase):
         self.assertEqual("2", actor.get_user_data())
         self.assertEqual("51", other_actors2[2].get_user_data())
 
+    def test_userdata_mutable(self):
+        import sys
+        data = {'color': 0, 'auto': 'no'}
+        actor = RigidDynamic()
+        self.assertEqual(actor.get_user_data(), None)
+        self.assertEqual(sys.getrefcount(data), 2)  # original data + one in refcount
+        actor.set_user_data(data)
+        self.assertEqual(sys.getrefcount(data), 3)  # original data + one in refcount + one in shape
+        del data
+        self.assertEqual(sys.getrefcount(actor.get_user_data()), 2)  # one in refcount + one in shape
+        new_data = actor.get_user_data()
+        self.assertEqual(sys.getrefcount(new_data), 3)  # new data + one in refcount + one in shape
+        self.assertFalse(new_data is None)
+        self.assertEqual("no", new_data['auto'])
+        self.assertEqual(0, new_data['color'])
+        new_data['color'] = 1
+        self.assertEqual(1, actor.get_user_data()['color'])
+
 
 if __name__ == '__main__':
     unittest.main()
