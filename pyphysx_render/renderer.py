@@ -42,13 +42,12 @@ class PyPhysXParallelRenderer(PyPhysXWindowInterface):
 
     def render_scene(self, scene, recompute_actors=False):
         if recompute_actors or self.actors is None:
+            self.clear_actors()
             self.actors = scene.get_dynamic_rigid_actors() + scene.get_static_rigid_actors()
-            actors_shapes_data_and_local_poses = []
-            for actor in self.actors:
-                actors_shapes_data_and_local_poses.append(
-                    [(shape.get_shape_data(), shape.get_local_pose()) for shape in actor.get_atached_shapes()]
-                )
-            self.queue.put(('geometry', actors_shapes_data_and_local_poses))
-
-        actors_global_pose = [a.get_global_pose() for a in self.actors]
-        self.queue.put(('poses', actors_global_pose))
+            for i, actor in enumerate(self.actors):
+                for shape in actor.get_atached_shapes():
+                    clr = shape.get_user_data().get('color', None) if shape.get_user_data() is not None else None
+                    self.add_actor_geometry(i, shape.get_shape_data(), *shape.get_local_pose(), clr)
+                    # todo color from shape data
+        for i, actor in enumerate(self.actors):
+            self.set_actor_pose(i, *actor.get_global_pose())
