@@ -65,6 +65,13 @@ PYBIND11_MODULE(pyphysx, m) {
             .value("TWO_DIRECTIONAL", physx::PxFrictionType::eTWO_DIRECTIONAL)
             .export_values();
 
+    py::enum_<physx::PxShapeFlag::Enum>(m, "ShapeFlag")
+            .value("SIMULATION_SHAPE", physx::PxShapeFlag::eSIMULATION_SHAPE)
+            .value("SCENE_QUERY_SHAPE", physx::PxShapeFlag::eSCENE_QUERY_SHAPE)
+            .value("TRIGGER_SHAPE", physx::PxShapeFlag::eTRIGGER_SHAPE)
+            .value("VISUALIZATION", physx::PxShapeFlag::eVISUALIZATION)
+            .export_values();
+
     py::class_<Physics>(m, "Physics")
             .def_static("set_num_cpu", &Physics::set_num_cpu, pybind11::arg("num_cpu") = 0)
             .def_static("init_gpu", &Physics::init_gpu);
@@ -130,7 +137,14 @@ PYBIND11_MODULE(pyphysx, m) {
             .def("set_user_data", &Shape::set_user_data,
                  arg("o")
             )
-            .def("get_user_data", &Shape::get_user_data);
+            .def("get_user_data", &Shape::get_user_data)
+            .def("set_flag", &Shape::set_flag,
+                 arg("flag"),
+                 arg("value") = true
+            )
+            .def("get_flag_value", &Shape::get_flag_value,
+                 arg("flag")
+            );
 
     py::class_<RigidActor>(m, "RigidActor")
             .def("set_global_pose", &RigidActor::set_global_pose, arg("pos"),
