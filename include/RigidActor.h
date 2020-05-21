@@ -51,6 +51,9 @@ public:
     }
 
     auto get_user_data() {
+        if (get_physx_ptr()->userData == nullptr) {
+            return pybind11::reinterpret_borrow<pybind11::object>(pybind11::none());
+        }
         return pybind11::reinterpret_borrow<pybind11::object>(
                 pybind11::handle(
                         static_cast<PyObject *>(get_physx_ptr()->userData)

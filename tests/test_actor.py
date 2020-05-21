@@ -51,6 +51,7 @@ class ActorTest(unittest.TestCase):
     def test_userdata(self):
         name1 = "asdf"
         actor = RigidDynamic()
+        self.assertEqual(actor.get_user_data(), None)
         actor.set_user_data(name1)
         self.assertEqual("asdf", actor.get_user_data())
         del name1

@@ -38,6 +38,7 @@ class SceneTestCase(unittest.TestCase):
     def test_userdata(self):
         name1 = "asdf"
         shape = Shape.create_sphere(1., Material())
+        self.assertEqual(shape.get_user_data(), None)
         shape.set_user_data(name1)
         self.assertEqual("asdf", shape.get_user_data())
         del name1
