@@ -36,5 +36,20 @@ class SceneTestCase(unittest.TestCase):
         self.assertEqual(s.get_shape_data().shape[0], 6)  # additional 3 faces but one is removed from previous shape
 
 
+    def test_userdata(self):
+        name1 = "asdf"
+        shape = Shape.create_sphere(1., Material())
+        shape.set_user_data(name1)
+        self.assertEqual("asdf", shape.get_user_data())
+        del name1
+        self.assertEqual("asdf", shape.get_user_data())
+        shape.set_user_data("2")
+        other_actors = [RigidDynamic() for _ in range(10)]
+        other_actors2 = [RigidStatic() for _ in range(10)]
+        other_actors2[2].set_user_data('51')
+        self.assertEqual("2", shape.get_user_data())
+        self.assertEqual("51", other_actors2[2].get_user_data())
+
+
 if __name__ == '__main__':
     unittest.main()
