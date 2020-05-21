@@ -36,7 +36,7 @@ class PyPhysXWindow(pyglet.window.Window, PyPhysXWindowInterface):
 
         self.queue = queue
         pyglet.clock.schedule_interval(self.update, 1 / self.fps)
-        self.actors_global_pose, self.actors_batches_and_poses = [], []
+        self.actors = {}
 
         self.plot_frames = False
         self.plot_geometry = True
@@ -82,19 +82,20 @@ class PyPhysXWindow(pyglet.window.Window, PyPhysXWindowInterface):
                 batch.draw()
                 glPopMatrix()
 
-        if len(self.actors_global_pose) == len(self.actors_batches_and_poses):
-            for global_pose, batches_and_poses in zip(self.actors_global_pose, self.actors_batches_and_poses):
-                glPushMatrix()
-                gl_transform(*global_pose)
-                if self.plot_frames:
-                    self.plot_coordinate_system()
-                if self.plot_geometry:
-                    for (batch, local_pose) in batches_and_poses:
-                        glPushMatrix()
-                        gl_transform(*local_pose)
-                        batch.draw()
-                        glPopMatrix()
-                glPopMatrix()
+        for actor in self.actors.values():
+            if actor['pose'] is None:
+                continue
+            glPushMatrix()
+            gl_transform(*actor['pose'])
+            if self.plot_frames:
+                self.plot_coordinate_system()
+            if self.plot_geometry:
+                for batch, local_pose in zip(actor['batches'], actor['local_poses']):
+                    glPushMatrix()
+                    gl_transform(*local_pose)
+                    batch.draw()
+                    glPopMatrix()
+            glPopMatrix()
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
         if buttons & pyglet.window.mouse.LEFT:
@@ -117,17 +118,7 @@ class PyPhysXWindow(pyglet.window.Window, PyPhysXWindowInterface):
         try:
             while True:  # get all data from the queue before rendering
                 cmd, data = self.queue.get(block=False)
-                if cmd == 'geometry':
-                    self.actors_batches_and_poses = []
-                    for actor_shapes_and_poses in data:
-                        self.actors_batches_and_poses.append(
-                            [(self.batch_from_shape_data(data), local_pose) for data, local_pose in
-                             actor_shapes_and_poses]
-                        )
-                elif cmd == 'poses':
-                    self.actors_global_pose = data
-                else:
-                    getattr(self, cmd)(*data[0], **data[1])
+                getattr(self, cmd)(*data[0], **data[1])
         except Empty:
             pass
 
@@ -174,3 +165,16 @@ class PyPhysXWindow(pyglet.window.Window, PyPhysXWindowInterface):
         if self.video_filename is not None:
             print("Saving {}-frames video into: {}".format(len(self.vid_imgs), self.video_filename))
             imageio.mimsave(self.video_filename, self.vid_imgs, fps=self.fps)
+
+    def add_actor_geometry(self, actor_id, geometry_data, local_pos, local_quat, color=None):
+        if actor_id not in self.actors:
+            self.actors[actor_id] = dict(batches=[], local_poses=[], pose=None)
+        self.actors[actor_id]['batches'].append(self.batch_from_shape_data(geometry_data, color))
+        self.actors[actor_id]['local_poses'].append((local_pos, local_quat))
+
+    def clear_actors(self):
+        self.actors.clear()
+
+    def set_actor_pose(self, actor_id, pos, quat):
+        if actor_id in self.actors:
+            self.actors[actor_id]['pose'] = (pos, quat)

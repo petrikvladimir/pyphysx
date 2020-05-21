@@ -12,10 +12,21 @@ from pyphysx import *
 actor = RigidDynamic()
 mesh_mat = Material()
 obj: trimesh.Scene = trimesh.load('spade.obj', split_object=True, group_material=False)
-shapes = [actor.attach_shape(Shape.create_convex_mesh_from_points(g.vertices, mesh_mat, scale=1e-3)) for g in
-          obj.geometry.values()]
+for g in obj.geometry.values():
+    actor.attach_shape(Shape.create_convex_mesh_from_points(g.vertices, mesh_mat, scale=1e-3))
 actor.set_global_pose([0.5, 0.5, 1.0])
 actor.set_mass(1.)
+
+# Add custom coloring to the shapes
+for i, s in enumerate(actor.get_atached_shapes()):
+    if i == 10:
+        s.set_user_data(dict(color='tab:blue'))
+    elif i == 9:
+        s.set_user_data(dict(color='tab:grey'))
+    elif i in [0, 1, 4, 5]:
+        s.set_user_data(dict(color='tab:green'))
+    else:
+        s.set_user_data(dict(color='green'))
 
 scene = Scene()
 scene.add_actor(RigidStatic.create_plane(mat=Material(static_friction=0.1, dynamic_friction=0.1, restitution=0.5)))

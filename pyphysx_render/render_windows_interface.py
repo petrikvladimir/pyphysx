@@ -52,3 +52,19 @@ class PyPhysXWindowInterface:
     def close(self):
         """ Close window. """
         pass
+
+    @add_to_queue
+    def add_actor_geometry(self, actor_id, geometry_data, local_pos, local_quat, color=None):
+        """ Add actor geometry into the internal rendering buffer. Actor is identified by actor_id, new is created if
+            id was not used before. """
+        pass
+
+    @add_to_queue
+    def clear_actors(self):
+        """ Remove all actors from the rendering buffer. """
+        pass
+
+    @add_to_queue
+    def set_actor_pose(self, actor_id, pos, quat):
+        """ Set actor pose based on the actor_id """
+        pass
