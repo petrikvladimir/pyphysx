@@ -15,7 +15,7 @@ install:
 script:
   - export PYTHONPATH=$PYTHONPATH:$(pwd)/build/lib.linux-x86_64-$TRAVIS_PYTHON_VERSION
   - cd build/temp.linux-x86_64-$TRAVIS_PYTHON_VERSION
-  - pytest tests --cov=codecov --cov ../../pyphysx_utils --cov ../../pyphysx_render
+  - pytest tests --cov=codecov --cov ../lib.linux-x86_64-$TRAVIS_PYTHON_VERSION/pyphysx_utils --cov ../lib.linux-x86_64-$TRAVIS_PYTHON_VERSION/pyphysx_render
   - make gcov
 after_success:
   - codecov -X gcov
