@@ -66,15 +66,15 @@ class CMakeBuild(build_ext):
 
 setup(
     name='pyphysx',
-    version='0.0.1',
+    version='0.0.2',
     author='Vladimir Petrik',
     author_email='vladimir.petrik@cvut.cz',
     description='PyPhysX - python wrapper for PhysX Nvidia simulator.',
     long_description='',
     ext_modules=[CMakeExtension('pyphysx')],
     cmdclass=dict(build_ext=CMakeBuild),
-    install_requires=['conan', 'numpy', 'pyglet', 'imageio', 'imageio_ffmpeg', 'trimesh', 'networkx', 'scipy',
-                      'matplotlib'],
+    install_requires=['conan', 'numpy', 'pyglet', 'imageio', 'imageio_ffmpeg', 'trimesh', 'networkx',
+                      'numba', 'numpy_quaternion', 'matplotlib'],
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
     packages=['pyphysx_render', 'pyphysx_utils'],

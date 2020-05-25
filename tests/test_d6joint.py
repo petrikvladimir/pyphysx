@@ -16,7 +16,7 @@ class D6JointTest(unittest.TestCase):
 
     def test_local_pose(self):
         a1, a2 = RigidDynamic(), RigidDynamic()
-        j = D6Joint(a1, a2, local_pos0=(0., 3., 0.), local_pos1=(0., -5., 0.))
+        j = D6Joint(a1, a2, local_pose0=(0., 3., 0.), local_pose1=(0., -5., 0.))
         self.assertAlmostEqual(j.get_local_pose(0)[0][1], 3.)
         self.assertAlmostEqual(j.get_local_pose(1)[0][1], -5.)
 
@@ -27,7 +27,7 @@ class D6JointTest(unittest.TestCase):
             relative transform returns value for joint required to have actors at identity
         """
         a0, a1 = RigidDynamic(), RigidDynamic()
-        j = D6Joint(a0, a1, local_pos0=(0., 3., 0.), local_pos1=(0., -5., 0.))
+        j = D6Joint(a0, a1, local_pose0=(0., 3., 0.), local_pose1=(0., -5., 0.))
         self.assertAlmostEqual(j.get_relative_transform()[0][1], -8.)
 
     def test_broken_joint(self):
@@ -38,7 +38,7 @@ class D6JointTest(unittest.TestCase):
         a1.disable_gravity()
         scene.add_actor(a0)
         scene.add_actor(a1)
-        j = D6Joint(a0, a1, local_pos0=(0., 3., 0.))
+        j = D6Joint(a0, a1, local_pose0=(0., 3., 0.))
         j.set_break_force(10, 1000)
         scene.simulate()
         self.assertFalse(j.is_broken())

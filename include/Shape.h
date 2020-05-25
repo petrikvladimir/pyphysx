@@ -28,12 +28,12 @@ public:
         return get_physx_ptr()->getFlags().isSet(flag);
     }
 
-    void set_local_pose(const Eigen::Vector3f &pos, const Eigen::Vector4f &quat) {
-        get_physx_ptr()->setLocalPose(eigen_to_transform(pos, quat));
+    void set_local_pose(const physx::PxTransform &pose) {
+        get_physx_ptr()->setLocalPose(pose);
     }
 
     auto get_local_pose() {
-        return transform_to_eigen(get_physx_ptr()->getLocalPose());
+        return get_physx_ptr()->getLocalPose();
     }
 
     Eigen::MatrixXf get_shape_data() {
