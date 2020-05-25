@@ -9,6 +9,7 @@ import numpy as np
 from pyphysx_utils.transformations import *
 from pyphysx import *
 import quaternion as npq
+import sys
 
 
 def get_t_matrix(pose):
@@ -50,7 +51,7 @@ class TransformationTestCase(unittest.TestCase):
         self.assertTrue(npq.isclose(q, qref, rtol=1e-5))
 
     def test_multiply_transform(self):
-        pose1 = ((0.1, 0.2, 0.4), npq.from_rotation_vector([0.1, 0.3, 0.5]))
+        pose1 = (np.array((0.1, 0.2, 0.4)), npq.from_rotation_vector([0.1, 0.3, 0.5]))
         pose2 = ((0.3, 0.2, -0.4), npq.from_rotation_vector([0.5, 0.1, 0.2]))
         pose3 = multiply_transformations(pose1, pose2)
 
@@ -59,7 +60,7 @@ class TransformationTestCase(unittest.TestCase):
         t3 = np.matmul(t1, t2)
 
         identity = np.matmul(np.linalg.inv(t3), get_t_matrix(pose3))
-        self.assertAlmostEqual(0., np.linalg.norm(identity - np.eye(4)))
+        self.assertAlmostEqual(0., np.linalg.norm(identity - np.eye(4)), places=4)
 
     def test_multiply_incomplete_transform(self):
         q1 = npq.from_rotation_vector([0.1, 0.3, 0.5])
@@ -81,6 +82,21 @@ class TransformationTestCase(unittest.TestCase):
         tm = get_t_matrix(inv_pose)
         identity = np.matmul(tn, tm)
         self.assertAlmostEqual(0., np.linalg.norm(identity - np.eye(4)))
+
+    def test_get_transformation_matrix(self):
+        t = pose_to_transformation_matrix((1, 2, 3))
+        expected = np.eye(4)
+        expected[:3, 3] = [1, 2, 3]
+        self.assertAlmostEqual(0., np.linalg.norm(t - expected), places=3)
+
+    def test_ensure_complete_pose(self):
+        pose1 = (np.array((0.1, 0.2, 0.4)), npq.from_rotation_vector([0.1, 0.3, 0.5]))
+        pose1a = pose_ensure_complete(pose1)
+        self.assertEqual(id(pose1), id(pose1a))
+
+        pose2 = ((0.3, 0.2, -0.4), npq.from_rotation_vector([0.5, 0.1, 0.2]))
+        pose2a = pose_ensure_complete(pose2)
+        self.assertNotEqual(id(pose2), id(pose2a))
 
 
 if __name__ == '__main__':
