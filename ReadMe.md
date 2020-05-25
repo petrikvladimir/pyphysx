@@ -68,6 +68,8 @@ The code will render and simulate the scene and automatically generate video lik
   - set/update flags or actor properties (velocity, kinematic target, mass)
 - D6Joint
   - specify per axis limits and drives
+- transformations
+  - automatic transformation casting between pxTransform and tuple of position and numpy quaternion (see [Transformation](doc/transformation.md))
 
 ## Rendering
 - the library uses `pyglet` library to render 3d scene in parallel process

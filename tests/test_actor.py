@@ -11,21 +11,23 @@ import sys
 sys.path.append('lib')
 
 from pyphysx import *
+import quaternion as npq
 
 
 class ActorTest(unittest.TestCase):
 
     def test_global_pose(self):
         actor = RigidDynamic()
-        actor.set_global_pose([0, 2, 1])
+        actor.set_global_pose(([0, 2, 1], npq.one))
         p, q = actor.get_global_pose()
-        np.testing.assert_almost_equal(p, [0, 2, 1])
-        np.testing.assert_almost_equal(q, [0, 0, 0, 1])
 
-        actor.set_global_pose([0, 2, 1], [1, 0, 0, 1])
+        np.testing.assert_almost_equal(p, [0, 2, 1])
+        self.assertTrue(npq.isclose(q, npq.one))
+
+        actor.set_global_pose(([0, 2, 1], [1, 0, 0, 1]))
         p, q = actor.get_global_pose()
         np.testing.assert_almost_equal(p, [0, 2, 1])
-        np.testing.assert_almost_equal(q, np.array([1, 0, 0, 1]) / np.sqrt(2))  # quaternion is always normalized
+        np.testing.assert_almost_equal(npq.as_float_array(q), np.array([1, 0, 0, 1]) / np.sqrt(2))  # is normalized
 
     def test_mass(self):
         actor = RigidDynamic()

@@ -42,12 +42,12 @@ public:
         return get_dyn_ptr()->getAngularDamping();
     }
 
-    void set_angular_velocity(const Eigen::Vector3f &vel) {
-        get_dyn_ptr()->setAngularVelocity(eigen_to_pxvec(vel));
+    void set_angular_velocity(const physx::PxVec3 &vel) {
+        get_dyn_ptr()->setAngularVelocity(vel);
     }
 
     auto get_angular_velocity() {
-        return pxvec_to_eigen(get_dyn_ptr()->getAngularVelocity());
+        return get_dyn_ptr()->getAngularVelocity();
     }
 
     void set_linear_damping(float damping) {
@@ -59,11 +59,11 @@ public:
     }
 
     auto get_linear_velocity() {
-        return pxvec_to_eigen(get_dyn_ptr()->getLinearVelocity());
+        return get_dyn_ptr()->getLinearVelocity();
     }
 
-    void set_linear_velocity(const Eigen::Vector3f &vel) {
-        get_dyn_ptr()->setLinearVelocity(eigen_to_pxvec(vel));
+    void set_linear_velocity(const physx::PxVec3 &vel) {
+        get_dyn_ptr()->setLinearVelocity(vel);
     }
 
     void set_max_linear_velocity(float max_vel) {
@@ -74,20 +74,20 @@ public:
         get_dyn_ptr()->setMaxAngularVelocity(max_vel);
     }
 
-    void add_force(const Eigen::Vector3f &force, physx::PxForceMode::Enum &force_mode) {
-        get_dyn_ptr()->addForce(eigen_to_pxvec(force), force_mode);
+    void add_force(const physx::PxVec3 &force, physx::PxForceMode::Enum &force_mode) {
+        get_dyn_ptr()->addForce(force, force_mode);
     }
 
-    void add_torque(const Eigen::Vector3f &torque, physx::PxForceMode::Enum &force_mode) {
-        get_dyn_ptr()->addTorque(eigen_to_pxvec(torque), force_mode);
+    void add_torque(const physx::PxVec3 &torque, physx::PxForceMode::Enum &force_mode) {
+        get_dyn_ptr()->addTorque(torque, force_mode);
     }
 
     void set_rigid_body_flag(const physx::PxRigidBodyFlag::Enum &flag, bool value) {
         get_dyn_ptr()->setRigidBodyFlag(flag, value);
     }
 
-    void set_kinematic_target(const Eigen::Vector3f &pos, const Eigen::Vector4f &quat) {
-        get_dyn_ptr()->setKinematicTarget(eigen_to_transform(pos, quat));
+    void set_kinematic_target(const physx::PxTransform &pose) {
+        get_dyn_ptr()->setKinematicTarget(pose);
     }
 
 };

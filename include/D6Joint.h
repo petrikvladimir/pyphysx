@@ -13,12 +13,9 @@
 class D6Joint : public BasePhysxPointer<physx::PxD6Joint> {
 
 public:
-    D6Joint(RigidActor a0, RigidActor a1,
-            const Eigen::Vector3f &local_pos0, const Eigen::Vector4f &local_quat0,
-            const Eigen::Vector3f &local_pos1, const Eigen::Vector4f &local_quat1) :
-            BasePhysxPointer(physx::PxD6JointCreate(*Physics::get_physics(),
-                                                    a0.get_physx_ptr(), eigen_to_transform(local_pos0, local_quat0),
-                                                    a1.get_physx_ptr(), eigen_to_transform(local_pos1, local_quat1))) {}
+    D6Joint(RigidActor a0, RigidActor a1, const physx::PxTransform &local_pose0, const physx::PxTransform &local_pose1)
+            : BasePhysxPointer(physx::PxD6JointCreate(*Physics::get_physics(), a0.get_physx_ptr(), local_pose0,
+                                                      a1.get_physx_ptr(), local_pose1)) {}
 
     void set_motion(physx::PxD6Axis::Enum axis, physx::PxD6Motion::Enum type) {
         get_physx_ptr()->setMotion(axis, type);
@@ -29,15 +26,12 @@ public:
     }
 
     auto get_local_pose(size_t actor_id) {
-        if (actor_id == 0) {
-            return transform_to_eigen(get_physx_ptr()->getLocalPose(physx::PxJointActorIndex::eACTOR0));
-        } else {
-            return transform_to_eigen(get_physx_ptr()->getLocalPose(physx::PxJointActorIndex::eACTOR1));
-        }
+        const auto actor = actor_id == 0 ? physx::PxJointActorIndex::eACTOR0 : physx::PxJointActorIndex::eACTOR1;
+        return get_physx_ptr()->getLocalPose(actor);
     }
 
     auto get_relative_transform() {
-        return transform_to_eigen(get_physx_ptr()->getRelativeTransform());
+        return get_physx_ptr()->getRelativeTransform();
     }
 
     /** @brief Set hard joint limit. */
@@ -85,28 +79,28 @@ public:
                 stiffness, damping, force_limit, is_acceleration));
     }
 
-    void set_drive_position(const Eigen::Vector3f &pos, const Eigen::Vector4f &quat) {
-        get_physx_ptr()->setDrivePosition(eigen_to_transform(pos, quat));
+    void set_drive_position(const physx::PxTransform &pose) {
+        get_physx_ptr()->setDrivePosition(pose);
     }
 
-    void set_drive_velocity(const Eigen::Vector3f &linear, const Eigen::Vector3f &angular) {
-        get_physx_ptr()->setDriveVelocity(eigen_to_pxvec(linear), eigen_to_pxvec(angular));
+    void set_drive_velocity(const physx::PxVec3 &linear, const physx::PxVec3 &angular) {
+        get_physx_ptr()->setDriveVelocity(linear, angular);
     }
 
     auto get_drive_position() {
-        return transform_to_eigen(get_physx_ptr()->getDrivePosition());
+        return get_physx_ptr()->getDrivePosition();
     }
 
     auto get_drive_velocity() {
         physx::PxVec3 lin, ang;
         get_physx_ptr()->getDriveVelocity(lin, ang);
-        return std::make_tuple(pxvec_to_eigen(lin), pxvec_to_eigen(ang));
+        return std::make_tuple(lin, ang);
     }
 
     auto get_force_torque() {
         physx::PxVec3 force, torque;
         get_physx_ptr()->getConstraint()->getForce(force, torque);
-        return std::make_tuple(pxvec_to_eigen(force), pxvec_to_eigen(torque));
+        return std::make_tuple(force, torque);
     }
 
 };

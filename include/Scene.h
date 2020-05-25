@@ -44,15 +44,11 @@ public:
         set_physx_ptr(Physics::get().physics->createScene(sceneDesc));
     }
 
-    /** @brief Simulate scene for given amount of time dt.
-     * Num steps can be used to control accuracy by using smaller delta time internally. */
-    void simulate(float dt, int num_substeps) {
-        const auto ddt = dt / float(num_substeps);
-        for (size_t i = 0; i < num_substeps; ++i) {
-            get_physx_ptr()->simulate(ddt);
-            get_physx_ptr()->fetchResults(true);
-            simulation_time += ddt;
-        }
+    /** @brief Simulate scene for given amount of time dt and fetch results with blocking. */
+    void simulate(float dt) {
+        get_physx_ptr()->simulate(dt);
+        get_physx_ptr()->fetchResults(true);
+        simulation_time += dt;
     }
 
     void add_actor(RigidActor actor) {

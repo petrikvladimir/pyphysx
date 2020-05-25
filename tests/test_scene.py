@@ -19,7 +19,8 @@ class SceneTestCase(unittest.TestCase):
         actor = RigidDynamic()
         scene = Scene()
         scene.add_actor(actor)
-        scene.simulate(dt=0.5, num_substeps=480)
+        for _ in range(480):
+            scene.simulate(dt=0.5 / 480)
         expected_distance = -0.5 * 9.81 * scene.simulation_time ** 2
         self.assertAlmostEqual(actor.get_global_pose()[0][2], expected_distance, places=2)
 

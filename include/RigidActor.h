@@ -17,11 +17,11 @@ public:
     explicit RigidActor(physx::PxRigidActor *physxPtr) : BasePhysxPointer(physxPtr) {}
 
     auto get_global_pose() {
-        return transform_to_eigen(get_physx_ptr()->getGlobalPose());
+        return get_physx_ptr()->getGlobalPose();
     }
 
-    void set_global_pose(const Eigen::Vector3f &pos, const Eigen::Vector4f &quat) {
-        get_physx_ptr()->setGlobalPose(eigen_to_transform(pos, quat));
+    void set_global_pose(const physx::PxTransform& pose) {
+        get_physx_ptr()->setGlobalPose(pose);
     }
 
     void attach_shape(const Shape &shape) {

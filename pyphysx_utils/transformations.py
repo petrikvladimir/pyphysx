@@ -4,17 +4,22 @@
 # Created on: 5/15/20
 #     Author: Vladimir Petrik <vladimir.petrik@cvut.cz>
 
-from scipy.spatial.transform import Rotation
+from pyphysx import cast_transformation
+import quaternion as npq
 
 
-def multiply_transformations(pos1, quat1, pos2, quat2):
+def multiply_transformations(pose1, pose2):
     """ Given two poses T_1 and T_2, represented by position and quaternion, compute T_1 * T_2. """
-    rot1 = Rotation.from_quat(quat1)
-    rot2 = Rotation.from_quat(quat2)
-    return rot1.apply(pos2) + pos1, (rot1 * rot2).as_quat()
+    if not (isinstance(pose1, tuple) and len(pose1) == 2):
+        pose1 = cast_transformation(pose1)
+    if not (isinstance(pose2, tuple) and len(pose2) == 2):
+        pose2 = cast_transformation(pose2)
+    return npq.rotate_vectors(pose1[1], pose2[0]) + pose1[0], pose1[1] * pose2[1]
 
 
-def inverse_transform(pos, quat):
+def inverse_transform(pose):
     """ Inverse transformation. """
-    rot = Rotation.from_quat(quat).inv()
-    return -rot.apply(pos), rot.as_quat()
+    if not (isinstance(pose, tuple) and len(pose) == 2):
+        pose = cast_transformation(pose)
+    qinv: npq.quaternion = pose[1].inverse()
+    return -npq.rotate_vectors(qinv, pose[0]), qinv
