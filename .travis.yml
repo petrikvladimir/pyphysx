@@ -8,7 +8,7 @@ before_install:
   - pip install -U conan
   - pip install codecov
   - pip install --upgrade numpy
-  - pip install pyglet imageio imageio_ffmpeg trimesh networkx numba numpy_quaternion matplotlib
+  - pip install pyglet imageio imageio_ffmpeg trimesh networkx numba numpy_quaternion matplotlib scipy
   - pip install pytest-cov
   - export PYPHYSX_COV=true
 install:
