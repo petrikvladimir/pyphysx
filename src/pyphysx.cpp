@@ -280,7 +280,7 @@ PYBIND11_MODULE(pyphysx, m) {
     py::class_<RigidStatic, RigidActor>(m, "RigidStatic")
             .def(py::init<>())
             .def_static("create_plane", &RigidStatic::create_plane,
-                        arg("mat"),
+                        arg("material"),
                         arg("nx") = 0.,
                         arg("ny") = 0.,
                         arg("nz") = 1.,
