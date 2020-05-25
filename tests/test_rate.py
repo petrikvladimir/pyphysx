@@ -5,7 +5,7 @@
 #     Author: Vladimir Petrik <vladimir.petrik@cvut.cz>
 
 import unittest
-from pyphysx_render.rate import Rate
+from pyphysx_utils.rate import Rate
 import time
 
 

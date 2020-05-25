@@ -28,11 +28,11 @@ pip install git+https://github.com/petrikvladimir/pyphysx.git@master
 For more advanced examples, have a look into the folder [examples](examples/).
 ```python
 from pyphysx_render.renderer import PyPhysXParallelRenderer
-from pyphysx_render.rate import Rate
+from pyphysx_utils.rate import Rate
 from pyphysx import *
 
 scene = Scene()
-scene.add_actor(RigidStatic.create_plane(mat=Material(static_friction=0.1, dynamic_friction=0.1, restitution=0.5)))
+scene.add_actor(RigidStatic.create_plane(material=Material(static_friction=0.1, dynamic_friction=0.1, restitution=0.5)))
 
 actor = RigidDynamic()
 actor.attach_shape(Shape.create_box([0.2] * 3, Material(restitution=1.)))
@@ -41,9 +41,9 @@ actor.set_mass(1.)
 scene.add_actor(actor)
 
 render = PyPhysXParallelRenderer(render_window_kwargs=dict(video_filename='out.mp4'))
-rate = Rate(25)
+rate = Rate(120)
 for i in range(100):
-    scene.simulate(rate.period(), 10)
+    scene.simulate(rate.period())
     render.render_scene(scene)
     rate.sleep()
 ```
