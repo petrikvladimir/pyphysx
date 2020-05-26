@@ -39,3 +39,8 @@ def pose_to_transformation_matrix(pose):
     transformation[:3, :3] = npq.as_rotation_matrix(pose[1])
     transformation[:3, 3] = pose[0]
     return transformation
+
+
+def unit_pose():
+    """ Return unit pose (0,0,0) (1,0,0,0) """
+    return np.zeros(3), npq.one
