@@ -76,9 +76,9 @@ class PyPhysXWindow(pyglet.window.Window, PyPhysXWindowInterface):
         self.plot_coordinate_system()
 
         if self.plot_labels:
-            for (pos, quat, scale, batch) in self.labels:
+            for (pose, scale, batch) in self.labels:
                 glPushMatrix()
-                gl_transform(pos, quat, scale)
+                gl_transform(pose, scale)
                 batch.draw()
                 glPopMatrix()
 
@@ -86,13 +86,13 @@ class PyPhysXWindow(pyglet.window.Window, PyPhysXWindowInterface):
             if actor['pose'] is None:
                 continue
             glPushMatrix()
-            gl_transform(*actor['pose'])
+            gl_transform(actor['pose'])
             if self.plot_frames:
                 self.plot_coordinate_system()
             if self.plot_geometry:
                 for batch, local_pose in zip(actor['batches'], actor['local_poses']):
                     glPushMatrix()
-                    gl_transform(*local_pose)
+                    gl_transform(local_pose)
                     batch.draw()
                     glPopMatrix()
             glPopMatrix()
@@ -142,13 +142,13 @@ class PyPhysXWindow(pyglet.window.Window, PyPhysXWindowInterface):
             batch.add(n, rtype, None, ('v3f', d), ('c3B', c))
         return batch
 
-    def add_label(self, pos=(0, 0, 0), quat=(0, 0, 0, 1), scale=1., text='', font_name=None, font_size=None,
+    def add_label(self, pose=None, scale=1., text='', font_name=None, font_size=None,
                   bold=False, italic=False, color='green', alpha=1., x=0, y=0, width=None, height=None, anchor_x='left',
                   anchor_y='baseline', align='left'):
         label = pyglet.text.Label(text, font_name, font_size, bold, italic,
                                   tuple(gl_color_from_matplotlib(color, return_rgba=True, alpha=alpha)),
                                   x, y, width, height, anchor_x, anchor_y, align)
-        self.labels.append((pos, quat, np.array(scale) * 1e-2, label))
+        self.labels.append((pose if pose is not None else unit_pose(), np.array(scale) * 1e-2, label))
 
     def clear_labels(self):
         self.labels.clear()
@@ -156,7 +156,7 @@ class PyPhysXWindow(pyglet.window.Window, PyPhysXWindowInterface):
     def update_labels_text(self, texts):
         assert len(texts) == len(self.labels)
         label: pyglet.text.Label
-        for (pos, quat, scale, label), text in zip(self.labels, texts):
+        for (pose, scale, label), text in zip(self.labels, texts):
             if text is not None:
                 label.text = text
 
@@ -166,15 +166,15 @@ class PyPhysXWindow(pyglet.window.Window, PyPhysXWindowInterface):
             print("Saving {}-frames video into: {}".format(len(self.vid_imgs), self.video_filename))
             imageio.mimsave(self.video_filename, self.vid_imgs, fps=self.fps)
 
-    def add_actor_geometry(self, actor_id, geometry_data, local_pos, local_quat, color=None):
+    def add_actor_geometry(self, actor_id, geometry_data, local_pose, color=None):
         if actor_id not in self.actors:
             self.actors[actor_id] = dict(batches=[], local_poses=[], pose=None)
         self.actors[actor_id]['batches'].append(self.batch_from_shape_data(geometry_data, color))
-        self.actors[actor_id]['local_poses'].append((local_pos, local_quat))
+        self.actors[actor_id]['local_poses'].append(local_pose)
 
     def clear_actors(self):
         self.actors.clear()
 
-    def set_actor_pose(self, actor_id, pos, quat):
+    def set_actor_pose(self, actor_id, pose):
         if actor_id in self.actors:
-            self.actors[actor_id]['pose'] = (pos, quat)
+            self.actors[actor_id]['pose'] = pose

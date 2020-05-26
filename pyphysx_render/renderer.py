@@ -5,6 +5,8 @@
 #     Author: Vladimir Petrik <vladimir.petrik@cvut.cz>
 
 from multiprocessing import Process, Queue
+from queue import Empty
+
 from pyphysx_render.render_windows_interface import PyPhysXWindowInterface
 
 
@@ -39,6 +41,12 @@ class PyPhysXParallelRenderer(PyPhysXWindowInterface):
         default_render_window_kwargs.update(render_window_kwargs)
         r = render_window_cls(queue, **default_render_window_kwargs)
         pyglet.app.run()
+        # clear the queue, otherwise will not join
+        while True:
+            try:
+                d = queue.get(block=False)
+            except Empty:
+                return
 
     def render_scene(self, scene, recompute_actors=False):
         if recompute_actors or self.actors is None:
@@ -47,7 +55,6 @@ class PyPhysXParallelRenderer(PyPhysXWindowInterface):
             for i, actor in enumerate(self.actors):
                 for shape in actor.get_atached_shapes():
                     clr = shape.get_user_data().get('color', None) if shape.get_user_data() is not None else None
-                    self.add_actor_geometry(i, shape.get_shape_data(), *shape.get_local_pose(), clr)
-                    # todo color from shape data
+                    self.add_actor_geometry(i, shape.get_shape_data(), shape.get_local_pose(), clr)
         for i, actor in enumerate(self.actors):
-            self.set_actor_pose(i, *actor.get_global_pose())
+            self.set_actor_pose(i, actor.get_global_pose())

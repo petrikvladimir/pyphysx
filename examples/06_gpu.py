@@ -7,7 +7,7 @@
 import itertools
 import multiprocessing
 
-from pyphysx_render.rate import Rate
+from pyphysx_utils.rate import Rate
 from pyphysx import *
 import numpy as np
 import pandas as pd
@@ -28,7 +28,7 @@ def do_sim(i, return_dict, prop):
     )
     obj: trimesh.Scene = trimesh.load('spade.obj', split_object=True, group_material=False)
     mat = Material(static_friction=0.1, dynamic_friction=0.1, restitution=0.5)
-    scene.add_actor(RigidStatic.create_plane(mat=mat))
+    scene.add_actor(RigidStatic.create_plane(material=mat))
     for _ in range(prop['num_objects']):
         o = RigidDynamic()
         if prop['obj_type'] == 'sphere':

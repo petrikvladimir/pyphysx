@@ -106,15 +106,15 @@ class TreeRobot:
 
 class URDFRobot(TreeRobot):
 
-    def __init__(self, urdf_path, mesh_path=None, attach_to_world_pos=None, attach_to_world_quat=(0, 0, 0, 1),
-                 attach_to_actor=None, joints_drive_setup=None) -> None:
+    def __init__(self, urdf_path, mesh_path=None, attach_to_world_pose=None, attach_to_actor=None,
+                 joints_drive_setup=None) -> None:
         super().__init__()
         self.urdf_path = Path(urdf_path)
         self.mesh_path = Path(mesh_path) if mesh_path is not None else self.urdf_path.parent
 
-        if attach_to_world_pos is not None:
+        if attach_to_world_pose is not None:
             self.world_attachment_actor = RigidStatic()
-            self.world_attachment_actor.set_global_pose(attach_to_world_pos, attach_to_world_quat)
+            self.world_attachment_actor.set_global_pose(attach_to_world_pose)
         elif attach_to_actor is not None:
             self.world_attachment_actor = attach_to_actor
         else:
