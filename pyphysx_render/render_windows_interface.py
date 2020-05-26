@@ -28,8 +28,7 @@ class PyPhysXWindowInterface:
         self.sending_queue = sending_queue
 
     @add_to_queue
-    def add_label(self, pos=(0, 0, 0), quat=(0, 0, 0, 1), scale=1.,
-                  text='',
+    def add_label(self, pose=None, scale=1., text='',
                   font_name=None, font_size=None, bold=False, italic=False,
                   color='green', alpha=1.,
                   x=0, y=0, width=None, height=None,
@@ -54,7 +53,7 @@ class PyPhysXWindowInterface:
         pass
 
     @add_to_queue
-    def add_actor_geometry(self, actor_id, geometry_data, local_pos, local_quat, color=None):
+    def add_actor_geometry(self, actor_id, geometry_data, local_pose, color=None):
         """ Add actor geometry into the internal rendering buffer. Actor is identified by actor_id, new is created if
             id was not used before. """
         pass
@@ -65,6 +64,6 @@ class PyPhysXWindowInterface:
         pass
 
     @add_to_queue
-    def set_actor_pose(self, actor_id, pos, quat):
+    def set_actor_pose(self, actor_id, pose):
         """ Set actor pose based on the actor_id """
         pass

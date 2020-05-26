@@ -9,6 +9,8 @@ import numpy as np
 from pyglet.gl import GL_LINES, GLfloat, glMultMatrixf
 import matplotlib.colors as mcolors
 from scipy.spatial.transform import Rotation
+import quaternion as npq
+from pyphysx_utils.transformations import pose_to_transformation_matrix, unit_pose
 
 
 def gl_color_from_matplotlib(color=None, alpha=None, return_rgba=False):
@@ -33,30 +35,21 @@ def add_ground_lines(batch, dist=1., min_v=-10., max_v=10., color='tab:gray'):
         batch.add(2, GL_LINES, None, ('v3f', (*sv, *ev)), ('c3B', (*c, *c)))
 
 
-def add_coordinate_system(batch, pos=None, quat=None, scale=1.):
+def add_coordinate_system(batch, pose=None, scale=1.):
     """ Add coordinate system into the pyglet batch. """
-    if pos is None:
-        pos = np.zeros(3)
-    if quat is None:
-        quat = np.array([0, 0, 0, 1.])
-    rot = Rotation.from_quat(quat)
-    gx = rot.apply(np.array([1, 0, 0])) * scale
-    gy = rot.apply(np.array([0, 1, 0])) * scale
-    gz = rot.apply(np.array([0, 0, 1])) * scale
+    p, q = pose if pose is not None else unit_pose()
+    gx, gy, gz = npq.rotate_vectors(q, np.eye(3) * scale)
     cx = gl_color_from_matplotlib('tab:red')
     cy = gl_color_from_matplotlib('tab:green')
     cz = gl_color_from_matplotlib('tab:blue')
-    batch.add(2, GL_LINES, None, ('v3f', (*pos, *gx)), ('c3B', (*cx, *cx)))
-    batch.add(2, GL_LINES, None, ('v3f', (*pos, *gy)), ('c3B', (*cy, *cy)))
-    batch.add(2, GL_LINES, None, ('v3f', (*pos, *gz)), ('c3B', (*cz, *cz)))
+    batch.add(2, GL_LINES, None, ('v3f', (*p, *gx)), ('c3B', (*cx, *cx)))
+    batch.add(2, GL_LINES, None, ('v3f', (*p, *gy)), ('c3B', (*cy, *cy)))
+    batch.add(2, GL_LINES, None, ('v3f', (*p, *gz)), ('c3B', (*cz, *cz)))
 
 
-def gl_transform(pos, quat, scale=None):
+def gl_transform(pose, scale=None):
     """ Apply gl transform (glMultMatrixf) from position, quaternion, and optional xyz scale [sx,sy,sz] or [s] """
-    mat = np.zeros((4, 4))
-    mat[:3, :3] = np.array(Rotation.from_quat(quat).as_matrix())
-    mat[:3, 3] = np.array(pos)
-    mat[3, 3] = 1
+    mat = pose_to_transformation_matrix(pose)
     glMultMatrixf((GLfloat * 16)(*mat.T.flatten()))
     if scale is not None:
         mat = np.diag(np.append(np.ones(3) * scale, 1))
