@@ -98,6 +98,11 @@ class TransformationTestCase(unittest.TestCase):
         pose2a = pose_ensure_complete(pose2)
         self.assertNotEqual(id(pose2), id(pose2a))
 
+    def test_unit_pose(self):
+        pose = unit_pose()
+        self.assertAlmostEqual(np.linalg.norm(pose[0]), 0.)
+        self.assertAlmostEqual(npq.rotation_intrinsic_distance(pose[1], npq.one), 0.)
+
 
 if __name__ == '__main__':
     unittest.main()
