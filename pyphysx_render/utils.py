@@ -8,7 +8,6 @@ import random
 import numpy as np
 from pyglet.gl import GL_LINES, GLfloat, glMultMatrixf
 import matplotlib.colors as mcolors
-from scipy.spatial.transform import Rotation
 import quaternion as npq
 from pyphysx_utils.transformations import pose_to_transformation_matrix, unit_pose
 
