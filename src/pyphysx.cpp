@@ -226,7 +226,11 @@ PYBIND11_MODULE(pyphysx, m) {
             .def("set_user_data", &RigidActor::set_user_data,
                  arg("o")
             )
-            .def("get_user_data", &RigidActor::get_user_data);
+            .def("get_user_data", &RigidActor::get_user_data)
+            .def("overlaps", &RigidActor::overlaps,
+                 arg("other_actor"),
+                 "Check if current actor overlaps with a given actor."
+            );
 
 
     py::class_<RigidDynamic, RigidActor>(m, "RigidDynamic")
