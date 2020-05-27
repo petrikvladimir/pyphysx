@@ -81,6 +81,23 @@ class ActorTest(unittest.TestCase):
         new_data['color'] = 1
         self.assertEqual(1, actor.get_user_data()['color'])
 
+    def test_overlap(self):
+        a1 = RigidDynamic()
+        a1.attach_shape(Shape.create_box([0.1] * 3, Material()))
+        a2 = RigidDynamic()
+        a2.attach_shape(Shape.create_box([0.1] * 3, Material()))
+
+        s3 = Shape.create_box([0.1] * 3, Material())
+        s3.set_local_pose([0., 0., -0.3])
+        a3 = RigidDynamic()
+        a3.attach_shape(s3)
+        self.assertTrue(a1.overlaps(a2))
+        self.assertFalse(a1.overlaps(a3))
+        a2.set_global_pose([0, 0., 0.3])
+        a3.set_global_pose([0, 0., 0.3])
+        self.assertFalse(a1.overlaps(a2))
+        self.assertTrue(a1.overlaps(a3))
+
 
 if __name__ == '__main__':
     unittest.main()

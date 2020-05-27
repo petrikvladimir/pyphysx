@@ -65,6 +65,22 @@ public:
         );
     }
 
+    auto overlaps(RigidActor other) {
+        for (const auto shape : get_atached_shapes()) {
+            for (const auto other_shape: other.get_atached_shapes()) {
+                const auto overlap = physx::PxGeometryQuery::overlap(
+                        shape.get_physx_ptr()->getGeometry().any(),
+                        get_physx_ptr()->getGlobalPose() * shape.get_physx_ptr()->getLocalPose(),
+                        other_shape.get_physx_ptr()->getGeometry().any(),
+                        other.get_physx_ptr()->getGlobalPose() * other_shape.get_physx_ptr()->getLocalPose()
+                );
+                if (overlap) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 };
 
 
