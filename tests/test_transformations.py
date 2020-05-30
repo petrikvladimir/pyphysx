@@ -6,6 +6,8 @@
 
 import unittest
 import numpy as np
+from scipy.spatial.transform import Rotation
+
 from pyphysx_utils.transformations import *
 from pyphysx import *
 import quaternion as npq
@@ -102,6 +104,15 @@ class TransformationTestCase(unittest.TestCase):
         pose = unit_pose()
         self.assertAlmostEqual(np.linalg.norm(pose[0]), 0.)
         self.assertAlmostEqual(npq.rotation_intrinsic_distance(pose[1], npq.one), 0.)
+
+    def test_euler(self):
+        ang = [0.1, 0.2, 0.3]
+        for seq in ['XYZ', 'YXZ', 'xyz', 'yxz', 'xyx', 'XYX']:
+            expq = npq.from_float_array(Rotation.from_euler(seq, ang).as_quat()[[3, 0, 1, 2]])
+            self.assertAlmostEqual(npq.rotation_intrinsic_distance(quat_from_euler(seq, ang), expq), 0.)
+
+        self.assertAlmostEqual(npq.rotation_intrinsic_distance(quat_from_euler('Z', [1]), quat_from_euler('z', [1])),
+                               0.)
 
 
 if __name__ == '__main__':
