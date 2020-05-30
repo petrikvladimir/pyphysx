@@ -44,3 +44,20 @@ def pose_to_transformation_matrix(pose):
 def unit_pose():
     """ Return unit pose (0,0,0) (1,0,0,0) """
     return np.zeros(3), npq.one
+
+
+def quat_from_euler(seq='xyz', angles=None):
+    """ Compute quaternion from intrinsic (e.g. 'XYZ') or extrinsic (fixed axis, e.g. 'xyz') euler angles. """
+    angles = np.asarray(angles)
+    q = npq.one
+    for s, a in zip(seq, angles):
+        axis = np.array([
+            1 if s.capitalize() == 'X' else 0,
+            1 if s.capitalize() == 'Y' else 0,
+            1 if s.capitalize() == 'Z' else 0,
+        ])
+        if s.isupper():
+            q = q * npq.from_rotation_vector(axis * a)
+        else:
+            q = npq.from_rotation_vector(axis * a) * q
+    return q
