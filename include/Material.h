@@ -20,6 +20,8 @@ public:
             BasePhysxPointer(Physics::get_physics()->createMaterial(static_friction, dynamic_friction, restitution)) {
     }
 
+    explicit Material(physx::PxMaterial *pref) : BasePhysxPointer<physx::PxMaterial>(pref) {}
+
     void set_static_friction(float static_friction) {
         get_physx_ptr()->setStaticFriction(static_friction);
     }
