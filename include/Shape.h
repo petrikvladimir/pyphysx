@@ -66,6 +66,14 @@ public:
         );
     }
 
+    /** @brief Get all materials specified for this shape. */
+    auto get_materials() {
+        const auto n = get_physx_ptr()->getNbMaterials();
+        std::vector<physx::PxMaterial *> materials(n);
+        get_physx_ptr()->getMaterials(&materials[0], materials.size());
+        return from_vector_of_physx_ptr<Material>(materials);
+    }
+
     static Shape create_box(const Eigen::Vector3f &sz, Material mat, bool is_exclusive) {
         return Shape::from_geometry(physx::PxBoxGeometry(0.5 * sz[0], 0.5 * sz[1], 0.5 * sz[2]), mat, is_exclusive);
     }

@@ -207,6 +207,9 @@ PYBIND11_MODULE(pyphysx, m) {
             )
             .def("get_flag_value", &Shape::get_flag_value,
                  arg("flag")
+            )
+            .def("get_materials", &Shape::get_materials,
+                 "Get all materials specified for this shape."
             );
 
     py::class_<RigidActor>(m, "RigidActor")

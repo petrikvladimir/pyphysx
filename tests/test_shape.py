@@ -82,6 +82,13 @@ class ShapeTestCase(unittest.TestCase):
         shape.set_flag(ShapeFlag.VISUALIZATION, False)
         self.assertFalse(shape.get_flag_value(ShapeFlag.VISUALIZATION))
 
+    def test_get_material(self):
+        mat = Material(0.5)
+        shape = Shape.create_sphere(0.3, mat)
+        mats = shape.get_materials()
+        self.assertEqual(len(mats), 1)
+        self.assertAlmostEqual(mats[0].get_static_friction(), 0.5)
+
 
 if __name__ == '__main__':
     unittest.main()
