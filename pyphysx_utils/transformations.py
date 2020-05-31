@@ -68,6 +68,8 @@ def quat_between_two_vectors(v, u) -> npq.quaternion:
         Based on: https://math.stackexchange.com/questions/180418/calculate-rotation-matrix-to-align-vector-a-to-vector-b-in-3d/476311#476311
     """
     vec = np.cross(v, u)
+    if np.all(np.isclose(vec, np.zeros(3))):
+        return npq.one
     ang_sine = np.linalg.norm(vec)
     ang_cosine = np.dot(v, u)
     ang = np.arctan2(ang_sine, ang_cosine)

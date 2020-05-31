@@ -129,6 +129,7 @@ class TransformationTestCase(unittest.TestCase):
         q = quat_between_two_vectors(v, u)
         u1 = npq.rotate_vectors(q, v)
         self.assertAlmostEqual(np.linalg.norm(u - u1), 0.)
+        self.assertAlmostEqual(npq.rotation_intrinsic_distance(npq.one, quat_between_two_vectors(v, v)), 0.)
 
 
 if __name__ == '__main__':
