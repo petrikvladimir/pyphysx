@@ -113,6 +113,7 @@ class TransformationTestCase(unittest.TestCase):
 
         self.assertAlmostEqual(npq.rotation_intrinsic_distance(quat_from_euler('Z', [1]), quat_from_euler('z', [1])),
                                0.)
+        self.assertAlmostEqual(npq.rotation_intrinsic_distance(quat_from_euler('Z', 2), quat_from_euler('z', 2)), 0.)
 
 
 if __name__ == '__main__':
