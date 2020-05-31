@@ -6,63 +6,139 @@
 #
 # Class used to represent robots (links connected by joints) in a tree like structure.
 # Parallel mechanism are therefore not supported.
-# todo: this file needs significant refactor...
+#
+# Each robot has a unique root node (link). Other links are connected by a joint (fixed, revolute, or prismatic) to a
+# parent. For serial manipulator:
+#
+# (root) -> (link_1) -> (link_2) ... -> (link_n)
+#
+# Root link can be optionally attached to an existing actor or to a static world pose.
 #
 
-from pathlib import Path
-import anytree
-from xml.etree.ElementTree import ElementTree, parse
-import numpy as np
-import trimesh
-from scipy.spatial.transform import Rotation
+from typing import Dict, Optional
 
-from pyphysx_utils.transformations import multiply_transformations, inverse_transform
+import numpy as np
+import quaternion as npq
+import anytree
+
+from pyphysx_utils.transformations import multiply_transformations, inverse_transform, unit_pose, quat_from_euler
 from pyphysx import *
 
 
-class Link(anytree.Node):
+class Joint:
+    """
+    Defines a joint that connects two link together.
+    Can be one of the types: (i) fixed, (ii) prismatic, or (iii) revolute.
+    """
 
-    def __init__(self, name, actor=None, material=None):
+    def __init__(self, name, joint_type='fixed', null_value=0.) -> None:
+        super().__init__()
+        self.name = name
+        self.joint_type: str = joint_type
+        self.null_value: float = null_value
+        self.physx_joint: Optional[D6Joint] = None
+
+    def joint_transformation(self, joint_position=None):
+        """ Get transformation of joint. For prismatic, this is defined as translation in x-axis.
+            For revolute it is rotation about x-axis. """
+        if self.joint_type == 'fixed':
+            return unit_pose()
+        if joint_position is None:
+            joint_position = self.null_value
+        if self.joint_type == 'prismatic':
+            return np.array([joint_position, 0, 0]), npq.one
+        elif self.joint_type == 'revolute':
+            return np.zeros(3), quat_from_euler('x', [joint_position])
+        else:
+            raise NotImplementedError('Only fixed, prismatic and revolute joints are supported.')
+
+    def transformation_from_parent_to_child_link(self, joint_position=None):
+        """ Return transformation from parent to the child either for the null position or for the specified
+            position of the joint. """
+        t0 = self.physx_joint.get_local_pose(0)
+        tj = self.joint_transformation(joint_position)
+        t1 = inverse_transform(self.physx_joint.get_local_pose(1))
+        return multiply_transformations(multiply_transformations(t0, tj), t1)
+
+    @property
+    def is_revolute(self):
+        return self.joint_type == 'revolute'
+
+    @property
+    def is_fixed(self):
+        return self.joint_type == 'fixed'
+
+    @property
+    def is_prismatic(self):
+        return self.joint_type == 'prismatic'
+
+    def create_physx_joint(self, actor0, actor1, local_pose0, local_pose1, lower_limit=None, upper_limit=None):
+        """ Create physx joint that connects given actors at given poses. Free joint motion is used if limits are not
+        specified and limited is used otherwise for prismatic and revolute joint. """
+        if local_pose0 is None:
+            local_pose0 = unit_pose()
+        if local_pose1 is None:
+            local_pose1 = unit_pose()
+        self.physx_joint = D6Joint(actor0, actor1, local_pose0, local_pose1)
+        is_limited = lower_limit is not None and upper_limit is not None
+        if self.is_revolute:
+            self.physx_joint.set_motion(D6Axis.TWIST, D6Motion.LIMITED if is_limited else D6Motion.FREE)
+            if is_limited:
+                self.physx_joint.set_twist_limit(lower_limit=lower_limit, upper_limit=upper_limit)
+        elif self.is_prismatic:
+            self.physx_joint.set_motion(D6Axis.X, D6Motion.LIMITED if is_limited else D6Motion.FREE)
+            if is_limited:
+                self.physx_joint.set_linear_limit(D6Axis.X, lower_limit=lower_limit, upper_limit=upper_limit)
+
+    def set_joint_position(self, value):
+        """ Set desired position of the joint. """
+        value = value if value is not None else self.null_value
+        if self.is_prismatic:
+            self.physx_joint.set_drive_position((value, 0, 0))
+        elif self.is_revolute:
+            self.physx_joint.set_drive_position((np.zeros(3), quat_from_euler('x', value)))
+
+    def set_joint_velocity(self, value):
+        """ Set desired velocity of the joint. """
+        if self.is_prismatic:
+            self.physx_joint.set_drive_velocity(linear=(value, 0, 0))
+        elif self.is_revolute:
+            self.physx_joint.set_drive_velocity(angular=(value, 0, 0))
+
+    def configure_drive(self, stiffness=1e7, damping=1e5, force_limit=1e5, is_acceleration=False):
+        """ Configure drive for the joint. Drive is used to control joint position and velocity as PD controller. """
+        if self.is_revolute:
+            self.physx_joint.set_drive(D6Drive.TWIST, stiffness=stiffness, damping=damping, force_limit=force_limit,
+                                       is_acceleration=is_acceleration)
+        elif self.is_prismatic:
+            self.physx_joint.set_drive(D6Drive.X, stiffness=stiffness, damping=damping, force_limit=force_limit,
+                                       is_acceleration=is_acceleration)
+
+
+class Link(anytree.Node):
+    """
+    Link is named and defines: (i) an actor that specifies dynamic and geometric properties and (ii) joint that connects
+    this link to the parent link.
+    """
+
+    def __init__(self, name, actor=None):
         super().__init__(name)
         self.actor = actor
-        self.material = material
-        self.joint = None
-        self.joint_name = None
-        self.motion_axis = None
-
-    def get_transform_from_parent(self, joint_value):
-        t0 = self.joint.get_local_pose(0)
-        jtran = self.get_transform_for_motion_axis(joint_value)
-        t1 = self.joint.get_local_pose(1)
-        return multiply_transformations(*multiply_transformations(*t0, *jtran), *t1)
-
-    def get_transform_for_motion_axis(self, v):
-        axis = self.motion_axis
-        pos, quat = np.zeros(3), np.array([0, 0, 0, 1.])
-        if axis == D6Axis.X:
-            pos[0] = v
-        elif axis == D6Axis.Y:
-            pos[1] = v
-        elif axis == D6Axis.Z:
-            pos[2] = v
-        elif axis == D6Axis.TWIST:
-            quat = Rotation.from_euler('x', v).as_quat()
-        elif axis == D6Axis.SWING1:
-            quat = Rotation.from_euler('y', v).as_quat()
-        elif axis == D6Axis.SWING2:
-            quat = Rotation.from_euler('z', v).as_quat()
-        return pos, quat
+        self.joint_from_parent: Optional[Joint] = None
 
 
 class TreeRobot:
 
     def __init__(self) -> None:
         super().__init__()
-        self._root_node = None
-        self.links = {}
+        self.links = {}  # type: Dict[str, Link]
+        self.movable_joints = {}  # type: Dict[str, Joint]
+        self._root_node = None  # type: Optional[Link]
+        self.world_attachment_actor = None
 
     @property
-    def root_node(self):
+    def root_node(self) -> Link:
+        """ Get the root node of the kinematic tree. Root node value is cached. """
         if self._root_node is None:
             roots = [node for node in self.links.values() if node.is_root]
             assert len(roots) == 1
@@ -70,210 +146,96 @@ class TreeRobot:
         return self._root_node
 
     def add_link(self, link: Link):
+        """ Add new link to the structure. This invalidates previously computed root node. """
         self.links[link.name] = link
         self._root_node = None
 
-    def add_joint(self, parent_name: str, child_name: str, pos, quat, axis, init_value=0.):
+    def add_joint(self, parent_name: str, child_name: str, joint: Joint = None, local_pose0=None, local_pose1=None,
+                  lower_limit=None, upper_limit=None):
+        """ Add new joint to the structure. This invalidates previously computed root node. """
         self.links[child_name].parent = self.links[parent_name]
-        self.links[child_name].joint.pos = pos
-        self.links[child_name].joint.quat = quat
-        self.links[child_name].joint.axis = axis
-        self.links[child_name].joint.val = init_value
+        self.links[child_name].joint_from_parent = joint
+        if joint is not None:
+            self.links[child_name].joint_from_parent.create_physx_joint(
+                self.links[parent_name].actor, self.links[child_name].actor,
+                local_pose0, local_pose1, lower_limit, upper_limit
+            )
+            if not joint.is_fixed:
+                self.movable_joints[joint.name] = joint
         self._root_node = None
 
-    def print_structure(self):
-        for pre, fill, node in anytree.RenderTree(self.root_node):
+    def print_structure(self, from_link: Link = None):
+        """ Print structure of the robot into the terminal. Useful only for debugging. """
+        for pre, fill, node in anytree.RenderTree(self.root_node if from_link is None else from_link):
             print("%s%s" % (pre, node.name))
 
-    def compute_link_transformations(self, joint_values=None):
-        """ Compute transformations of all links and return then in a dictionary. """
+    @property
+    def root_pose(self):
+        """ Get the pose of the root link. If attached return parent pose otherwise unit pose. """
+        return unit_pose() if self.world_attachment_actor is None else self.world_attachment_actor.get_global_pose()
+
+    def compute_link_transformations(self, joint_values: Optional[Dict[str, float]] = None) -> Dict[str, tuple]:
+        """ Compute transformations of all links for given joint values and return them in a dictionary in which link
+        name serves as a key and link pose is a value. """
         if joint_values is None:
             joint_values = {}
         link_transforms = {}
-        for link in anytree.LevelOrderIter(self.root_node):
+        for link in anytree.LevelOrderIter(self.root_node):  # type: Link
             if link.is_root:
-                link_transforms[link.name] = (np.zeros(3), np.array([0, 0, 0, 1]))
+                link_transforms[link.name] = self.root_pose
                 continue
             parent_transform = link_transforms[link.parent.name]
-            link_transforms[link.name] = multiply_transformations(
-                *parent_transform, *link.get_transform_from_parent(joint_values.get(link.joint_name, 0.))
-            )
+            joint_value = joint_values.get(link.joint_from_parent.name, None)
+            relative_pose = link.joint_from_parent.transformation_from_parent_to_child_link(joint_value)
+            link_transforms[link.name] = multiply_transformations(parent_transform, relative_pose)
         return link_transforms
 
     def get_joint_names(self):
-        return [l.joint_name for l in self.links.values() if not l.is_root and l.motion_axis is not None]
+        """ Get joint names for all movable joints, i.e. for prismatic and revolute joints. """
+        return list(self.movable_joints.keys())
 
+    def attach_root_node_to_pose(self, pose):
+        """ Create attachment joint that connects root link to given world coordinates. """
+        self.world_attachment_actor = RigidStatic()
+        self.world_attachment_actor.set_global_pose(pose)
+        return D6Joint(self.world_attachment_actor, self.root_node.actor)
 
-class URDFRobot(TreeRobot):
+    def attach_root_node_to_actor(self, actor, **kwargs):
+        """ Create attachment joint that connects root link to the given actor. """
+        self.world_attachment_actor = actor
+        return D6Joint(self.world_attachment_actor, self.root_node.actor, **kwargs)
 
-    def __init__(self, urdf_path, mesh_path=None, attach_to_world_pose=None, attach_to_actor=None,
-                 joints_drive_setup=None) -> None:
-        super().__init__()
-        self.urdf_path = Path(urdf_path)
-        self.mesh_path = Path(mesh_path) if mesh_path is not None else self.urdf_path.parent
-
-        if attach_to_world_pose is not None:
-            self.world_attachment_actor = RigidStatic()
-            self.world_attachment_actor.set_global_pose(attach_to_world_pose)
-        elif attach_to_actor is not None:
-            self.world_attachment_actor = attach_to_actor
-        else:
-            self.world_attachment_actor = None
-
-        urdf = parse(self.urdf_path)
-        self.load_links_from_urdf_etree(urdf, self.mesh_path)
-        self.load_joint_from_urdf_etree(urdf)
-        self.set_joints_drive(drives_setup=joints_drive_setup)
-        if self.world_attachment_actor is not None:
-            D6Joint(self.world_attachment_actor, self.root_node.actor)
-        self.reset_actor_poses()
-
-    @staticmethod
-    def load_mesh_shapes(mesh_path, material):
-        """ Load mesh obj file and return all shapes in an array. """
-        obj = trimesh.load(mesh_path, split_object=True, group_material=False)
-        if isinstance(obj, trimesh.scene.scene.Scene):
-            return [Shape.create_convex_mesh_from_points(g.vertices, material) for g in obj.geometry.values()]
-        else:
-            return [Shape.create_convex_mesh_from_points(obj.vertices, material)]
-
-    def _get_drive_axis_for_motion_axis(self, motion_axis: D6Axis):
-        if motion_axis == D6Axis.X:
-            return D6Drive.X
-        elif motion_axis == D6Axis.Y:
-            return D6Drive.Y
-        elif motion_axis == D6Axis.Z:
-            return D6Drive.Z
-        elif motion_axis == D6Axis.TWIST:
-            return D6Drive.TWIST
-        else:
-            return D6Drive.SWING
-
-    @staticmethod
-    def _get_physx_axis_from_urdf_prismatic_joint(element):
-        axis = [float(f) for f in element.find('axis').get('xyz').split()]
-        if np.isclose(axis, [1, 0, 0]).all():
-            return D6Axis.X
-        if np.isclose(axis, [0, 1, 0]).all():
-            return D6Axis.Y
-        if np.isclose(axis, [0, 0, 1]).all():
-            return D6Axis.Z
-        raise NotImplementedError("Only positive x,y, or z axis can be used for joint axis.")
-
-    @staticmethod
-    def _get_physx_axis_from_urdf_revolute_joint(element):
-        axis = [float(f) for f in element.find('axis').get('xyz').split()]
-        if np.isclose(axis, [1, 0, 0]).all():
-            return D6Axis.TWIST
-        if np.isclose(axis, [0, 1, 0]).all():
-            return D6Axis.SWING1
-        if np.isclose(axis, [0, 0, 1]).all():
-            return D6Axis.SWING2
-        raise NotImplementedError("Only positive x,y, or z axis can be used for joint axis.")
-
-    @staticmethod
-    def _get_origin_from_urdf_element(element):
-        element_origin = element.find('origin')
-        if element_origin is None:
-            return [0, 0, 0], [0, 0, 0, 1]
-        pos = [float(f) for f in element_origin.get('xyz', '0 0 0').split()]
-        quat = Rotation.from_euler('xyz', [float(f) for f in element_origin.get('rpy', '0 0 0').split()]).as_quat()
-        return pos, quat
-
-    def load_links_from_urdf_etree(self, urdf: ElementTree, mesh_root_folder: Path):
-        for ulink in urdf.iterfind('link'):
-            link = Link(ulink.get('name'), RigidDynamic(), Material())
-
-            geometry_element = ulink.find('collision/geometry')
-            if geometry_element is not None:
-                for geom in geometry_element:
-                    if geom.tag == 'mesh':
-                        mesh_path = mesh_root_folder.joinpath(geom.get('filename').replace('package://', ''))
-                        [link.actor.attach_shape(s) for s in self.load_mesh_shapes(mesh_path, link.material)]
-                    else:
-                        raise NotImplementedError  # todo add other urdf geometries
-
-            mass_element = ulink.find('inertial/mass')
-            mass = float(mass_element.get('value')) if mass_element is not None else None
-            if mass is None or mass < 0.1:
-                mass = 0.1
-                print('Mass of each link has to be set, otherwise unstable. Using {} kg mass.'.format(mass))
-            link.actor.set_mass(mass)
-            self.add_link(link)
-
-    def load_joint_from_urdf_etree(self, urdf: ElementTree):
-        for ujoint in urdf.iterfind('joint'):
-            origin = self._get_origin_from_urdf_element(ujoint)
-
-            jtype = ujoint.get('type', 'fixed')
-            parent_link = self.links[ujoint.find('parent').get('link')]
-            child_link = self.links[ujoint.find('child').get('link')]
-            child_link.joint_name = ujoint.get('name')
-            child_link.joint = D6Joint(parent_link.actor, child_link.actor, *origin)
-            child_link.parent = parent_link
-            if jtype == 'prismatic':
-                axis = self._get_physx_axis_from_urdf_prismatic_joint(ujoint)
-                limit_element = ujoint.find('limit')
-                if limit_element is not None:
-                    child_link.joint.set_motion(axis, D6Motion.LIMITED)
-                    lower, upper = float(limit_element.get('lower')), float(limit_element.get('upper'))
-                    child_link.joint.set_linear_limit(axis, lower, upper)
-                else:
-                    child_link.joint.set_motion(axis, D6Motion.FREE)
-                child_link.motion_axis = axis
-            elif jtype == 'revolute':
-                axis = self._get_physx_axis_from_urdf_revolute_joint(ujoint)
-                limit_element = ujoint.find('limit')
-                if limit_element is not None:
-                    child_link.joint.set_motion(axis, D6Motion.LIMITED)
-                    lower, upper = float(limit_element.get('lower')), float(limit_element.get('upper'))
-                    abs_max_limit = np.maximum(np.abs(lower), np.abs(upper))
-                    if axis == D6Axis.TWIST:  # todo: the best approach would be to transfer all to x-axis joints
-                        child_link.joint.set_twist_limit(axis, lower, upper)
-                    elif axis == D6Axis.SWING1:
-                        child_link.joint.set_swing_limit(abs_max_limit, 0.)
-                    elif axis == D6Axis.SWING2:
-                        child_link.joint.set_swing_limit(0., abs_max_limit)
-                else:
-                    child_link.joint.set_motion(axis, D6Motion.FREE)
-                child_link.motion_axis = axis
-            elif jtype == 'fixed':
-                pass
-            else:
-                raise NotImplementedError("Only fixed, revolute, or prismatic joints are supported.")
-
-    def set_joints_drive(self, drives_setup=None):
-        drives_setup = drives_setup or {}
+    def reset_pose(self, joint_values: Optional[Dict[str, float]] = None):
+        """ Reset pose of every actor in the tree. The poses are computed for a given joint values. The commanded joint
+            values are set to given values too."""
+        if joint_values is None:
+            joint_values = {}
+        transformations = self.compute_link_transformations(joint_values)
         for link in self.links.values():
-            if link.motion_axis is not None:
-                drive_setup = drives_setup.get(
-                    link.joint_name,
-                    dict(stiffness=1e7, damping=100., force_limit=1e5, is_acceleration=True)
-                )
-                link.joint.set_drive(self._get_drive_axis_for_motion_axis(link.motion_axis), **drive_setup)
+            link.actor.set_global_pose(transformations[link.name])
+        for joint in self.movable_joints.values():
+            joint.set_joint_position(joint_values.get(joint.name, None))
 
-    def get_aggregate(self):
-        agg = Aggregate(enable_self_collision=False)
+    def set_joints_position(self, joint_values: Dict[str, float]):
+        """ Set desired position of every joint in a tree. """
+        for joint in self.movable_joints.values():
+            joint.set_joint_position(joint_values[joint.name])
+
+    def set_joints_velocities(self, joint_values: Dict[str, float]):
+        """ Set desired velocity of every joint in a tree. """
+        for joint in self.movable_joints.values():
+            joint.set_joint_velocity(joint_values[joint.name])
+
+    def get_aggregate(self, enable_self_collision=False):
+        """ Get aggregate of actors that can be included into the scene. """
+        agg = Aggregate(enable_self_collision=enable_self_collision)
         if self.world_attachment_actor is not None:
             agg.add_actor(self.world_attachment_actor)
         for link in self.links.values():
             agg.add_actor(link.actor)
         return agg
 
-    def set_joint_drive_values(self, values=None):
-        if values is None:
-            return
+    def disable_gravity(self):
+        """ Disable gravity for all links. """
         for link in self.links.values():
-            if link.motion_axis is not None:
-                v = values.get(link.joint_name, 0.)
-                link.joint.set_drive_position(*link.get_transform_for_motion_axis(v))
-
-    def reset_actor_poses(self, base_pos=(0., 0., 0.), base_quat=(0., 0., 0., 1.), joint_values=None):
-        if self.world_attachment_actor is not None:
-            base_pos, base_quat = multiply_transformations(base_pos, base_quat,
-                                                           *self.world_attachment_actor.get_global_pose())
-        link_transforms = self.compute_link_transformations(joint_values)
-        for link in self.links.values():
-            link.actor.set_global_pose(*multiply_transformations(base_pos, base_quat, *link_transforms[link.name]))
-
-        self.set_joint_drive_values(joint_values)
+            link.actor.disable_gravity()
