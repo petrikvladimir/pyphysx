@@ -15,7 +15,9 @@ class D6Joint : public BasePhysxPointer<physx::PxD6Joint> {
 public:
     D6Joint(RigidActor a0, RigidActor a1, const physx::PxTransform &local_pose0, const physx::PxTransform &local_pose1)
             : BasePhysxPointer(physx::PxD6JointCreate(*Physics::get_physics(), a0.get_physx_ptr(), local_pose0,
-                                                      a1.get_physx_ptr(), local_pose1)) {}
+                                                      a1.get_physx_ptr(), local_pose1)) {
+        get_physx_ptr()->setConstraintFlag(physx::PxConstraintFlag::eENABLE_EXTENDED_LIMITS, true);
+    }
 
     void set_motion(physx::PxD6Axis::Enum axis, physx::PxD6Motion::Enum type) {
         get_physx_ptr()->setMotion(axis, type);
