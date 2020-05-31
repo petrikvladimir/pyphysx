@@ -4,43 +4,44 @@
 # Created on: 5/16/20
 #     Author: Vladimir Petrik <vladimir.petrik@cvut.cz>
 
-from pyphysx_render.rate import Rate
 from pyphysx_render.renderer import PyPhysXParallelRenderer
-from pyphysx_utils.tree_robot import *
+from pyphysx_utils.rate import Rate
+from pyphysx_utils.urdf_robot_parser import URDFRobot, quat_from_euler
+from pyphysx import *
+import numpy as np
 
 scene = Scene()
-scene.add_actor(RigidStatic.create_plane(mat=Material()))
+scene.add_actor(RigidStatic.create_plane(material=Material()))
 
-# URDF do not specify controller (drive) parameters, you need to tune and provide them by yourself.
-drive_setup = {
-    'panda_joint1': dict(stiffness=10000000, damping=1000, force_limit=1000, is_acceleration=False),
-    'panda_joint2': dict(stiffness=10000000, damping=1000, force_limit=1000, is_acceleration=False),
-    'panda_joint3': dict(stiffness=10000000, damping=1000, force_limit=1000, is_acceleration=False),
-    'panda_joint4': dict(stiffness=1000000,  damping=1000, force_limit=1000, is_acceleration=False),
-    'panda_joint5': dict(stiffness=100000,   damping=1000, force_limit=1000, is_acceleration=False),
-    'panda_joint6': dict(stiffness=100000,   damping=1000, force_limit=1000, is_acceleration=False),
-    'panda_joint7': dict(stiffness=100000,   damping=1000, force_limit=1000, is_acceleration=False),
-}
-robot = URDFRobot("franka_panda/panda_tmp.urdf", attach_to_world_pos=(0, 0, 0), joints_drive_setup=drive_setup)
+robot = URDFRobot("crane_robot.urdf")
+robot.attach_root_node_to_pose((0, 0, 0))
+robot.reset_pose()
 scene.add_aggregate(robot.get_aggregate())
 
-q = {}
-for name in robot.get_joint_names():
-    q[name] = 0.0
-q['panda_joint4'] = np.deg2rad(-90.)
-q['panda_joint6'] = np.deg2rad(90.)
-robot.reset_actor_poses(joint_values=q)
-robot.set_joint_drive_values(q)
+robot.movable_joints['rz'].configure_drive(stiffness=1e6, damping=1e5, force_limit=1e5, is_acceleration=False)
+robot.movable_joints['tz'].configure_drive(stiffness=1e6, damping=1e5, force_limit=1e5, is_acceleration=False)
+robot.movable_joints['ty'].configure_drive(stiffness=1e6, damping=1e5, force_limit=1e5, is_acceleration=False)
 
 render = PyPhysXParallelRenderer(render_window_kwargs=dict(
-    video_filename='load_urdf.mp4'
+    # video_filename='load_urdf.mp4'
 ))
-render.render_scene(scene)
-
+render.add_label(pose=((0.5, 0, 0), quat_from_euler('z', np.deg2rad(90))), color='tab:blue',
+                 text='Rendering visual shapes.')
 rate = Rate(120)
+
 while render.is_running():
+    t = scene.simulation_time
+    if 1 < t < 2:
+        robot.movable_joints['tz'].set_joint_position((t - 1) * 0.5)
+    if 2 < t < 3:
+        robot.movable_joints['rz'].set_joint_position((t - 2) * np.deg2rad(180))
+    if 3 < t < 4:
+        robot.movable_joints['ty'].set_joint_position((t - 3) * 0.3)
+
+    if 5. < t < 5. + rate.period():
+        render.update_labels_text(['Rendering collision shapes'])
+        render.render_scene(scene, recompute_actors=True, render_shapes_with_one_of_flags=[ShapeFlag.SIMULATION_SHAPE])
+
     scene.simulate(rate.period())
-    q['panda_joint1'] += np.deg2rad(120.) * rate.period()  # rotate 120deg per second
-    robot.set_joint_drive_values(q)
     render.render_scene(scene)
     rate.sleep()

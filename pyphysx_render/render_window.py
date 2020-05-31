@@ -12,6 +12,7 @@ import imageio
 
 from pyphysx_render.render_windows_interface import PyPhysXWindowInterface
 from pyphysx_render.utils import *
+from pyphysx_utils.transformations import quat_from_euler
 
 
 class PyPhysXWindow(pyglet.window.Window, PyPhysXWindowInterface):
@@ -61,7 +62,7 @@ class PyPhysXWindow(pyglet.window.Window, PyPhysXWindowInterface):
 
     def get_eye_pos(self):
         v = [self.cam_pos_distance, 0, 0]
-        return Rotation.from_euler('ZY', [self.cam_pos_azimuth, -self.cam_pos_elevation]).apply(v)
+        return npq.rotate_vectors(quat_from_euler('ZY', [self.cam_pos_azimuth, -self.cam_pos_elevation]), v)
 
     def plot_coordinate_system(self):
         glLineWidth(self.coordinate_lw)

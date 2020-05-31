@@ -7,6 +7,8 @@
 from multiprocessing import Process, Queue
 from queue import Empty
 
+from pyphysx import Shape, ShapeFlag
+
 from pyphysx_render.render_windows_interface import PyPhysXWindowInterface
 
 
@@ -48,12 +50,19 @@ class PyPhysXParallelRenderer(PyPhysXWindowInterface):
             except Empty:
                 return
 
-    def render_scene(self, scene, recompute_actors=False):
+    def render_scene(self, scene, recompute_actors=False, render_shapes_with_one_of_flags=(ShapeFlag.VISUALIZATION,)):
+        """ Render those shapes whose flag value is true for at least one of the flag specified in
+            render_shapes_with_one_of_flags. """
         if recompute_actors or self.actors is None:
             self.clear_actors()
             self.actors = scene.get_dynamic_rigid_actors() + scene.get_static_rigid_actors()
             for i, actor in enumerate(self.actors):
-                for shape in actor.get_atached_shapes():
+                for shape in actor.get_atached_shapes():  # type: Shape
+                    show = False
+                    for show_flag in render_shapes_with_one_of_flags:
+                        show |= shape.get_flag_value(show_flag)
+                    if not show:
+                        continue
                     clr = shape.get_user_data().get('color', None) if shape.get_user_data() is not None else None
                     self.add_actor_geometry(i, shape.get_shape_data(), shape.get_local_pose(), clr)
         for i, actor in enumerate(self.actors):
