@@ -48,7 +48,7 @@ def unit_pose():
 
 def quat_from_euler(seq='xyz', angles=None):
     """ Compute quaternion from intrinsic (e.g. 'XYZ') or extrinsic (fixed axis, e.g. 'xyz') euler angles. """
-    angles = np.asarray(angles)
+    angles = np.atleast_1d(angles)
     q = npq.one
     for s, a in zip(seq, angles):
         axis = np.array([
