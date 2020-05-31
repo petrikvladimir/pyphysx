@@ -115,6 +115,21 @@ class TransformationTestCase(unittest.TestCase):
                                0.)
         self.assertAlmostEqual(npq.rotation_intrinsic_distance(quat_from_euler('Z', 2), quat_from_euler('z', 2)), 0.)
 
+    def test_quat_between_vectors(self):
+        v = np.array([1, 0, 0])
+        u = np.array([0, 0, 1])
+        q = quat_between_two_vectors(v, u)
+        u1 = npq.rotate_vectors(q, v)
+        self.assertAlmostEqual(np.linalg.norm(u - u1), 0.)
+
+        v = np.array([0.3, 0.56, .12])
+        u = np.array([0.16, 0.985, 1.65])
+        v = v / np.linalg.norm(v)
+        u = u / np.linalg.norm(u)
+        q = quat_between_two_vectors(v, u)
+        u1 = npq.rotate_vectors(q, v)
+        self.assertAlmostEqual(np.linalg.norm(u - u1), 0.)
+
 
 if __name__ == '__main__':
     unittest.main()

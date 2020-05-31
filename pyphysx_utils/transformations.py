@@ -61,3 +61,14 @@ def quat_from_euler(seq='xyz', angles=None):
         else:
             q = npq.from_rotation_vector(axis * a) * q
     return q
+
+
+def quat_between_two_vectors(v, u) -> npq.quaternion:
+    """ Computes rotation (represented by quaternion) that transforms unit vector v into the unit vector u.
+        Based on: https://math.stackexchange.com/questions/180418/calculate-rotation-matrix-to-align-vector-a-to-vector-b-in-3d/476311#476311
+    """
+    vec = np.cross(v, u)
+    ang_sine = np.linalg.norm(vec)
+    ang_cosine = np.dot(v, u)
+    ang = np.arctan2(ang_sine, ang_cosine)
+    return npq.from_rotation_vector(vec / ang_sine * ang)
