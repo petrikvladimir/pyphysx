@@ -74,7 +74,7 @@ setup(
     ext_modules=[CMakeExtension('pyphysx')],
     cmdclass=dict(build_ext=CMakeBuild),
     install_requires=['conan', 'numpy', 'pyglet', 'imageio', 'imageio_ffmpeg', 'trimesh', 'networkx',
-                      'numba', 'numpy_quaternion', 'matplotlib', 'scipy'],
+                      'numba', 'numpy_quaternion', 'matplotlib', 'scipy', 'anytree'],
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
     packages=['pyphysx_render', 'pyphysx_utils'],
