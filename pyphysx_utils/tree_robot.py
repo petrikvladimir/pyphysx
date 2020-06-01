@@ -118,6 +118,20 @@ class Joint:
             self.physx_joint.set_drive(D6Drive.X, stiffness=stiffness, damping=damping, force_limit=force_limit,
                                        is_acceleration=is_acceleration)
 
+    def get_limits(self):
+        """ Get limits of the joint, return tuple consisting of lower and upper limit.
+            If joint is not not limited returns -inf, inf. """
+        if self.is_prismatic:
+            if self.physx_joint.get_motion(D6Axis.X) == D6Motion.FREE:
+                return -np.inf, np.inf
+            return self.physx_joint.get_linear_limit(D6Axis.X)
+        elif self.is_revolute:
+            if self.physx_joint.get_motion(D6Axis.TWIST) == D6Motion.FREE:
+                return -np.inf, np.inf
+            return self.physx_joint.get_twist_limit()
+        else:
+            return 0, 0
+
 
 class Link(anytree.Node):
     """
