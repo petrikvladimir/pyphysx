@@ -300,6 +300,9 @@ PYBIND11_MODULE(pyphysx, m) {
                  arg("axis"),
                  arg("motion")
             )
+            .def("get_motion", &D6Joint::get_motion,
+                 arg("axis")
+            )
             .def("get_local_pose", &D6Joint::get_local_pose,
                  arg("actor_id") = 0
             )

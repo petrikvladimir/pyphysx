@@ -23,6 +23,10 @@ public:
         get_physx_ptr()->setMotion(axis, type);
     }
 
+    auto get_motion(physx::PxD6Axis::Enum axis) {
+        return get_physx_ptr()->getMotion(axis);
+    }
+
     void release() {
         get_physx_ptr()->release();
     }

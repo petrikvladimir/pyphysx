@@ -60,3 +60,10 @@ class D6JointTest(unittest.TestCase):
         low, up = j.get_twist_limit()
         self.assertAlmostEqual(low, -2)
         self.assertAlmostEqual(up, 2)
+
+    def test_motion(self):
+        a1, a2 = RigidDynamic(), RigidDynamic()
+        j = D6Joint(a1, a2, local_pose0=(0., 3., 0.), local_pose1=(0., -5., 0.))
+        self.assertEqual(j.get_motion(D6Axis.X), D6Motion.LOCKED)
+        j.set_motion(D6Axis.X, D6Motion.FREE)
+        self.assertEqual(j.get_motion(D6Axis.X), D6Motion.FREE)
