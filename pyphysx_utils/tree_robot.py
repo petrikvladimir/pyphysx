@@ -36,6 +36,8 @@ class Joint:
         self.name = name
         self.joint_type: str = joint_type
         self.null_value: float = null_value
+        self.commanded_joint_position = null_value
+        self.commanded_joint_velocity = 0.
         self.physx_joint: Optional[D6Joint] = None
 
     def joint_transformation(self, joint_position=None):
@@ -97,6 +99,7 @@ class Joint:
             self.physx_joint.set_drive_position((value, 0, 0))
         elif self.is_revolute:
             self.physx_joint.set_drive_position((np.zeros(3), quat_from_euler('x', value)))
+        self.commanded_joint_position = value
 
     def set_joint_velocity(self, value):
         """ Set desired velocity of the joint. """
@@ -104,6 +107,7 @@ class Joint:
             self.physx_joint.set_drive_velocity(linear=(value, 0, 0))
         elif self.is_revolute:
             self.physx_joint.set_drive_velocity(angular=(value, 0, 0))
+        self.commanded_joint_velocity = value
 
     def configure_drive(self, stiffness=1e7, damping=1e5, force_limit=1e5, is_acceleration=False):
         """ Configure drive for the joint. Drive is used to control joint position and velocity as PD controller. """
