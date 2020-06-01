@@ -49,6 +49,8 @@ class PyPhysXWindow(pyglet.window.Window, PyPhysXWindowInterface):
         self.vid_imgs = []
 
         glEnable(GL_DEPTH_TEST)
+        glEnable(pyglet.gl.GL_BLEND)
+        glBlendFunc(pyglet.gl.GL_SRC_ALPHA, pyglet.gl.GL_ONE_MINUS_SRC_ALPHA)
 
     def on_resize(self, width, height):
         glViewport(0, 0, width, height)
@@ -138,9 +140,9 @@ class PyPhysXWindow(pyglet.window.Window, PyPhysXWindowInterface):
         batch = pyglet.graphics.Batch()
         n = data.shape[1] // 3
         rtype = GL_QUADS if n == 4 else GL_TRIANGLES
-        c = np.tile(gl_color_from_matplotlib(color), n)
+        c = np.tile(gl_color_from_matplotlib(color, return_rgba=True), n)
         for d in data:
-            batch.add(n, rtype, None, ('v3f', d), ('c3B', c))
+            batch.add(n, rtype, None, ('v3f', d), ('c4B', c))
         return batch
 
     def add_label(self, pose=None, scale=1., text='', font_name=None, font_size=None,
