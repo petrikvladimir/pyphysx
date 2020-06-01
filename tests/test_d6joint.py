@@ -23,7 +23,7 @@ class D6JointTest(unittest.TestCase):
     def test_relative_transform(self):
         """
             p0 = I, p1 = I
-            T0 = (0,0.5,0), T1 = (0,0.3,0.)
+            T0 = (0,5,0), T1 = (0,3,0.)
             relative transform returns value for joint required to have actors at identity
         """
         a0, a1 = RigidDynamic(), RigidDynamic()
@@ -48,3 +48,15 @@ class D6JointTest(unittest.TestCase):
         a1.add_force([-11., 0, 0])
         scene.simulate()
         self.assertTrue(j.is_broken())
+
+    def test_limits(self):
+        a1, a2 = RigidDynamic(), RigidDynamic()
+        j = D6Joint(a1, a2, local_pose0=(0., 3., 0.), local_pose1=(0., -5., 0.))
+        j.set_linear_limit(D6Axis.Y, -1, 1)
+        low, up = j.get_linear_limit(D6Axis.Y)
+        self.assertAlmostEqual(low, -1)
+        self.assertAlmostEqual(up, 1)
+        j.set_twist_limit(-2, 2)
+        low, up = j.get_twist_limit()
+        self.assertAlmostEqual(low, -2)
+        self.assertAlmostEqual(up, 2)

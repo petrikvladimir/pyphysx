@@ -310,6 +310,9 @@ PYBIND11_MODULE(pyphysx, m) {
                  arg("upper_limit"),
                  arg("contact_dist") = -1
             )
+            .def("get_linear_limit", &D6Joint::get_linear_limit,
+                 arg("axis")
+            )
             .def("set_linear_limit_soft", &D6Joint::set_linear_limit_soft,
                  arg("axis"),
                  arg("lower_limit"),
@@ -321,6 +324,9 @@ PYBIND11_MODULE(pyphysx, m) {
                  arg("lower_limit"),
                  arg("upper_limit"),
                  arg("contact_dist") = -1
+            )
+            .def("get_twist_limit", &D6Joint::get_twist_limit,
+                 "Get tuple of lower and upper limit for twist axis"
             )
             .def("set_twist_limit_soft", &D6Joint::set_twist_limit_soft,
                  arg("lower_limit"),

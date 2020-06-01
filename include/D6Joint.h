@@ -42,6 +42,12 @@ public:
                 Physics::get_physics()->getTolerancesScale(), lower_limit, upper_limit, contact_dist));
     }
 
+    /** @brief Return tuple of lower and upper limit for the given linear axis. */
+    auto get_linear_limit(physx::PxD6Axis::Enum axis) {
+        const auto limit = get_physx_ptr()->getLinearLimit(axis);
+        return std::make_tuple(limit.lower, limit.upper);
+    }
+
     /** @brief Set soft joint limit. */
     void set_linear_limit_soft(physx::PxD6Axis::Enum axis, float lower_limit, float upper_limit, float spring_stiffness,
                                float spring_damping) {
@@ -51,6 +57,12 @@ public:
 
     void set_twist_limit(float lower_limit, float upper_limit, float contact_dist) {
         get_physx_ptr()->setTwistLimit(physx::PxJointAngularLimitPair(lower_limit, upper_limit, contact_dist));
+    }
+
+    /** @brief Return tuple of lower and upper limit for the twist axis. */
+    auto get_twist_limit() {
+        const auto limit = get_physx_ptr()->getTwistLimit();
+        return std::make_tuple(limit.lower, limit.upper);
     }
 
     void set_twist_limit_soft(float lower_limit, float upper_limit, float spring_stiffness, float spring_damping) {
