@@ -83,3 +83,7 @@ The code will render and simulate the scene and automatically generate video lik
     - f to show on/off coordinates frame
     - g to show on/off geometries
     - l to show on/off text labels
+
+## URDF parser
+- parse robot from `URDF` file
+- specify joint controller and command robot

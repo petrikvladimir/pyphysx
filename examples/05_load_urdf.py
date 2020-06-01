@@ -23,12 +23,15 @@ robot.movable_joints['tz'].configure_drive(stiffness=1e6, damping=1e5, force_lim
 robot.movable_joints['ty'].configure_drive(stiffness=1e6, damping=1e5, force_limit=1e5, is_acceleration=False)
 
 render = PyPhysXParallelRenderer(render_window_kwargs=dict(
-    # video_filename='load_urdf.mp4'
+    video_filename='load_urdf.gif',
+    coordinates_scale=0.5, coordinate_lw=2,
 ))
-render.add_label(pose=((0.5, 0, 0), quat_from_euler('z', np.deg2rad(90))), color='tab:blue',
-                 text='Rendering visual shapes.')
-rate = Rate(120)
+render.add_label(pose=((0.7, 0, 0), quat_from_euler('z', np.deg2rad(90))), color='tab:blue',
+                 text='Rendering visual shapes.', anchor_x='center')
+render.add_label(pose=((0.9, 0, 0), quat_from_euler('z', np.deg2rad(90))), color='tab:green',
+                 text='', anchor_x='center')
 
+rate = Rate(120)
 while render.is_running():
     t = scene.simulation_time
     if 1 < t < 2:
@@ -39,8 +42,14 @@ while render.is_running():
         robot.movable_joints['ty'].set_joint_position((t - 3) * 0.3)
 
     if 5. < t < 5. + rate.period():
-        render.update_labels_text(['Rendering collision shapes'])
+        render.update_labels_text(['Rendering collision shapes', None])
         render.render_scene(scene, recompute_actors=True, render_shapes_with_one_of_flags=[ShapeFlag.SIMULATION_SHAPE])
+
+    render.update_labels_text([None, 'Command: rz: {:.2f}, tz: {:.2f}, ty: {:.2f}'.format(
+        robot.movable_joints['rz'].commanded_joint_position,
+        robot.movable_joints['tz'].commanded_joint_position,
+        robot.movable_joints['ty'].commanded_joint_position
+    )])
 
     scene.simulate(rate.period())
     render.render_scene(scene)

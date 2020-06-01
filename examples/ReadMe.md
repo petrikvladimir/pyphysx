@@ -21,6 +21,11 @@ Shows how to add/update labels into the scene.
 ![](anim_labels.gif)
 
 
+## Load URDF example
+Example shows how to load simple urdf model into the physx and how to specify the joint values.
+
+![](anim_load_urdf.gif)
+
 ## GPU computation example
 The example is split into two parts: (i) compute execution time for cpu and gpu for various scenes and (ii) plot results.
 For turning on gpu computation you need to init gpu (the function initialize GPU context) and you can pass (optional) GPU settings into the scene constructor:
