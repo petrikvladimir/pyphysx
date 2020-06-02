@@ -128,6 +128,30 @@ class TreeRobotTestCase(unittest.TestCase):
         j.set_twist_limit(-1, 2)
         self.assertEqual(j.get_twist_limit(), (-1, 2))
 
+    def test_update_velocity(self):
+        r = TreeRobot()
+        for i in range(2):
+            r.add_link(Link('l{}'.format(i), RigidDynamic()))
+        r.add_joint('l0', 'l1', Joint('j0', joint_type='prismatic'), local_pose0=(0, 0, 1))
+        r.movable_joints['j0'].set_joint_velocity(0.1)
+        r.update(2.)
+        self.assertAlmostEqual(r.movable_joints['j0'].commanded_joint_position, 0.2)
+        r.update(1.)
+        self.assertAlmostEqual(r.movable_joints['j0'].commanded_joint_position, 0.3)
+
+    def test_update_kin_target(self):
+        scene = Scene()
+        r = TreeRobot(kinematic=True)
+        for i in range(2):
+            r.add_link(Link('l{}'.format(i), RigidDynamic()))
+        r.add_joint('l0', 'l1', Joint('j0', joint_type='prismatic'), local_pose0=(0, 0, 1))
+        r.attach_root_node_to_pose(unit_pose())
+        r.reset_pose()
+        r.movable_joints['j0'].set_joint_velocity(0.1)
+        scene.add_aggregate(r.get_aggregate())
+        r.update(0.1)
+        scene.simulate(0.1)
+        self.assert_pose(r.links['l1'].actor.get_global_pose(), (0.01, 0, 1.0))
 
     def assert_pose(self, current_pose, desired_pose):
         """ Assert pose based on the distances. """
