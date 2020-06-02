@@ -22,9 +22,12 @@ Shows how to add/update labels into the scene.
 
 
 ## Load URDF example
-Example shows how to load simple urdf model into the physx and how to specify the joint values.
+Example shows how to load simple urdf model into the physx and how to specify the joint commands in position or velocity mode.
+Left example shows dynamic simulation of robot while the right one shows kinematic simulation.
+The type of simulation can be specified when loading the robot.
 
 ![](anim_load_urdf.gif)
+![](anim_load_urdf_kinematic.gif)
 
 ## GPU computation example
 The example is split into two parts: (i) compute execution time for cpu and gpu for various scenes and (ii) plot results.

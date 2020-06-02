@@ -113,6 +113,22 @@ class TreeRobotTestCase(unittest.TestCase):
         self.assert_pose(transformations['l4'], ((2, 2, -1), quat_from_euler('x', [np.deg2rad(90)])))
         self.assert_pose(transformations['l5'], ((2, 2, 0), quat_from_euler('x', [np.deg2rad(90)])))
 
+    def test_kinematic_joint(self):
+        j = KinematicPhysXJoint(None, None, (0, 0, 1), (0, 0, 2))
+        self.assert_pose(j.get_local_pose(0), (0, 0, 1))
+        self.assert_pose(j.get_local_pose(1), (0, 0, 2))
+
+        j.set_motion(None, D6Motion.FREE)
+        self.assertEqual(j.get_motion(None), D6Motion.FREE)
+        j.set_motion(None, D6Motion.LIMITED)
+        self.assertEqual(j.get_motion(None), D6Motion.LIMITED)
+
+        j.set_linear_limit(None, -1, 1)
+        self.assertEqual(j.get_linear_limit(None), (-1, 1))
+        j.set_twist_limit(-1, 2)
+        self.assertEqual(j.get_twist_limit(), (-1, 2))
+
+
     def assert_pose(self, current_pose, desired_pose):
         """ Assert pose based on the distances. """
         current_pose = cast_transformation(current_pose)

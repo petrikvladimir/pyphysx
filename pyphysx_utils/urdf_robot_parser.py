@@ -19,8 +19,8 @@ from pyphysx_utils.transformations import quat_between_two_vectors
 
 class URDFRobot(TreeRobot):
 
-    def __init__(self, urdf_path, mesh_path=None) -> None:
-        super().__init__()
+    def __init__(self, urdf_path, mesh_path=None, **kwargs) -> None:
+        super().__init__(**kwargs)
         self.urdf_path = Path(urdf_path)
         self.mesh_path = Path(mesh_path) if mesh_path is not None else self.urdf_path.parent
         urdf = parse(self.urdf_path)

@@ -25,6 +25,50 @@ from pyphysx_utils.transformations import multiply_transformations, inverse_tran
 from pyphysx import *
 
 
+class KinematicPhysXJoint:
+    """ Class that provides same functions as D6Joint but for kinematic robot. """
+
+    def __init__(self, actor0, actor1, local_pose0=None, local_pose1=None) -> None:
+        super().__init__()
+        self.lower = -np.inf
+        self.upper = np.inf
+        self.local_pose0 = cast_transformation(local_pose0) if local_pose0 is not None else unit_pose()
+        self.local_pose1 = cast_transformation(local_pose1) if local_pose1 is not None else unit_pose()
+        self.motion = D6Motion.LOCKED
+
+    def get_local_pose(self, actor_id):
+        return self.local_pose0 if actor_id == 0 else self.local_pose1
+
+    def set_motion(self, axis, motion):
+        self.motion = motion
+
+    def get_motion(self, axis):
+        return self.motion
+
+    def set_linear_limit(self, axis, lower, upper):
+        self.lower = lower
+        self.upper = upper
+
+    def get_linear_limit(self, axis):
+        return self.lower, self.upper
+
+    def set_twist_limit(self, lower, upper):
+        self.lower = lower
+        self.upper = upper
+
+    def get_twist_limit(self):
+        return self.lower, self.upper
+
+    def set_drive_position(self, pose):
+        pass
+
+    def set_drive_velocity(self, linear=None, angular=None):
+        pass
+
+    def set_drive(self, axis, stiffness=0, damping=0, force_limit=0, is_acceleration=False):
+        pass
+
+
 class Joint:
     """
     Defines a joint that connects two link together.
@@ -74,14 +118,16 @@ class Joint:
     def is_prismatic(self):
         return self.joint_type == 'prismatic'
 
-    def create_physx_joint(self, actor0, actor1, local_pose0, local_pose1, lower_limit=None, upper_limit=None):
+    def create_physx_joint(self, actor0, actor1, local_pose0, local_pose1, lower_limit=None, upper_limit=None,
+                           kinematic=False):
         """ Create physx joint that connects given actors at given poses. Free joint motion is used if limits are not
         specified and limited is used otherwise for prismatic and revolute joint. """
         if local_pose0 is None:
             local_pose0 = unit_pose()
         if local_pose1 is None:
             local_pose1 = unit_pose()
-        self.physx_joint = D6Joint(actor0, actor1, local_pose0, local_pose1)
+        jcls = KinematicPhysXJoint if kinematic else D6Joint
+        self.physx_joint = jcls(actor0, actor1, local_pose0, local_pose1)
         is_limited = lower_limit is not None and upper_limit is not None
         if self.is_revolute:
             self.physx_joint.set_motion(D6Axis.TWIST, D6Motion.LIMITED if is_limited else D6Motion.FREE)
@@ -147,8 +193,11 @@ class Link(anytree.Node):
 
 class TreeRobot:
 
-    def __init__(self) -> None:
+    def __init__(self, kinematic=False) -> None:
+        """ If robot is kinematic, then all actors are set to be kinematic. Actors poses are set from forward kinematic
+            automatically. """
         super().__init__()
+        self.kinematic = kinematic
         self.links = {}  # type: Dict[str, Link]
         self.movable_joints = {}  # type: Dict[str, Joint]
         self._root_node = None  # type: Optional[Link]
@@ -166,6 +215,8 @@ class TreeRobot:
     def add_link(self, link: Link):
         """ Add new link to the structure. This invalidates previously computed root node. """
         self.links[link.name] = link
+        if self.kinematic:
+            link.actor.set_rigid_body_flag(RigidBodyFlag.KINEMATIC, True)
         self._root_node = None
 
     def add_joint(self, parent_name: str, child_name: str, joint: Joint = None, local_pose0=None, local_pose1=None,
@@ -176,7 +227,7 @@ class TreeRobot:
         if joint is not None:
             self.links[child_name].joint_from_parent.create_physx_joint(
                 self.links[parent_name].actor, self.links[child_name].actor,
-                local_pose0, local_pose1, lower_limit, upper_limit
+                local_pose0, local_pose1, lower_limit, upper_limit, self.kinematic
             )
             if not joint.is_fixed:
                 self.movable_joints[joint.name] = joint
@@ -257,3 +308,22 @@ class TreeRobot:
         """ Disable gravity for all links. """
         for link in self.links.values():
             link.actor.disable_gravity()
+
+    def update(self, dt):
+        """
+            Method should be call before each simulate command.
+            It updates the commanded joint position based on the current commanded position and velocity.
+            For kinematic robots, it computes and set kinematic target for each link.
+        """
+        for joint_name, joint in self.movable_joints.items():
+            joint.set_joint_position(
+                np.clip(joint.commanded_joint_position + joint.commanded_joint_velocity * dt, *joint.get_limits())
+            )
+
+        if self.kinematic:
+            joint_values = dict()
+            for joint_name, joint in self.movable_joints.items():
+                joint_values[joint_name] = joint.commanded_joint_position
+            link_poses = self.compute_link_transformations(joint_values)
+            for link_name, link in self.links.items():
+                link.actor.set_kinematic_target(link_poses[link_name])
