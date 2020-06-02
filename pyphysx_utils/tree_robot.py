@@ -45,16 +45,16 @@ class KinematicPhysXJoint:
     def get_motion(self, axis):
         return self.motion
 
-    def set_linear_limit(self, axis, lower, upper):
-        self.lower = lower
-        self.upper = upper
+    def set_linear_limit(self, axis, lower_limit, upper_limit):
+        self.lower = lower_limit
+        self.upper = upper_limit
 
     def get_linear_limit(self, axis):
         return self.lower, self.upper
 
-    def set_twist_limit(self, lower, upper):
-        self.lower = lower
-        self.upper = upper
+    def set_twist_limit(self, lower_limit, upper_limit):
+        self.lower = lower_limit
+        self.upper = upper_limit
 
     def get_twist_limit(self):
         return self.lower, self.upper
