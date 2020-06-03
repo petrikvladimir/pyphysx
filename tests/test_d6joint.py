@@ -61,6 +61,18 @@ class D6JointTest(unittest.TestCase):
         self.assertAlmostEqual(low, -2)
         self.assertAlmostEqual(up, 2)
 
+    def test_soft_limits(self):
+        a1, a2 = RigidDynamic(), RigidDynamic()
+        j = D6Joint(a1, a2, local_pose0=(0., 3., 0.), local_pose1=(0., -5., 0.))
+        j.set_linear_limit_soft(D6Axis.Y, -1, 1, 1., 1.)
+        low, up = j.get_linear_limit(D6Axis.Y)
+        self.assertAlmostEqual(low, -1)
+        self.assertAlmostEqual(up, 1)
+        j.set_twist_limit_soft(-2, 2, 2, 3)
+        low, up = j.get_twist_limit()
+        self.assertAlmostEqual(low, -2)
+        self.assertAlmostEqual(up, 2)
+
     def test_motion(self):
         a1, a2 = RigidDynamic(), RigidDynamic()
         j = D6Joint(a1, a2, local_pose0=(0., 3., 0.), local_pose1=(0., -5., 0.))

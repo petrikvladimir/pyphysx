@@ -70,7 +70,7 @@ public:
     }
 
     void set_twist_limit_soft(float lower_limit, float upper_limit, float spring_stiffness, float spring_damping) {
-        get_physx_ptr()->setSwingLimit(physx::PxJointLimitCone(
+        get_physx_ptr()->setTwistLimit(physx::PxJointAngularLimitPair(
                 lower_limit, upper_limit, physx::PxSpring(spring_stiffness, spring_damping)));
     }
 
