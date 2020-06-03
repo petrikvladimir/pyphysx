@@ -83,6 +83,11 @@ public:
                 y_limit_angle, z_limit_angle, physx::PxSpring(spring_stiffness, spring_damping)));
     }
 
+    auto get_swing_limit() {
+        const auto limit = get_physx_ptr()->getSwingLimit();
+        return std::make_tuple(limit.yAngle, limit.zAngle);
+    }
+
     void set_break_force(float force, float torque) {
         get_physx_ptr()->setBreakForce(force, torque);
     }

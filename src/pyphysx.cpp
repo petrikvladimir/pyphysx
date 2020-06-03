@@ -342,6 +342,9 @@ PYBIND11_MODULE(pyphysx, m) {
                  arg("z_limit_angle"),
                  arg("contact_dist") = -1
             )
+            .def("get_swing_limit", &D6Joint::get_swing_limit,
+                 "Get y and z limit angle of the swing joint."
+            )
             .def("set_swing_limit_soft", &D6Joint::set_swing_limit_soft,
                  arg("y_limit_angle"),
                  arg("z_limit_angle"),
