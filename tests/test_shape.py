@@ -104,6 +104,15 @@ class ShapeTestCase(unittest.TestCase):
         self.assertAlmostEqual(np.max(z), 1.5)
         self.assertAlmostEqual(np.min(z), -1.5)
 
+    def test_sphere_data(self):
+        s = Shape.create_sphere(radius=6., material=Material())
+        data = s.get_shape_data()
+        self.assertEqual(data.shape[1], 12)
+        points = data.reshape(-1, 3)
+        dist = np.linalg.norm(points, axis=1)  # per point distance to origin should be close to radius
+        self.assertAlmostEqual(np.min(dist), 6., places=2)
+        self.assertAlmostEqual(np.max(dist), 6., places=2)
+
 
 if __name__ == '__main__':
     unittest.main()
