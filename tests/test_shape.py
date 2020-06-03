@@ -89,6 +89,21 @@ class ShapeTestCase(unittest.TestCase):
         self.assertEqual(len(mats), 1)
         self.assertAlmostEqual(mats[0].get_static_friction(), 0.5)
 
+    def test_box_data(self):
+        s = Shape.create_box(size=[1, 2, 3], material=Material())
+        data = s.get_shape_data()
+        self.assertEqual(data.shape[0], 6)
+        self.assertEqual(data.shape[1], 12)
+        x = data[:, 0::3].flatten()
+        y = data[:, 1::3].flatten()
+        z = data[:, 2::3].flatten()
+        self.assertAlmostEqual(np.max(x), 0.5)
+        self.assertAlmostEqual(np.min(x), -0.5)
+        self.assertAlmostEqual(np.max(y), 1.0)
+        self.assertAlmostEqual(np.min(y), -1.0)
+        self.assertAlmostEqual(np.max(z), 1.5)
+        self.assertAlmostEqual(np.min(z), -1.5)
+
 
 if __name__ == '__main__':
     unittest.main()
