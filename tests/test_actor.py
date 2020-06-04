@@ -100,6 +100,22 @@ class ActorTest(unittest.TestCase):
         self.assertFalse(a1.overlaps(a2))
         self.assertTrue(a1.overlaps(a3))
 
+    def test_velocity(self):
+        scene = Scene()
+        a = RigidDynamic()
+        a.attach_shape(Shape.create_box([0.1] * 3, Material()))
+        a.disable_gravity()
+        scene.add_actor(a)
+        a.set_max_linear_velocity(0.05)
+        a.set_max_angular_velocity(0.1)
+        a.set_linear_velocity([0, 0, 0.1])
+        a.set_angular_velocity([0, 0, 0.2])
+        self.assertAlmostEqual(np.linalg.norm(a.get_linear_velocity() - [0, 0, 0.1]), 0.)
+        self.assertAlmostEqual(np.linalg.norm(a.get_angular_velocity() - [0, 0, 0.2]), 0.)
+        scene.simulate()  # maximum velocities should be obey after simulation
+        self.assertAlmostEqual(np.linalg.norm(a.get_linear_velocity() - [0, 0, 0.05]), 0.)
+        self.assertAlmostEqual(np.linalg.norm(a.get_angular_velocity() - [0, 0, 0.1]), 0.)
+
 
 if __name__ == '__main__':
     unittest.main()
