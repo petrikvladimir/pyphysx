@@ -100,6 +100,16 @@ class ActorTest(unittest.TestCase):
         self.assertFalse(a1.overlaps(a2))
         self.assertTrue(a1.overlaps(a3))
 
+    def test_overlap_plane(self):
+        a1 = RigidDynamic()
+        a1.attach_shape(Shape.create_box([0.1] * 3, Material()))
+        a2 = RigidStatic.create_plane(Material())
+        self.assertTrue(a1.overlaps(a2))
+        a1.set_global_pose((0., 0., 0.1 + 1e-8))
+        self.assertFalse(a1.overlaps(a2))
+        a1.set_global_pose((0., 0., -0.2))
+        self.assertTrue(a1.overlaps(a2))  # plane is treated as a solid half-plane
+
     def test_velocity(self):
         scene = Scene()
         a = RigidDynamic()
