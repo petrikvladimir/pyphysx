@@ -65,7 +65,8 @@ class URDFRobot(TreeRobot):
             origin = self._get_origin_from_urdf_element(joint_element)
             limit_element = joint_element.find('limit')
 
-            axis = np.array([float(f) for f in joint_element.find('axis').get('xyz', '1 0 0').split()])
+            axis = [1., 0., 0.] if joint_element.find('axis') == None \
+                else np.array([float(f) for f in joint_element.find('axis').get('xyz', '1 0 0').split()])
             alignment_transform = (np.zeros(3), quat_between_two_vectors(np.array([1., 0., 0.]), axis))
 
             self.add_joint(
