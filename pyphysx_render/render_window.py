@@ -20,8 +20,23 @@ from pyphysx_utils.transformations import quat_from_euler
 
 class PyPhysXWindow(pyglet.window.Window, PyPhysXWindowInterface):
     def __init__(self, queue: Queue, fps=25, video_filename=None, coordinates_scale=1., coordinate_lw=10.,
-                 cam_pos_azimuth=np.deg2rad(10), cam_pos_elevation=np.deg2rad(45), cam_pos_distance=2., **kwargs):
-        super(PyPhysXWindow, self).__init__(**kwargs)
+                 cam_pos_azimuth=np.deg2rad(10), cam_pos_elevation=np.deg2rad(45), cam_pos_distance=2.,
+                 no_gl=False,
+                 **kwargs):
+        """
+        :param queue: queue used to share the commands/data between process
+        :param fps: rendering FPS
+        :param video_filename: output video of the scene filename
+        :param coordinates_scale: length of the coordinate frames visualization
+        :param coordinate_lw: line width of the coordinate  frames visualization
+        :param cam_pos_azimuth: camera orientation/location
+        :param cam_pos_elevation: camera orientation/location
+        :param cam_pos_distance: camera orientation/location
+        :param no_gl: option used solely for testing as that will disable opengl renderer
+        :param kwargs:
+        """
+        if not no_gl:
+            super(PyPhysXWindow, self).__init__(**kwargs)
         self.cam_pos_azimuth = cam_pos_azimuth
         self.cam_pos_elevation = cam_pos_elevation
         self.cam_pos_distance = cam_pos_distance
@@ -51,9 +66,10 @@ class PyPhysXWindow(pyglet.window.Window, PyPhysXWindowInterface):
         self.video_filename = video_filename
         self.vid_imgs = []
 
-        glEnable(GL_DEPTH_TEST)
-        glEnable(pyglet.gl.GL_BLEND)
-        glBlendFunc(pyglet.gl.GL_SRC_ALPHA, pyglet.gl.GL_ONE_MINUS_SRC_ALPHA)
+        if not no_gl:
+            glEnable(GL_DEPTH_TEST)
+            glEnable(pyglet.gl.GL_BLEND)
+            glBlendFunc(pyglet.gl.GL_SRC_ALPHA, pyglet.gl.GL_ONE_MINUS_SRC_ALPHA)
 
     def on_resize(self, width, height):
         glViewport(0, 0, width, height)
@@ -67,7 +83,8 @@ class PyPhysXWindow(pyglet.window.Window, PyPhysXWindowInterface):
 
     def get_eye_pos(self):
         v = [self.cam_pos_distance, 0, 0]
-        return npq.rotate_vectors(quat_from_euler('ZY', [self.cam_pos_azimuth, -self.cam_pos_elevation]), v)
+        v = npq.rotate_vectors(quat_from_euler('ZY', [self.cam_pos_azimuth, -self.cam_pos_elevation]), v)
+        return v + self.look_at
 
     def plot_coordinate_system(self):
         glLineWidth(self.coordinate_lw)
@@ -107,23 +124,37 @@ class PyPhysXWindow(pyglet.window.Window, PyPhysXWindowInterface):
         if buttons & pyglet.window.mouse.LEFT:
             self.cam_pos_azimuth -= dx * 1e-2
             self.cam_pos_elevation -= dy * 1e-2
+        elif buttons & pyglet.window.mouse.MIDDLE:
+            v = 1e-2 * np.array([dx, dy, 0.])
+            self.look_at -= npq.rotate_vectors(quat_from_euler('z', self.cam_pos_azimuth + np.pi / 2), v)
 
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
         self.cam_pos_distance = np.clip(self.cam_pos_distance - scroll_y * 1e-1, 0.015, 100.)
 
     def on_key_press(self, symbol, modifiers):
         super().on_key_press(symbol, modifiers)
-        if symbol is pyglet.window.key.F:
+        if symbol == pyglet.window.key.F:
             self.plot_frames = not self.plot_frames
-        elif symbol is pyglet.window.key.G:
+        elif symbol == pyglet.window.key.G:
             self.plot_geometry = not self.plot_geometry
-        elif symbol is pyglet.window.key.L:
+        elif symbol == pyglet.window.key.L:
             self.plot_labels = not self.plot_labels
-        elif symbol is pyglet.window.key.P:
+        elif symbol == pyglet.window.key.P:
             filename = 'pyphysx_screenshot_{}.png'.format(time.strftime("%Y%m%d_%H%M%S"))
             filepath = Path(os.path.expanduser('~/Pictures')).joinpath(filename)
             imageio.imsave(filepath, self.grab_image())
             print("Screenshot saved into: {}".format(filepath))
+        elif symbol in [pyglet.window.key.LEFT, pyglet.window.key.RIGHT, pyglet.window.key.UP, pyglet.window.key.DOWN]:
+            v = np.zeros(3)
+            if symbol == pyglet.window.key.LEFT:
+                v[0] = 1
+            elif symbol == pyglet.window.key.RIGHT:
+                v[0] = -1
+            elif symbol == pyglet.window.key.UP:
+                v[1] = -1
+            elif symbol == pyglet.window.key.DOWN:
+                v[1] = 1
+            self.look_at -= npq.rotate_vectors(quat_from_euler('z', self.cam_pos_azimuth + np.pi / 2), 1e-1 * v)
 
     @staticmethod
     def grab_image():
