@@ -83,6 +83,7 @@ The code will render and simulate the scene and automatically generate video lik
     - f to show on/off coordinates frame
     - g to show on/off geometries
     - l to show on/off text labels
+    - p to take screenshot of the rendered scene `~/Pictures/pyphysx_screenshot_[datetime].png`
 
 ## URDF parser
 - parse robot from `URDF` file

@@ -4,6 +4,9 @@
 # Created on: 5/12/20
 #     Author: Vladimir Petrik <vladimir.petrik@cvut.cz>
 
+import os
+import time
+from pathlib import Path
 import pyglet
 from pyglet.gl import *
 from queue import Empty
@@ -116,6 +119,18 @@ class PyPhysXWindow(pyglet.window.Window, PyPhysXWindowInterface):
             self.plot_geometry = not self.plot_geometry
         elif symbol is pyglet.window.key.L:
             self.plot_labels = not self.plot_labels
+        elif symbol is pyglet.window.key.P:
+            filename = 'pyphysx_screenshot_{}.png'.format(time.strftime("%Y%m%d_%H%M%S"))
+            filepath = Path(os.path.expanduser('~/Pictures')).joinpath(filename)
+            imageio.imsave(filepath, self.grab_image())
+            print("Screenshot saved into: {}".format(filepath))
+
+    @staticmethod
+    def grab_image():
+        """ Get rendered image of the screen. Returns numpy array H x W x 4. """
+        ibar = pyglet.image.get_buffer_manager().get_color_buffer().get_image_data()
+        np_img = np.flip(np.asanyarray(ibar.get_data()).reshape(ibar.height, ibar.width, 4), axis=0)
+        return np_img
 
     def update(self, dt):
         try:
@@ -127,9 +142,7 @@ class PyPhysXWindow(pyglet.window.Window, PyPhysXWindowInterface):
 
         self.on_draw()
         if self.video_filename is not None:
-            ibar = pyglet.image.get_buffer_manager().get_color_buffer().get_image_data()
-            np_img = np.flip(np.asanyarray(ibar.get_data()).reshape(ibar.height, ibar.width, 4), axis=0)
-            self.vid_imgs.append(np_img)
+            self.vid_imgs.append(self.grab_image())
 
     @staticmethod
     def batch_from_shape(shape, color=None):
