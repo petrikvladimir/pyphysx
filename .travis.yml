@@ -1,8 +1,10 @@
 language: python
+dist: xenial
 python:
   - 3.7
   - 3.8
 before_install:
+  - sudo apt install -y freeglut3-dev
   - python --version
   - pip install -U pip
   - pip install -U conan
