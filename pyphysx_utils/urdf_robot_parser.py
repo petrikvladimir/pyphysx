@@ -20,6 +20,11 @@ from pyphysx_utils.transformations import quat_between_two_vectors
 class URDFRobot(TreeRobot):
 
     def __init__(self, urdf_path, mesh_path=None, **kwargs) -> None:
+        """
+        Create a robot from urdf_path or urdf_text.
+        :param urdf_path: path to the urdf file
+        :param mesh_path: path to the directory with meshes that are referred from urdf
+        """
         super().__init__(**kwargs)
         self.urdf_path = Path(urdf_path)
         self.mesh_path = Path(mesh_path) if mesh_path is not None else self.urdf_path.parent
@@ -42,9 +47,10 @@ class URDFRobot(TreeRobot):
 
             """ Color collision shapes based on the colors used in visual shapes. """
             visual_colors = [s.get_user_data()['color'] for s in visual_shapes if s.get_user_data() is not None]
-            mean_visual_color = np.mean(visual_colors, axis=0)
-            for s in collision_shapes:
-                s.set_user_data({'color': mean_visual_color})
+            if len(visual_colors) > 0:
+                mean_visual_color = np.mean(visual_colors, axis=0)
+                for s in collision_shapes:
+                    s.set_user_data({'color': mean_visual_color})
 
             """ Ignore simulation of visual shape and rendering of collision if both are specified. """
             if len(collision_shapes) != 0 and len(visual_shapes) != 0:
