@@ -6,10 +6,9 @@
 
 import unittest
 from queue import Queue
+import numpy as np
 
-import pyglet
-
-from pyphysx_utils.urdf_robot_parser import *
+from pyglet.window.key import LEFT, RIGHT, UP, DOWN
 from pyphysx_render.render_window import PyPhysXWindow
 
 
@@ -19,17 +18,17 @@ class RenderWindowTestCase(unittest.TestCase):
         self.queue = Queue()
         window = PyPhysXWindow(queue=self.queue, no_gl=True)
         self.assertAlmostEqual(0., np.linalg.norm(window.look_at))
-        window.on_key_press(pyglet.window.key.LEFT, None)
+        window.on_key_press(LEFT, None)
         self.assertAlmostEqual(1e-1, np.linalg.norm(window.look_at))
         self.assertNotAlmostEqual(0., np.linalg.norm(window.look_at))
-        window.on_key_press(pyglet.window.key.RIGHT, None)
+        window.on_key_press(RIGHT, None)
         self.assertAlmostEqual(0., np.linalg.norm(window.look_at))
 
         self.assertAlmostEqual(0., np.linalg.norm(window.look_at))
-        window.on_key_press(pyglet.window.key.UP, None)
+        window.on_key_press(UP, None)
         self.assertAlmostEqual(1e-1, np.linalg.norm(window.look_at))
         self.assertNotAlmostEqual(0., np.linalg.norm(window.look_at))
-        window.on_key_press(pyglet.window.key.DOWN, None)
+        window.on_key_press(DOWN, None)
         self.assertAlmostEqual(0., np.linalg.norm(window.look_at))
 
 
