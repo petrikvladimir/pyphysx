@@ -1,10 +1,13 @@
 language: python
 dist: xenial
+addons:
+  apt:
+    packages:
+      - freeglut3-dev
 python:
   - 3.7
   - 3.8
 before_install:
-  - sudo apt install -y freeglut3-dev
   - python --version
   - pip install -U pip
   - pip install -U conan
@@ -22,4 +25,3 @@ script:
   - make gcov
 after_success:
   - codecov -X gcov
-
