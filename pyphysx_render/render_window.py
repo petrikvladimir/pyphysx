@@ -30,7 +30,6 @@ class PyPhysXWindow(pyglet.window.Window, PyPhysXWindowInterface):
         :param cam_pos_azimuth: camera orientation/location
         :param cam_pos_elevation: camera orientation/location
         :param cam_pos_distance: camera orientation/location
-        :param no_gl: option used solely for testing as that will disable opengl renderer
         :param kwargs:
         """
         super(PyPhysXWindow, self).__init__(**kwargs)
@@ -59,9 +58,7 @@ class PyPhysXWindow(pyglet.window.Window, PyPhysXWindowInterface):
         self.plot_labels = True
 
         self.labels = []
-
-        self.video_filename = video_filename
-        self.vid_imgs = []
+        self.video_writer = imageio.get_writer(video_filename, fps=self.fps) if video_filename is not None else None
 
         glEnable(GL_DEPTH_TEST)
         glEnable(pyglet.gl.GL_BLEND)
@@ -168,8 +165,8 @@ class PyPhysXWindow(pyglet.window.Window, PyPhysXWindowInterface):
             pass
 
         self.on_draw()
-        if self.video_filename is not None:
-            self.vid_imgs.append(self.grab_image())
+        if self.video_writer is not None:
+            self.video_writer.append_data(self.grab_image())
 
     @staticmethod
     def batch_from_shape(shape, color=None):
@@ -205,9 +202,8 @@ class PyPhysXWindow(pyglet.window.Window, PyPhysXWindowInterface):
 
     def close(self):
         super().close()
-        if self.video_filename is not None:
-            print("Saving {}-frames video into: {}".format(len(self.vid_imgs), self.video_filename))
-            imageio.mimsave(self.video_filename, self.vid_imgs, fps=self.fps)
+        if self.video_writer is not None:
+            self.video_writer.close()
 
     def add_actor_geometry(self, actor_id, geometry_data, local_pose, color=None):
         if actor_id not in self.actors:

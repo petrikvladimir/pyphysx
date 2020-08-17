@@ -31,6 +31,14 @@ class RenderWindowTestCase(unittest.TestCase):
         window.on_key_press(DOWN, None)
         self.assertAlmostEqual(0., np.linalg.norm(window.look_at))
 
+    def test_writer_construction_destruction(self):
+        self.queue = Queue()
+        window = PyPhysXWindow(queue=self.queue, video_filename='/tmp/video.gif')
+        self.assertIsNotNone(window.video_writer)
+        self.assertFalse(window.video_writer.closed)
+        window.close()
+        self.assertTrue(window.video_writer.closed)
+
 
 if __name__ == '__main__':
     unittest.main()
