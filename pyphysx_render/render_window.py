@@ -20,9 +20,7 @@ from pyphysx_utils.transformations import quat_from_euler
 
 class PyPhysXWindow(pyglet.window.Window, PyPhysXWindowInterface):
     def __init__(self, queue: Queue, fps=25, video_filename=None, coordinates_scale=1., coordinate_lw=10.,
-                 cam_pos_azimuth=np.deg2rad(10), cam_pos_elevation=np.deg2rad(45), cam_pos_distance=2.,
-                 no_gl=False,
-                 **kwargs):
+                 cam_pos_azimuth=np.deg2rad(10), cam_pos_elevation=np.deg2rad(45), cam_pos_distance=2., **kwargs):
         """
         :param queue: queue used to share the commands/data between process
         :param fps: rendering FPS
@@ -35,8 +33,7 @@ class PyPhysXWindow(pyglet.window.Window, PyPhysXWindowInterface):
         :param no_gl: option used solely for testing as that will disable opengl renderer
         :param kwargs:
         """
-        if not no_gl:
-            super(PyPhysXWindow, self).__init__(**kwargs)
+        super(PyPhysXWindow, self).__init__(**kwargs)
         self.cam_pos_azimuth = cam_pos_azimuth
         self.cam_pos_elevation = cam_pos_elevation
         self.cam_pos_distance = cam_pos_distance
@@ -66,10 +63,9 @@ class PyPhysXWindow(pyglet.window.Window, PyPhysXWindowInterface):
         self.video_filename = video_filename
         self.vid_imgs = []
 
-        if not no_gl:
-            glEnable(GL_DEPTH_TEST)
-            glEnable(pyglet.gl.GL_BLEND)
-            glBlendFunc(pyglet.gl.GL_SRC_ALPHA, pyglet.gl.GL_ONE_MINUS_SRC_ALPHA)
+        glEnable(GL_DEPTH_TEST)
+        glEnable(pyglet.gl.GL_BLEND)
+        glBlendFunc(pyglet.gl.GL_SRC_ALPHA, pyglet.gl.GL_ONE_MINUS_SRC_ALPHA)
 
     def on_resize(self, width, height):
         glViewport(0, 0, width, height)

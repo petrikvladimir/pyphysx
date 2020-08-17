@@ -16,7 +16,7 @@ class RenderWindowTestCase(unittest.TestCase):
 
     def test_render_look_at_key_modifications(self):
         self.queue = Queue()
-        window = PyPhysXWindow(queue=self.queue, no_gl=True)
+        window = PyPhysXWindow(queue=self.queue)
         self.assertAlmostEqual(0., np.linalg.norm(window.look_at))
         window.on_key_press(LEFT, None)
         self.assertAlmostEqual(1e-1, np.linalg.norm(window.look_at))
