@@ -21,10 +21,6 @@ before_install:
   - export PYPHYSX_COV=true
 install:
   - python setup.py build
-before_script:
-  - "export DISPLAY=:99.0"
-  - "sh -e /etc/init.d/xvfb start"
-  - sleep 3
 script:
   - export PYTHONPATH=$PYTHONPATH:$(pwd)/build/lib.linux-x86_64-$TRAVIS_PYTHON_VERSION
   - cd build/temp.linux-x86_64-$TRAVIS_PYTHON_VERSION
