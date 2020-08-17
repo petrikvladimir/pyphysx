@@ -1,4 +1,11 @@
 language: python
+dist: xenial
+services:
+  - xvfb
+addons:
+  apt:
+    packages:
+      - freeglut3-dev
 python:
   - 3.7
   - 3.8
@@ -20,4 +27,3 @@ script:
   - make gcov
 after_success:
   - codecov -X gcov
-
