@@ -114,5 +114,10 @@ class ShapeTestCase(unittest.TestCase):
         self.assertAlmostEqual(np.max(dist), 6., places=2)
 
 
+    def test_geometry_type(self):
+        s = Shape.create_sphere(radius=6., material=Material())
+        self.assertEqual(s.get_geometry_type(), GeometryType.SPHERE)
+
+
 if __name__ == '__main__':
     unittest.main()
