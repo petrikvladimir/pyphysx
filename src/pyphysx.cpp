@@ -75,6 +75,16 @@ PYBIND11_MODULE(pyphysx, m) {
             .value("VISUALIZATION", physx::PxShapeFlag::eVISUALIZATION)
             .export_values();
 
+    py::enum_<physx::PxGeometryType::Enum>(m, "GeometryType")
+            .value("SPHERE", physx::PxGeometryType::eSPHERE)
+            .value("PLANE", physx::PxGeometryType::ePLANE)
+            .value("CAPSULE", physx::PxGeometryType::eCAPSULE)
+            .value("BOX", physx::PxGeometryType::eBOX)
+            .value("CONVEXMESH", physx::PxGeometryType::eCONVEXMESH)
+            .value("TRIANGLEMESH", physx::PxGeometryType::eTRIANGLEMESH)
+            .value("HEIGHTFIELD", physx::PxGeometryType::eHEIGHTFIELD)
+            .export_values();
+
     py::enum_<physx::PxD6Axis::Enum>(m, "D6Axis")
             .value("X", physx::PxD6Axis::eX)
             .value("Y", physx::PxD6Axis::eY)
@@ -210,6 +220,9 @@ PYBIND11_MODULE(pyphysx, m) {
             )
             .def("get_materials", &Shape::get_materials,
                  "Get all materials specified for this shape."
+            )
+            .def("get_geometry_type", &Shape::get_geometry_type,
+                 "Get type of the geometry, e.g. SPHERE, BOX, etc."
             );
 
     py::class_<RigidActor>(m, "RigidActor")

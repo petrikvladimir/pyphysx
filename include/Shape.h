@@ -36,6 +36,10 @@ public:
         return get_physx_ptr()->getLocalPose();
     }
 
+    auto get_geometry_type() {
+        return get_physx_ptr()->getGeometryType();
+    }
+
     Eigen::MatrixXf get_shape_data() {
         if (get_physx_ptr()->getGeometryType() == physx::PxGeometryType::eBOX) {
             return render_box_geometry();
