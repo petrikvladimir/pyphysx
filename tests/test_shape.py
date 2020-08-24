@@ -118,6 +118,14 @@ class ShapeTestCase(unittest.TestCase):
         s = Shape.create_sphere(radius=6., material=Material())
         self.assertEqual(s.get_geometry_type(), GeometryType.SPHERE)
 
+    def test_sphere_radius(self):
+        s = Shape.create_sphere(radius=6.2, material=Material())
+        self.assertAlmostEqual(s.get_sphere_radius(), 6.2, places=5)
+
+    def test_box_half_extents(self):
+        s = Shape.create_box(size=[0.1, 0.3, 0.2], material=Material())
+        self.assertAlmostEqual(0., np.linalg.norm(s.get_box_half_extents() - [0.05, 0.15, 0.1]))
+
 
 if __name__ == '__main__':
     unittest.main()

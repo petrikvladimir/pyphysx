@@ -40,6 +40,18 @@ public:
         return get_physx_ptr()->getGeometryType();
     }
 
+    auto get_sphere_radius() {
+        physx::PxSphereGeometry geom;
+        get_physx_ptr()->getSphereGeometry(geom);
+        return geom.radius;
+    }
+
+    auto get_box_half_extents() {
+        physx::PxBoxGeometry geom;
+        get_physx_ptr()->getBoxGeometry(geom);
+        return geom.halfExtents;
+    }
+
     Eigen::MatrixXf get_shape_data() {
         if (get_physx_ptr()->getGeometryType() == physx::PxGeometryType::eBOX) {
             return render_box_geometry();
