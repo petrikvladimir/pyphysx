@@ -223,6 +223,12 @@ PYBIND11_MODULE(pyphysx, m) {
             )
             .def("get_geometry_type", &Shape::get_geometry_type,
                  "Get type of the geometry, e.g. SPHERE, BOX, etc."
+            )
+            .def("get_sphere_radius", &Shape::get_sphere_radius,
+                 "Get radius of sphere geometry. Use only if shape type equals to sphere."
+            )
+            .def("get_box_half_extents", &Shape::get_box_half_extents,
+                 "Get half of the box sizes, i.e. vector of x/2, y/2, z/2. Use only for box geometries."
             );
 
     py::class_<RigidActor>(m, "RigidActor")
