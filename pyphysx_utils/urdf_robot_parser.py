@@ -19,7 +19,7 @@ from pyphysx_utils.transformations import quat_between_two_vectors
 
 class URDFRobot(TreeRobot):
 
-    def __init__(self, urdf_path, mesh_path=None, **kwargs) -> None:
+    def __init__(self, urdf_path, mesh_path=None, use_random_collision_colors=False, **kwargs) -> None:
         """
         Create a robot from urdf_path or urdf_text.
         :param urdf_path: path to the urdf file
@@ -30,27 +30,29 @@ class URDFRobot(TreeRobot):
         self.mesh_path = Path(mesh_path) if mesh_path is not None else self.urdf_path.parent
         urdf = parse(self.urdf_path)
         self.materials = self._parse_materials(urdf)
-        self.parse_links_from_urdf_etree(urdf, self.mesh_path)
+        self.parse_links_from_urdf_etree(urdf, self.mesh_path, use_random_collision_colors=use_random_collision_colors)
         self.parse_joints_from_urdf_etree(urdf)
 
-    def parse_links_from_urdf_etree(self, urdf: ElementTree, mesh_root_folder: Path):
+    def parse_links_from_urdf_etree(self, urdf: ElementTree, mesh_root_folder: Path, use_random_collision_colors=False):
         for link_element in urdf.iterfind('link'):
             link = Link(link_element.get('name'), RigidDynamic())
 
             visual_shapes = []
             for visual_element in link_element.iterfind('visual'):
                 visual_shapes += self._parse_shapes(visual_element, mesh_root_folder=mesh_root_folder,
-                                                    global_materials=self.materials)
+                                                    global_materials=self.materials, set_visual_mesh_userdata=True)
             collision_shapes = []
             for collision_element in link_element.iterfind('collision'):
                 collision_shapes += self._parse_shapes(collision_element, mesh_root_folder=mesh_root_folder)
 
             """ Color collision shapes based on the colors used in visual shapes. """
-            visual_colors = [s.get_user_data()['color'] for s in visual_shapes if s.get_user_data() is not None]
-            if len(visual_colors) > 0:
-                mean_visual_color = np.mean(visual_colors, axis=0)
-                for s in collision_shapes:
-                    s.set_user_data({'color': mean_visual_color})
+            if not use_random_collision_colors:
+                visual_colors = [s.get_user_data()['color'] for s in visual_shapes if
+                                 s.get_user_data() is not None and 'color' in s.get_user_data()]
+                if len(visual_colors) > 0:
+                    mean_visual_color = np.mean(visual_colors, axis=0)
+                    for s in collision_shapes:
+                        URDFRobot.shape_update_user_data(s, 'color', mean_visual_color)
 
             """ Ignore simulation of visual shape and rendering of collision if both are specified. """
             if len(collision_shapes) != 0 and len(visual_shapes) != 0:
@@ -111,13 +113,27 @@ class URDFRobot(TreeRobot):
         return name, color
 
     @staticmethod
-    def load_mesh_shapes(mesh_path, material, scale: float) -> List[Shape]:
-        """ Load mesh obj file and return all shapes in an array. """
-        obj = trimesh.load(mesh_path, split_object=True, group_material=False)
-        if isinstance(obj, trimesh.scene.scene.Scene):
-            return [Shape.create_convex_mesh_from_points(g.vertices, material, scale) for g in obj.geometry.values()]
+    def shape_update_user_data(shape, name, value):
+        if shape.get_user_data() is not None:
+            shape.get_user_data().update({name: value})
         else:
-            return [Shape.create_convex_mesh_from_points(obj.vertices, material, scale)]
+            shape.set_user_data({name: value})
+
+    @staticmethod
+    def load_mesh_shapes(mesh_path, material, scale: float, set_visual_mesh_userdata=False) -> List[Shape]:
+        """ Load mesh obj file and return all shapes in an array. """
+        mesh_resolver = trimesh.resolvers.FilePathResolver(mesh_path)
+        obj = trimesh.load(mesh_path, split_object=True, group_material=False, resolver=mesh_resolver)
+        if isinstance(obj, trimesh.scene.scene.Scene):
+            shapes = [Shape.create_convex_mesh_from_points(g.vertices, material, scale) for g in obj.geometry.values()]
+            if set_visual_mesh_userdata:
+                for s, g in zip(shapes, obj.geometry.values()):
+                    URDFRobot.shape_update_user_data(s, 'visual_mesh', g)
+        else:
+            shapes = [Shape.create_convex_mesh_from_points(obj.vertices, material, scale)]
+            if set_visual_mesh_userdata:
+                URDFRobot.shape_update_user_data(shapes[0], 'visual_mesh', obj)
+        return shapes
 
     @staticmethod
     def _get_origin_from_urdf_element(element):
@@ -129,7 +145,7 @@ class URDFRobot(TreeRobot):
         return pos, quat
 
     @staticmethod
-    def _parse_shapes(element, mesh_root_folder: Path, global_materials=None):
+    def _parse_shapes(element, mesh_root_folder: Path, global_materials=None, set_visual_mesh_userdata=False):
         """ Get list of shapes specified in a given element. E.g. if you provide collision element, it will give you
         all collision geometry elements. If global materials are specified, parse color as well. """
         geometry_element = element.find('geometry')
@@ -140,7 +156,8 @@ class URDFRobot(TreeRobot):
             if geom.tag == 'mesh':
                 mesh_path = mesh_root_folder.joinpath(geom.get('filename').replace('package://', ''))
                 scale = float(geom.get('scale', '1').split()[0])
-                shapes = URDFRobot.load_mesh_shapes(mesh_path, material=Material(), scale=scale)
+                shapes = URDFRobot.load_mesh_shapes(mesh_path, material=Material(), scale=scale,
+                                                    set_visual_mesh_userdata=set_visual_mesh_userdata)
             elif geom.tag == 'box':
                 shapes = [Shape.create_box(size=geom.get('size', '1 1 1').split(), material=Material())]
             elif geom.tag == 'sphere':
@@ -159,8 +176,7 @@ class URDFRobot(TreeRobot):
                     clr = global_materials.get(list(materials.keys())[0])
                 assert clr is not None, 'Color value must be specified either inside robot or in material.'
                 for s in shapes:
-                    s.set_user_data({'color': clr})
-
+                    URDFRobot.shape_update_user_data(s, 'color', clr)
         return shapes
 
     @staticmethod
