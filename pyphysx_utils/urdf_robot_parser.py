@@ -7,7 +7,7 @@
 # Parse URDF file into the tree robot.
 #
 
-from typing import List
+from typing import List, Tuple
 from pathlib import Path
 from xml.etree.ElementTree import ElementTree, parse
 
@@ -89,14 +89,26 @@ class URDFRobot(TreeRobot):
     def _parse_materials(element) -> Dict[str, List]:
         """ Parse materials into the dictionary. """
         materials = dict()
+
+        """ First parse all materials in order to prevent bug where material hierarchy is not respected. """
+        for material_element in element.findall('.//material'):
+            name, color = URDFRobot._parse_material(material_element)
+            if color is not None:
+                materials[name] = color
+
+        """ Replace previously obtained materials by top level materials """
         for material_element in element.iterfind('material'):
-            name = str(material_element.get('name'))
-            color = material_element.find('color')
-            if color is None:
-                materials[name] = None
-                continue
-            materials[name] = [float(v) for v in color.get('rgba', '1 1 1 1').split()]
+            name, color = URDFRobot._parse_material(material_element)
+            materials[name] = color
         return materials
+
+    @staticmethod
+    def _parse_material(material_element) -> Tuple[str, List]:
+        """ Given material element return tuple of name and color """
+        name = str(material_element.get('name'))
+        color_str = material_element.find('color')
+        color = None if color_str is None else [float(v) for v in color_str.get('rgba', '1 1 1 1').split()]
+        return name, color
 
     @staticmethod
     def load_mesh_shapes(mesh_path, material, scale: float) -> List[Shape]:
