@@ -73,7 +73,7 @@ class PyPhysxViewer(Viewer):
 
     def shape_to_meshes(self, shape: Shape):
         clr_string = shape.get_user_data().get('color', None) if shape.get_user_data() is not None else None
-        clr = gl_color_from_matplotlib(color=clr_string)
+        clr = gl_color_from_matplotlib(color=clr_string, return_rgba=True)
         visual_mesh = shape.get_user_data().get('visual_mesh', None) if shape.get_user_data() is not None else None
 
         meshes = []
@@ -114,11 +114,9 @@ class PyPhysxViewer(Viewer):
             raise NotImplementedError('Not supported type of the geometry.')
         return meshes
 
-    def shape_to_nodes(self, shape, children=None):
-        if children is None:
-            children = []
+    def shape_to_nodes(self, shape):
         pose = pose_to_transformation_matrix(shape.get_local_pose())
-        return [pyrender.Node(mesh=mesh, matrix=pose, children=children) for mesh in self.shape_to_meshes(shape=shape)]
+        return [pyrender.Node(mesh=mesh, matrix=pose) for mesh in self.shape_to_meshes(shape=shape)]
 
     def actor_to_node(self, actor, flags):
         shapes = [s for s in actor.get_atached_shapes() if PyPhysxViewer.has_shape_any_of_flags(s, flags)]
@@ -127,8 +125,7 @@ class PyPhysxViewer(Viewer):
         all_nodes: List[pyrender.Node] = []
         for s in shapes:
             all_nodes += self.shape_to_nodes(s)
-        all_nodes[0].children = all_nodes[1:]
-        return all_nodes[0]
+        return pyrender.Node(children=all_nodes)
 
     def add_physx_scene(self, scene, render_shapes_with_one_of_flags=(ShapeFlag.VISUALIZATION,), offset=np.zeros(3)):
         """ Call this function to create a renderer scene from physx scene. """
