@@ -120,17 +120,20 @@ class URDFRobot(TreeRobot):
             shape.set_user_data({name: value})
 
     @staticmethod
-    def load_mesh_shapes(mesh_path, material, scale: float, set_visual_mesh_userdata=False) -> List[Shape]:
+    def load_mesh_shapes(mesh_path, material, scale, set_visual_mesh_userdata=False) -> List[Shape]:
         """ Load mesh obj file and return all shapes in an array. """
         mesh_resolver = trimesh.resolvers.FilePathResolver(mesh_path)
         obj = trimesh.load(mesh_path, split_object=True, group_material=False, resolver=mesh_resolver)
+        transform = np.diag([*scale, 1])
+        obj.apply_transform(transform)
+
         if isinstance(obj, trimesh.scene.scene.Scene):
-            shapes = [Shape.create_convex_mesh_from_points(g.vertices, material, scale) for g in obj.geometry.values()]
+            shapes = [Shape.create_convex_mesh_from_points(g.vertices, material) for g in obj.geometry.values()]
             if set_visual_mesh_userdata:
                 for s, g in zip(shapes, obj.geometry.values()):
                     URDFRobot.shape_update_user_data(s, 'visual_mesh', g)
         else:
-            shapes = [Shape.create_convex_mesh_from_points(obj.vertices, material, scale)]
+            shapes = [Shape.create_convex_mesh_from_points(obj.vertices, material)]
             if set_visual_mesh_userdata:
                 URDFRobot.shape_update_user_data(shapes[0], 'visual_mesh', obj)
         return shapes
@@ -155,15 +158,20 @@ class URDFRobot(TreeRobot):
         for geom in geometry_element:
             if geom.tag == 'mesh':
                 mesh_path = mesh_root_folder.joinpath(geom.get('filename').replace('package://', ''))
-                scale = float(geom.get('scale', '1').split()[0])
+                scale = [float(f) for f in geom.get('scale', '1 1 1').split()]
                 shapes = URDFRobot.load_mesh_shapes(mesh_path, material=Material(), scale=scale,
                                                     set_visual_mesh_userdata=set_visual_mesh_userdata)
             elif geom.tag == 'box':
                 shapes = [Shape.create_box(size=geom.get('size', '1 1 1').split(), material=Material())]
             elif geom.tag == 'sphere':
                 shapes = [Shape.create_sphere(radius=float(geom.get('radius', '1')), material=Material())]
+            elif geom.tag == 'cylinder':
+                mesh = trimesh.creation.cylinder(radius=float(geom.get('radius', '1')),
+                                                    height=float(geom.get('length', '1')))
+                scale = float(geom.get('scale', '1').split()[0])
+                shapes = [Shape.create_convex_mesh_from_points(mesh.vertices, Material(), scale)]
             else:
-                raise NotImplementedError('Only sphere/box/mesh geometries are supported')
+                raise NotImplementedError('Only sphere/box/cylinder/mesh geometries are supported. Got {}'.format(geom.tag))
         local_pose = URDFRobot._get_origin_from_urdf_element(element)
         for s in shapes:
             s.set_local_pose(local_pose)
@@ -174,7 +182,7 @@ class URDFRobot(TreeRobot):
                 clr = list(materials.values())[0]
                 if clr is None:
                     clr = global_materials.get(list(materials.keys())[0])
-                assert clr is not None, 'Color value must be specified either inside robot or in material.'
+                assert clr is not None, 'Color value must be specified either inside robot or in material. Not found for material {}'.format(materials)
                 for s in shapes:
                     URDFRobot.shape_update_user_data(s, 'color', clr)
         return shapes
