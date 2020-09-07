@@ -12,7 +12,7 @@ import trimesh
 import numpy as np
 from typing import List
 
-from pyrender import Viewer, Primitive, GLTF
+from pyrender import Viewer, Primitive, GLTF, TextAlign
 
 from pyphysx import ShapeFlag, Shape, RigidActor, GeometryType
 from pyphysx_render.pyrender_trackball import RoboticTrackball
@@ -198,3 +198,28 @@ class PyPhysxViewer(Viewer):
             else:
                 imageio.mimwrite(filename, self._saved_frames, fps=self.viewer_flags['refresh_rate'])
         self._saved_frames = []
+
+    def add_label(self, text, location=TextAlign.CENTER, font_name='OpenSans-Regular', font_pt=40, color=None,
+                  scale=1.0):
+        """ Add label on the screen. Returns the label object that can be used to update the text. """
+        if self.viewer_flags['caption'] is None:
+            self.viewer_flags['caption'] = []
+
+        self.render_lock.acquire()
+        self.viewer_flags['caption'].append(
+            dict(text=text, location=location, font_name=font_name, font_pt=font_pt,
+                 color=gl_color_from_matplotlib(color, return_rgba=True),
+                 scale=scale))
+        self.render_lock.release()
+        return self.viewer_flags['caption'][-1]
+
+    def update_label_text(self, label, new_text):
+        self.render_lock.acquire()
+        label['text'] = new_text
+        self.render_lock.release()
+
+    def _location_to_x_y(self, location):
+        """ Workaround to be able to select arbitrary text location by user. """
+        if isinstance(location, tuple):
+            return location
+        return super()._location_to_x_y(location)
