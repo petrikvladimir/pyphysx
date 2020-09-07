@@ -22,7 +22,7 @@ from pyphysx_utils.transformations import pose_to_transformation_matrix, multipl
 
 class PyPhysxViewer(Viewer):
     def __init__(self, render_scene=None, viewport_size=None, render_flags=None, viewer_flags=None,
-                 registered_keys=None, run_in_thread=True, **kwargs):
+                 registered_keys=None, run_in_thread=True, video_filename=None, **kwargs):
         """
             Use render_scene to specify camera or lighting or additional geometries if required.
             Additional viewer flags:
@@ -58,6 +58,8 @@ class PyPhysxViewer(Viewer):
         super().__init__(render_scene, viewport_size, render_flags, _viewer_flags, registered_keys, run_in_thread,
                          **kwargs)
         self.nodes_and_actors = []
+        fps = self.viewer_flags['refresh_rate']
+        self.video_writer = imageio.get_writer(video_filename, fps=fps) if video_filename is not None else None
 
     def _reset_view(self):
         super()._reset_view()
@@ -229,3 +231,22 @@ class PyPhysxViewer(Viewer):
         if isinstance(location, tuple):
             return location
         return super()._location_to_x_y(location)
+
+    @staticmethod
+    def _time_event_save_video(dt, self):
+        """ Use memory-safe writer to video file. """
+        if self.video_writer is not None:
+            data = self._renderer.read_color_buf()
+            if not np.all(data == 0.0):
+                self.video_writer.append_data(data)
+
+    def _init_and_start_app(self):
+        from pyglet import clock
+        clock.schedule_interval(PyPhysxViewer._time_event_save_video, 1.0 / self.viewer_flags['refresh_rate'], self)
+        super()._init_and_start_app()
+
+    def close(self):
+        super().close()
+        if self.video_writer is not None:
+            self.video_writer.close()
+            self.video_writer = None
