@@ -6,11 +6,12 @@
 #
 # Example showing how to load URDF robot and how to control it in position or velocity mode.
 
-from pyphysx_render.renderer import PyPhysXParallelRenderer
-from pyphysx_utils.rate import Rate
-from pyphysx_utils.urdf_robot_parser import URDFRobot, quat_from_euler
-from pyphysx import *
 import numpy as np
+from pyrender import TextAlign
+from pyphysx import *
+from pyphysx_utils.rate import Rate
+from pyphysx_utils.urdf_robot_parser import URDFRobot
+from pyphysx_render.pyrender import PyPhysxViewer
 
 position_control = True  # Select position control (if True) or velocity control (if False)
 kinematic_robot = False  # Dynamic robot simulation (if False) or only kinematic robot simulation (if True)
@@ -32,17 +33,14 @@ robot.movable_joints['tz'].configure_drive(stiffness=1e6, damping=1e5, force_lim
 robot.movable_joints['ty'].configure_drive(stiffness=1e6, damping=1e5, force_limit=1e5, is_acceleration=False)
 
 """ Configure renderer and add labels. """
-render = PyPhysXParallelRenderer(render_window_kwargs=dict(
-    video_filename='load_urdf.gif',
-    coordinates_scale=0.5, coordinate_lw=2,
-))
-render.add_label(pose=((0.7, 0, 0), quat_from_euler('z', np.deg2rad(90))), color='tab:blue',
-                 text='Rendering visual shapes.', anchor_x='center')
-render.add_label(pose=((0.9, 0, 0), quat_from_euler('z', np.deg2rad(90))), color='tab:green',
-                 text='', anchor_x='center')
+render = PyPhysxViewer()
+render.add_physx_scene(scene)
+
+label_shapes = render.add_label('Rendering visual shapes.', TextAlign.BOTTOM_LEFT, scale=0.5, color='tab:blue')
+label_joints = render.add_label('', TextAlign.BOTTOM_RIGHT, scale=0.5, color='tab:green')
 
 rate = Rate(120)
-while render.is_running():
+while render.is_active:
     """ Set robot commands based on the simulation time. Positions and velocity control should follow the same path. """
     t = scene.simulation_time
     if position_control:
@@ -64,19 +62,20 @@ while render.is_running():
 
     """ Render collision shapes instead of visual shapes if time is larger than 5 seconds. """
     if 5. < t < 5. + rate.period():
-        render.update_labels_text(['Rendering collision shapes', None])
-        render.render_scene(scene, recompute_actors=True, render_shapes_with_one_of_flags=[ShapeFlag.SIMULATION_SHAPE])
+        render.clear_physx_scenes()
+        render.add_physx_scene(scene, render_shapes_with_one_of_flags=(ShapeFlag.SIMULATION_SHAPE,))
+        render.update_label_text(label_shapes, 'Rendering collision shapes')
 
-    render.update_labels_text([None, 'Command: rz: {:.2f}, tz: {:.2f}, ty: {:.2f}'.format(
+    render.update_label_text(label_joints, 'Command: rz: {:.2f}, tz: {:.2f}, ty: {:.2f}'.format(
         robot.movable_joints['rz'].commanded_joint_position,
         robot.movable_joints['tz'].commanded_joint_position,
         robot.movable_joints['ty'].commanded_joint_position
-    )])
+    ))
 
     """ Perform simulation.  """
     robot.update(rate.period())  # Robot update is necessary before simulation! It updates kinematic target and command.
     scene.simulate(rate.period())
 
     """ Render in real time. """
-    render.render_scene(scene)
+    render.update()
     rate.sleep()

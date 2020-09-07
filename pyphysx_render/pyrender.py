@@ -139,6 +139,12 @@ class PyPhysxViewer(Viewer):
                 self.render_lock.release()
         self.update()
 
+    def clear_physx_scenes(self):
+        """ Remove all tracked actors and the corresponding nodes. """
+        for node, actor, offset in self.nodes_and_actors:  # type: pyrender.Node, RigidActor
+            self.scene.remove_node(node)
+        self.nodes_and_actors.clear()
+
     def update(self):
         for node, actor, offset in self.nodes_and_actors:  # type: pyrender.Node, RigidActor
             pose = multiply_transformations(offset, actor.get_global_pose())
