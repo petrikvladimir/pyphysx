@@ -2,10 +2,10 @@
 The examples show usage of the wrapper. After running the code, you should see output similar to the animations shown bellow.
 
 ## Free fall of the cube
-![](anim_fall_small.gif)
+![](videos/anim_01_free_fall.gif)
 
 ## Mesh loading example
-![](anim_spade.gif)
+![](videos/anim_02_spade.gif)
 
 ## Joints example
 Two rigid bodies connected by joints: 
@@ -13,12 +13,12 @@ Two rigid bodies connected by joints:
 (ii) Fixed joint in the middle,
 and (iii) Linear joint with damping on the right.
 
-![](anim_joints.gif)
+![](videos/anim_03_joints.gif)
 
 ## Labels example
 Shows how to add/update labels into the scene.
 
-![](anim_labels.gif)
+![](videos/anim_04_labels.gif)
 
 
 ## Load URDF example
@@ -26,8 +26,8 @@ Example shows how to load simple urdf model into the physx and how to specify th
 Left example shows dynamic simulation of robot while the right one shows kinematic simulation.
 The type of simulation can be specified when loading the robot.
 
-![](anim_load_urdf.gif)
-![](anim_load_urdf_kinematic.gif)
+![](videos/anim_05_load_urdf.gif)
+![](videos/anim_05_load_urdf_kinematic.gif)
 
 ## GPU computation example
 The example is split into two parts: (i) compute execution time for cpu and gpu for various scenes and (ii) plot results.
@@ -43,5 +43,7 @@ Scene(scene_flags=[SceneFlag.ENABLE_PCM, SceneFlag.ENABLE_GPU_DYNAMICS, SceneFla
 # Notes
 Rendered videos were compressed using:
 ```
-gifsicle -i labels.gif -O3 --resize-width 256 --colors 32 --lossy -o anim_labels.gif
+for vid in [free_fall, joint]
+    gifsicle -i ${vid}.gif -O3 --resize-width 256 --colors 32 --lossy -o anim_${vid}.gif
+endfor
 ```

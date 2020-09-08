@@ -8,7 +8,7 @@ import time
 from pyrender import TextAlign
 from pyphysx_render.pyrender import PyPhysxViewer
 
-viewer = PyPhysxViewer(viewer_flags={'show_world_axis': False})
+viewer = PyPhysxViewer(viewer_flags={'show_world_axis': False}, video_filename='videos/04_labels.gif')
 
 # Add label to the center of the screen. Will be kept in the center during window resizing.
 viewer.add_label('Hello world!', TextAlign.CENTER, color='tab:blue', scale=1)

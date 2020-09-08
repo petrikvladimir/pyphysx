@@ -25,11 +25,10 @@ pip install git+https://github.com/petrikvladimir/pyphysx.git@master
 ```
 
 ## Trivial example
-For more advanced examples, have a look into the folder [examples](examples/).
 ```python
-from pyphysx_render.renderer import PyPhysXParallelRenderer
-from pyphysx_utils.rate import Rate
 from pyphysx import *
+from pyphysx_utils.rate import Rate
+from pyphysx_render.pyrender import PyPhysxViewer
 
 scene = Scene()
 scene.add_actor(RigidStatic.create_plane(material=Material(static_friction=0.1, dynamic_friction=0.1, restitution=0.5)))
@@ -40,17 +39,20 @@ actor.set_global_pose([0.5, 0.5, 1.0])
 actor.set_mass(1.)
 scene.add_actor(actor)
 
-render = PyPhysXParallelRenderer(render_window_kwargs=dict(video_filename='out.mp4'))
-rate = Rate(120)
-for i in range(100):
+render = PyPhysxViewer(video_filename='videos/01_free_fall.gif')
+render.add_physx_scene(scene)
+
+rate = Rate(240)
+while render.is_active:
     scene.simulate(rate.period())
-    render.render_scene(scene)
+    render.update()
     rate.sleep()
+
 ```
 The code will render and simulate the scene and automatically generate video like this:
+![](examples/videos/anim_01_free_fall.gif)
 
-![](examples/anim_fall.gif)
-
+For more advanced examples, have a look into the folder [examples](examples/). For example:
 
 # Features
 ## PhysX interface
@@ -72,19 +74,35 @@ The code will render and simulate the scene and automatically generate video lik
   - automatic transformation casting between pxTransform and tuple of position and numpy quaternion (see [Transformation](doc/transformation.md))
 
 ## Rendering
-- the library uses `pyglet` library to render 3d scene in parallel process
-- you decide when you want to update your scene by using function `render_scene(scene)`
-- renderer can save video automatically after the window is closed `render = PyPhysXParallelRenderer(render_window_kwargs=dict(video_filename='out.mp4', fullscreen=True))`
-- window control:
+PyRender is used for pyphysx scene rendering. It allows to render shadows, support off-screen rendering and provides nice user interface.
+- To record whole session into a video use:
+    `render = PyPhysxViewer(video_filename='videos/02_spade.gif')`
+- Viewer control:
   - mouse:
     - right button drag to rotate the scene
+    - middle button to move the target location at which camera looks at
+    - scroll mouse for zoom 
   - keys:
-    - esc to close the window
-    - f to show on/off coordinates frame
-    - g to show on/off geometries
-    - l to show on/off text labels
-    - p to take screenshot of the rendered scene `~/Pictures/pyphysx_screenshot_[datetime].png`
+    - ``a``: Toggles rotational animation mode.
+    - ``c``: Toggles backface culling.
+    - ``f``: Toggles fullscreen mode.
+    - ``h``: Toggles shadow rendering.
+    - ``i``: Toggles axis display mode
+      (no axes, world axis, mesh axes, all axes).
+    - ``l``: Toggles lighting mode
+      (scene lighting, Raymond lighting, or direct lighting).
+    - ``m``: Toggles face normal visualization.
+    - ``n``: Toggles vertex normal visualization.
+    - ``o``: Toggles orthographic mode.
+    - ``q``: Quits the viewer.
+    - ``r``: Starts recording a GIF, and pressing again stops recording
+      and opens a file dialog.
+    - ``s``: Opens a file dialog to save the current view as an image.
+    - ``w``: Toggles wireframe mode
+      (scene default, flip wireframes, all wireframe, or all solid).
+    - ``z``: Resets the camera to the initial view.
 
 ## URDF parser
 - parse robot from `URDF` file
 - specify joint controller and command robot
+- support for full dynamic control or kinematic position or velocity control (that is standard for industrial robots), therefore you can control you robots without fine tunning PID joint controller

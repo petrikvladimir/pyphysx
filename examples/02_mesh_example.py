@@ -33,7 +33,7 @@ scene = Scene()
 scene.add_actor(RigidStatic.create_plane(material=Material(static_friction=0.1, dynamic_friction=0.1, restitution=0.5)))
 scene.add_actor(actor)
 
-render = PyPhysxViewer()
+render = PyPhysxViewer(video_filename='videos/02_spade.gif')
 render.add_physx_scene(scene)
 
 rate = Rate(240)

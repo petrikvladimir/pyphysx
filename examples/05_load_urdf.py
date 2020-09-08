@@ -33,7 +33,7 @@ robot.movable_joints['tz'].configure_drive(stiffness=1e6, damping=1e5, force_lim
 robot.movable_joints['ty'].configure_drive(stiffness=1e6, damping=1e5, force_limit=1e5, is_acceleration=False)
 
 """ Configure renderer and add labels. """
-render = PyPhysxViewer()
+render = PyPhysxViewer(video_filename='videos/05_load_urdf.gif')
 render.add_physx_scene(scene)
 
 label_shapes = render.add_label('Rendering visual shapes.', TextAlign.BOTTOM_LEFT, scale=0.5, color='tab:blue')
