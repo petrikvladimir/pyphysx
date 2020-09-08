@@ -17,7 +17,7 @@ actor.set_global_pose([0.5, 0.5, 1.0])
 actor.set_mass(1.)
 scene.add_actor(actor)
 
-render = PyPhysxViewer()
+render = PyPhysxViewer(video_filename='videos/01_free_fall.gif')
 render.add_physx_scene(scene)
 
 rate = Rate(240)
