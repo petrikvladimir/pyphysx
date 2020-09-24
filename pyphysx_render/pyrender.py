@@ -138,8 +138,9 @@ class PyPhysxViewer(Viewer):
                 self.nodes_and_actors.append((n, actor, offset))
                 self.render_lock.acquire()
                 self.scene.add_node(n)
+                pose = multiply_transformations(offset, actor.get_global_pose())
+                self.scene.set_pose(n, pose_to_transformation_matrix(pose))
                 self.render_lock.release()
-        self.update()
 
     def clear_physx_scenes(self):
         """ Remove all tracked actors and the corresponding nodes. """
@@ -147,11 +148,12 @@ class PyPhysxViewer(Viewer):
             self.scene.remove_node(node)
         self.nodes_and_actors.clear()
 
-    def update(self):
-        for node, actor, offset in self.nodes_and_actors:  # type: pyrender.Node, RigidActor
-            pose = multiply_transformations(offset, actor.get_global_pose())
-            self.render_lock.acquire()
-            self.scene.set_pose(node, pose_to_transformation_matrix(pose))
+    def update(self, blocking=False):
+        """ Update scene if lock can be acquired. Otherwise do nothing. Set blocking to True in order to force it. """
+        if self.render_lock.acquire(blocking=blocking):
+            for node, actor, offset in self.nodes_and_actors:  # type: pyrender.Node, RigidActor
+                pose = multiply_transformations(offset, actor.get_global_pose())
+                self.scene.set_pose(node, pose_to_transformation_matrix(pose))
             self.render_lock.release()
 
     def _set_axes(self, world, mesh):
@@ -232,18 +234,12 @@ class PyPhysxViewer(Viewer):
             return location
         return super()._location_to_x_y(location)
 
-    @staticmethod
-    def _time_event_save_video(dt, self):
-        """ Use memory-safe writer to video file. """
+    def on_draw(self):
+        super().on_draw()
         if self.video_writer is not None:
             data = self._renderer.read_color_buf()
             if not np.all(data == 0.0):
                 self.video_writer.append_data(data)
-
-    def _init_and_start_app(self):
-        from pyglet import clock
-        clock.schedule_interval(PyPhysxViewer._time_event_save_video, 1.0 / self.viewer_flags['refresh_rate'], self)
-        super()._init_and_start_app()
 
     def close(self):
         super().close()
