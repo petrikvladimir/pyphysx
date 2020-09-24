@@ -29,6 +29,11 @@ The type of simulation can be specified when loading the robot.
 ![](videos/anim_05_load_urdf.gif)
 ![](videos/anim_05_load_urdf_kinematic.gif)
 
+## Load URDF Franka Emika Panda robot
+Example shows both visual and collision model of the robot.
+
+![](videos/anim_05a_load_panda.gif)
+
 ## GPU computation example
 The example is split into two parts: (i) compute execution time for cpu and gpu for various scenes and (ii) plot results.
 For turning on gpu computation you need to init gpu (the function initialize GPU context) and you can pass (optional) GPU settings into the scene constructor:
@@ -39,11 +44,3 @@ Scene(scene_flags=[SceneFlag.ENABLE_PCM, SceneFlag.ENABLE_GPU_DYNAMICS, SceneFla
 )
 ```
 ![](06_gpu_performance.png)
-
-# Notes
-Rendered videos were compressed using:
-```
-for vid in [free_fall, joint]
-    gifsicle -i ${vid}.gif -O3 --resize-width 256 --colors 32 --lossy -o anim_${vid}.gif
-endfor
-```
