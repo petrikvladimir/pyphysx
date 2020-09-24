@@ -6,12 +6,16 @@
 
 import numpy as np
 from pyrender.trackball import Trackball
+import quaternion as npq
+
+from pyphysx_utils.transformations import quat_from_euler
 
 
 class RoboticTrackball(Trackball):
 
     def __init__(self, pose, size, scale, target=np.array([0.0, 0.0, 0.0])):
         super().__init__(pose, size, scale, target)
+        self._pdown = np.zeros(2)
 
     def drag(self, point):
         point = np.array(point, dtype=np.float32)
@@ -29,6 +33,14 @@ class RoboticTrackball(Trackball):
             self._n_pose[:3, :3] = self.look_at_rotation(eye=self._n_pose[:3, 3], target=target, up=[0, 0, 1])
         else:
             super().drag(point)
+
+    def move_target(self, d):
+        target = self._target
+        eye = self._pose[:3, 3].flatten()
+        _, a, _ = self.cartesian_to_spherical(eye, target)
+        v = npq.rotate_vectors(quat_from_euler('z', a), d)
+        self._n_target += v
+        self._n_pose[:3, 3] += v
 
     @staticmethod
     def spherical_to_cartesian(d, a, e, target=np.zeros(3)):

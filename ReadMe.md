@@ -83,6 +83,8 @@ PyRender is used for pyphysx scene rendering. It allows to render shadows, suppo
     - middle button to move the target location at which camera looks at
     - scroll mouse for zoom 
   - keys:
+    - ``up/down/left/right``: Move the target location at which camera looks at.
+    - ``PgUp/PgDn``: Zoom.
     - ``a``: Toggles rotational animation mode.
     - ``c``: Toggles backface culling.
     - ``f``: Toggles fullscreen mode.
