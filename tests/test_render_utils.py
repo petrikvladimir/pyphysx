@@ -7,7 +7,6 @@
 
 import unittest
 from pyphysx_render.utils import gl_color_from_matplotlib
-import time
 
 
 class TestRenderUtils(unittest.TestCase):
