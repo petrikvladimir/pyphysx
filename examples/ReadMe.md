@@ -34,6 +34,11 @@ Example shows both visual and collision model of the robot.
 
 ![](videos/anim_05a_load_panda.gif)
 
+## Panda scene interaction
+Example shows interaction between cubes and panda robot. In addition it shows how to change background color.
+
+![](videos/anim_05b_panda_cubes.gif)
+
 ## GPU computation example
 The example is split into two parts: (i) compute execution time for cpu and gpu for various scenes and (ii) plot results.
 For turning on gpu computation you need to init gpu (the function initialize GPU context) and you can pass (optional) GPU settings into the scene constructor:

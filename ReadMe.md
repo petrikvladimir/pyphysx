@@ -53,6 +53,7 @@ The code will render and simulate the scene and automatically generate video lik
 ![](examples/videos/anim_01_free_fall.gif)
 
 For more advanced examples, have a look into the folder [examples](examples/). For example:
+![](examples/videos/anim_05b_panda_cubes.gif)
 
 # Features
 ## PhysX interface
