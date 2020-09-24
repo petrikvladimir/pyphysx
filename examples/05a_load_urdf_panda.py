@@ -30,7 +30,7 @@ robot.reset_pose(q)  # reset pose of all links based on default values for joint
 scene.add_aggregate(robot.get_aggregate())  # add robot into the scene, robot is an aggregate of actors with self
 
 """ Configure renderer. """
-render = PyPhysxViewer()
+render = PyPhysxViewer(video_filename='videos/05a_load_panda.gif')
 render.add_physx_scene(scene, offset=[0., -0.5, 0.])
 render.add_physx_scene(scene, offset=[0., 0.5, 0.], render_shapes_with_one_of_flags=(ShapeFlag.SIMULATION_SHAPE,))
 
