@@ -7,6 +7,7 @@
 
 import os
 import imageio
+import pyglet
 import pyrender
 import trimesh
 import numpy as np
@@ -27,7 +28,6 @@ class PyPhysxViewer(Viewer):
             Use render_scene to specify camera or lighting or additional geometries if required.
             Additional viewer flags:
                 - axes_scale - size of coordinate axes
-            # todo: add key that moves target, and rotate
         """
 
         if render_scene is None:
@@ -250,3 +250,19 @@ class PyPhysxViewer(Viewer):
         if self.video_writer is not None:
             self.video_writer.close()
             self.video_writer = None
+
+    def on_key_press(self, symbol, modifiers):
+        move_keys = {
+            pyglet.window.key.UP: np.array([-0.1, 0.0, 0.]),
+            pyglet.window.key.DOWN: np.array([0.1, 0.0, 0.]),
+            pyglet.window.key.LEFT: np.array([0.0, -0.1, 0.]),
+            pyglet.window.key.RIGHT: np.array([0.0, 0.1, 0.]),
+        }
+        if symbol in move_keys.keys():
+            self._trackball.move_target(move_keys[symbol])
+        elif symbol == pyglet.window.key.PAGEUP:
+            self._trackball.scroll(1)
+        elif symbol == pyglet.window.key.PAGEDOWN:
+            self._trackball.scroll(-1)
+
+        super().on_key_press(symbol, modifiers)
