@@ -51,6 +51,7 @@ class PyPhysxViewer(Viewer):
             'use_raymond_lighting': True,
             'plane_grid_spacing': 1.,
             'plane_grid_num_of_lines': 10,
+            'spheres_count': [8, 8],
         }
         if viewer_flags is not None:
             _viewer_flags.update(viewer_flags)
@@ -87,7 +88,8 @@ class PyPhysxViewer(Viewer):
             else:
                 raise NotImplementedError('Only trimesh scene or trimesh instances are supported.')
         elif shape.get_geometry_type() == GeometryType.SPHERE:
-            geom = trimesh.creation.uv_sphere(radius=shape.get_sphere_radius())
+            geom = trimesh.creation.uv_sphere(radius=shape.get_sphere_radius(),
+                                              count=self.viewer_flags['spheres_count'])
             geom.visual.vertex_colors = clr
             meshes.append(pyrender.Mesh.from_trimesh(geom))
         elif shape.get_geometry_type() == GeometryType.BOX:
