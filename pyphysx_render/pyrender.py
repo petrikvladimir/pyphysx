@@ -146,9 +146,11 @@ class PyPhysxViewer(Viewer):
 
     def clear_physx_scenes(self):
         """ Remove all tracked actors and the corresponding nodes. """
+        self.render_lock.acquire()
         for node, actor, offset in self.nodes_and_actors:  # type: pyrender.Node, RigidActor
             self.scene.remove_node(node)
         self.nodes_and_actors.clear()
+        self.render_lock.release()
 
     def update(self, blocking=False):
         """ Update scene if lock can be acquired. Otherwise do nothing. Set blocking to True in order to force it. """
