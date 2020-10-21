@@ -21,6 +21,7 @@ class TestPyRender(unittest.TestCase):
         self.assertEqual(1, len(mesh))
         self.assertEqual(1, len(mesh[0].primitives))
         self.assertEqual(2 * m * n - m, mesh[0].primitives[0].positions.shape[0])
+        render.close_external()
 
     def test_clear_scene(self):
         scene = Scene()
@@ -36,6 +37,7 @@ class TestPyRender(unittest.TestCase):
         self.assertEqual(2, len(render.nodes_and_actors))
         render.clear_physx_scenes()
         self.assertEqual(0, len(render.nodes_and_actors))
+        render.close_external()
 
 
 if __name__ == '__main__':
