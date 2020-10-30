@@ -1,13 +1,16 @@
 language: python
-dist: xenial
-services:
-  - xvfb
-addons:
-  apt:
-    packages:
-      - freeglut3-dev
+os:
+  - linux
+  - osx
+#dist: xenial
+#services:
+#  - xvfb
+#addons:
+#  apt:
+#    packages:
+#      - freeglut3-dev
 python:
-  - 3.7
+#  - 3.7
   - 3.8
 before_install:
   - python --version
