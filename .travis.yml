@@ -27,9 +27,12 @@ before_install:
   - pip3 install -U pip
   - pip3 install -U conan
   - pip3 install --upgrade numpy
-  - pip3 install if [ "$TRAVIS_OS_NAME" = "osx" ]; --user ; fi codecov
-  - pip3 install if [ "$TRAVIS_OS_NAME" = "osx" ]; --user ; fi pyrender imageio imageio_ffmpeg trimesh networkx numba numpy_quaternion matplotlib scipy anytree
-  - pip3 install if [ "$TRAVIS_OS_NAME" = "osx" ]; --user ; fi pytest-cov
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; pip3 install codecov ; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; pip3 install pyrender imageio imageio_ffmpeg trimesh networkx numba numpy_quaternion matplotlib scipy anytree ; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; pip3 install pytest-cov ; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; pip3 install --user codecov ; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; pip3 install --user pyrender imageio imageio_ffmpeg trimesh networkx numba numpy_quaternion matplotlib scipy anytree ; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; pip3 install --user pytest-cov ; fi
   - export PYPHYSX_COV=true
 install:
   - python3 setup.py build
