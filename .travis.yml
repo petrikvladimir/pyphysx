@@ -33,13 +33,13 @@ before_install:
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then pip3 install --user codecov ; fi
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then pip3 install --user pyrender imageio imageio_ffmpeg trimesh networkx numba numpy_quaternion matplotlib scipy anytree ; fi
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then pip3 install --user pytest-cov ; fi
-  - export PYPHYSX_COV=true
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then export PYPHYSX_COV=true ; fi
 install:
   - python3 setup.py build
 script:
-  - export PYTHONPATH=$PYTHONPATH:$(pwd)/build/lib.linux-x86_64-$TRAVIS_PYTHON_VERSION
-  - cd build/temp.linux-x86_64-$TRAVIS_PYTHON_VERSION
-  - pytest tests --cov=codecov --cov ../lib.linux-x86_64-$TRAVIS_PYTHON_VERSION/pyphysx_utils --cov ../lib.linux-x86_64-$TRAVIS_PYTHON_VERSION/pyphysx_render
-  - make gcov
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then export PYTHONPATH=$PYTHONPATH:$(pwd)/build/lib.linux-x86_64-$TRAVIS_PYTHON_VERSION ; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then cd build/temp.linux-x86_64-$TRAVIS_PYTHON_VERSION ; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then pytest tests --cov=codecov --cov ../lib.linux-x86_64-$TRAVIS_PYTHON_VERSION/pyphysx_utils --cov ../lib.linux-x86_64-$TRAVIS_PYTHON_VERSION/pyphysx_render ; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then make gcov ; fi
 after_success:
   - codecov -X gcov
