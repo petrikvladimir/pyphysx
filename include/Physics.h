@@ -25,6 +25,7 @@ public:
     }
 
     static auto init_gpu() {
+#if !__APPLE__
         physx::PxCudaContextManagerDesc desc;
         desc.interopMode = physx::PxCudaInteropMode::NO_INTEROP;
         Physics::get().cuda_context_manager = PxCreateCudaContextManager(*Physics::get().foundation, desc);
@@ -34,6 +35,7 @@ public:
                 Physics::get().cuda_context_manager = nullptr;
             }
         }
+#endif
     }
 
     /** @brief Set number of CPU used for all scenes computation. */
@@ -49,7 +51,9 @@ public:
 #define SAFE_RELEASE(x)    if(x)    { x->release(); x = nullptr;    }
         release_all_scenes();
         SAFE_RELEASE(dispatcher);
+#if !__APPLE__
         SAFE_RELEASE(cuda_context_manager);
+#endif
         SAFE_RELEASE(cooking);
         SAFE_RELEASE(physics);
         SAFE_RELEASE(foundation);

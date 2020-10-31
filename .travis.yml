@@ -1,29 +1,45 @@
 language: python
-dist: xenial
-services:
-  - xvfb
+#os:
+#  - linux
+#  - osx
+jobs:
+  include:
+    - name: "PyPhysX on Linux"
+      python:
+        - 3.7
+        - 3.8
+    - name: "PyPhysX on macOS"
+      os: osx
+      osx_image: xcode11.2  # Python 3.7.4 running on macOS 10.14.4
+      language: shell       # 'language: python' is an error on Travis CI macOS
+#dist: xenial
+#services:
+#  - xvfb
 addons:
   apt:
     packages:
       - freeglut3-dev
-python:
-  - 3.7
-  - 3.8
+#python:
+#  - 3.7
+#  - 3.8
 before_install:
-  - python --version
-  - pip install -U pip
-  - pip install -U conan
-  - pip install codecov
-  - pip install --upgrade numpy
-  - pip install pyrender imageio imageio_ffmpeg trimesh networkx numba numpy_quaternion matplotlib scipy anytree
-  - pip install pytest-cov
-  - export PYPHYSX_COV=true
+#  - python --version
+  - pip3 install -U pip
+  - pip3 install -U conan
+  - pip3 install --upgrade numpy
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then pip3 install codecov ; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then pip3 install pyrender imageio imageio_ffmpeg trimesh networkx numba numpy_quaternion matplotlib scipy anytree ; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then pip3 install pytest-cov ; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then pip3 install --user codecov ; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then pip3 install --user pyrender imageio imageio_ffmpeg trimesh networkx numba numpy_quaternion matplotlib scipy anytree ; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then pip3 install --user pytest-cov ; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then export PYPHYSX_COV=true ; fi
 install:
-  - python setup.py build
+  - python3 setup.py build
 script:
-  - export PYTHONPATH=$PYTHONPATH:$(pwd)/build/lib.linux-x86_64-$TRAVIS_PYTHON_VERSION
-  - cd build/temp.linux-x86_64-$TRAVIS_PYTHON_VERSION
-  - pytest tests --cov=codecov --cov ../lib.linux-x86_64-$TRAVIS_PYTHON_VERSION/pyphysx_utils --cov ../lib.linux-x86_64-$TRAVIS_PYTHON_VERSION/pyphysx_render
-  - make gcov
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then export PYTHONPATH=$PYTHONPATH:$(pwd)/build/lib.linux-x86_64-$TRAVIS_PYTHON_VERSION ; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then cd build/temp.linux-x86_64-$TRAVIS_PYTHON_VERSION ; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then pytest tests --cov=codecov --cov ../lib.linux-x86_64-$TRAVIS_PYTHON_VERSION/pyphysx_utils --cov ../lib.linux-x86_64-$TRAVIS_PYTHON_VERSION/pyphysx_render ; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then make gcov ; fi
 after_success:
   - codecov -X gcov
