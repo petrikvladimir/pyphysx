@@ -25,6 +25,7 @@ public:
     }
 
     static auto init_gpu() {
+#if !__APPLE__
         physx::PxCudaContextManagerDesc desc;
         desc.interopMode = physx::PxCudaInteropMode::NO_INTEROP;
         Physics::get().cuda_context_manager = PxCreateCudaContextManager(*Physics::get().foundation, desc);
@@ -34,6 +35,7 @@ public:
                 Physics::get().cuda_context_manager = nullptr;
             }
         }
+#endif
     }
 
     /** @brief Set number of CPU used for all scenes computation. */
