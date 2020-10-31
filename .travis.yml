@@ -2,16 +2,24 @@ language: python
 os:
   - linux
   - osx
+jobs:
+  include:
+    - name: "Python 3.8.0 on Linux"
+      python: 3.8
+    - name: "Python 3.7.4 on macOS"
+      os: osx
+      osx_image: xcode11.2  # Python 3.7.4 running on macOS 10.14.4
+      language: shell       # 'language: python' is an error on Travis CI macOS
 #dist: xenial
 #services:
 #  - xvfb
-#addons:
-#  apt:
-#    packages:
-#      - freeglut3-dev
-python:
+addons:
+  apt:
+    packages:
+      - freeglut3-dev
+#python:
 #  - 3.7
-  - 3.8
+#  - 3.8
 before_install:
   - python --version
   - pip install -U pip
