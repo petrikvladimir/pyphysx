@@ -1,12 +1,14 @@
 language: python
-os:
-  - linux
-  - osx
+#os:
+#  - linux
+#  - osx
 jobs:
   include:
-    - name: "Python 3.8.0 on Linux"
-      python: 3.8
-    - name: "Python 3.7.4 on macOS"
+    - name: "PyPhysX on Linux"
+      python:
+        - 3.7
+        - 3.8
+    - name: "PyPhysX on macOS"
       os: osx
       osx_image: xcode11.2  # Python 3.7.4 running on macOS 10.14.4
       language: shell       # 'language: python' is an error on Travis CI macOS
@@ -21,16 +23,16 @@ addons:
 #  - 3.7
 #  - 3.8
 before_install:
-  - python --version
-  - pip install -U pip
-  - pip install -U conan
-  - pip install codecov
-  - pip install --upgrade numpy
-  - pip install pyrender imageio imageio_ffmpeg trimesh networkx numba numpy_quaternion matplotlib scipy anytree
-  - pip install pytest-cov
+#  - python --version
+  - pip3 install -U pip
+  - pip3 install -U conan
+  - pip3 install codecov
+  - pip3 install --upgrade numpy
+  - pip3 install pyrender imageio imageio_ffmpeg trimesh networkx numba numpy_quaternion matplotlib scipy anytree
+  - pip3 install pytest-cov
   - export PYPHYSX_COV=true
 install:
-  - python setup.py build
+  - python3 setup.py build
 script:
   - export PYTHONPATH=$PYTHONPATH:$(pwd)/build/lib.linux-x86_64-$TRAVIS_PYTHON_VERSION
   - cd build/temp.linux-x86_64-$TRAVIS_PYTHON_VERSION
