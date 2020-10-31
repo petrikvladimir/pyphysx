@@ -26,10 +26,10 @@ before_install:
 #  - python --version
   - pip3 install -U pip
   - pip3 install -U conan
-  - pip3 install codecov
   - pip3 install --upgrade numpy
-  - pip3 install pyrender imageio imageio_ffmpeg trimesh networkx numba numpy_quaternion matplotlib scipy anytree
-  - pip3 install pytest-cov
+  - pip3 install --user codecov
+  - pip3 install --user pyrender imageio imageio_ffmpeg trimesh networkx numba numpy_quaternion matplotlib scipy anytree
+  - pip3 install --user pytest-cov
   - export PYPHYSX_COV=true
 install:
   - python3 setup.py build
