@@ -50,8 +50,8 @@ actor.set_global_pose([0.5, -0.5, 1.0])
 actor.set_mass(1.)
 scene.add_actor(actor)
 
-robot = URDFRobot("franka_panda/panda.urdf", kinematic=True, use_random_collision_colors=True)
-robot.root_node.actor.set_global_pose([-0.5, -0.5, 1.0])
+robot = URDFRobot("franka_panda/panda.urdf", kinematic=False, use_random_collision_colors=True)
+robot.attach_root_node_to_pose([0.0, 0.0, 1.0])
 q = dict()
 for i, value in enumerate([0, -np.pi / 4, 0, -3 * np.pi / 4, 0, np.pi / 2, np.pi / 4]):
     q['panda_joint{}'.format(i + 1)] = value
@@ -60,12 +60,13 @@ scene.add_aggregate(robot.get_aggregate())  # add robot into the scene, robot is
 
 
 """ Create a viewer and add the scene into it. """
-render = MeshcatViewer(wait_for_open=True, open_meshcat=True, show_frames=True)
+render = MeshcatViewer(wait_for_open=True, open_meshcat=True, show_frames=False)
 render.add_physx_scene(scene)
 
 """ Simulate forever. Note, that meschat viewer is always active. """
-rate = Rate(24)
+rate = Rate(120)
 while render.is_active:
+    robot.update(rate.period())
     scene.simulate(rate.period())
     render.update()
     rate.sleep()

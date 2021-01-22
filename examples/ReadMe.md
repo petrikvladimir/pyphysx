@@ -49,3 +49,15 @@ Scene(scene_flags=[SceneFlag.ENABLE_PCM, SceneFlag.ENABLE_GPU_DYNAMICS, SceneFla
 )
 ```
 ![](06_gpu_performance.png)
+
+## Meshcat Viewer example
+Example shows how to use MeshCat 3D web visualizer with PyPhysx.
+```python
+# ... create scene as usual and then create viewer
+render = MeshcatViewer(wait_for_open=True, open_meshcat=True) # this will open tab in your browser with empty scene
+render.add_physx_scene(scene)  # add pyphysx scene into the meshcat viewer
+# ... simulate etc.
+render.update() # update poses of actors
+
+```
+![](videos/anim_07_meshcat.gif)
