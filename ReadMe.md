@@ -75,6 +75,9 @@ For more advanced examples, have a look into the folder [examples](examples/). F
   - automatic transformation casting between pxTransform and tuple of position and numpy quaternion (see [Transformation](doc/transformation.md))
 
 ## Rendering
+Currently, there are two options for rendering: using PyRender backend or using MeshCat web-viewer.
+
+### PyRender 
 PyRender is used for pyphysx scene rendering. It allows to render shadows, support off-screen rendering and provides nice user interface.
 - To record whole session into a video use:
     `render = PyPhysxViewer(video_filename='videos/02_spade.gif')`
@@ -104,6 +107,36 @@ PyRender is used for pyphysx scene rendering. It allows to render shadows, suppo
     - ``w``: Toggles wireframe mode
       (scene default, flip wireframes, all wireframe, or all solid).
     - ``z``: Resets the camera to the initial view.
+    
+### MeshCat
+Meshcat render scene or animation in web browser.
+The PyPhysx just sends the information to the server either on calling `update()` function or on calling `publish_animation()` function.
+Examples of different usage of Meshcat viewer are bellow.
+
+Online rendering:
+```python
+render = MeshcatViewer(wait_for_open=True, open_meshcat=True)
+render.add_scene(scene)
+for _ in range(100):
+    scene.simulate()
+    render.update()
+```
+
+Connecting to existing server:
+```python
+render = MeshcatViewer(zmq_url='tcp://127.0.0.1:6000')
+# update as before
+```
+
+Rendering to animation and publish after rendering is done:
+```python
+render = MeshcatViewer(wait_for_open=True, open_meshcat=True, render_to_animation=True, animation_fps=30)
+render.add_scene(scene)
+for _ in range(100):
+    scene.simulate()
+    render.update() # will render to animation without sending information to meshcat server, i.e. is fast
+render.publish_animation() # publish to the server
+```
 
 ## URDF parser
 - parse robot from `URDF` file

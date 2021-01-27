@@ -80,6 +80,37 @@ class MeschatTest(unittest.TestCase):
         self.assertAlmostEqual(pmax[1], gmax[1], places=5)
         self.assertAlmostEqual(pmax[2], gmax[2], places=5)
 
+    def test_no_animation_default(self):
+        viewer = MeshcatViewer()
+        self.assertIsNone(viewer.animation)
+
+    def test_animation_fps(self):
+        viewer = MeshcatViewer(render_to_animation=True, animation_fps=43)
+        self.assertEqual(viewer.animation.default_framerate, 43)
+
+    def test_render_to_animation(self):
+        scene = Scene()
+        actor = RigidDynamic()
+        actor.attach_shape(Shape.create_box([0.2] * 3, Material()))
+        scene.add_actor(actor)
+
+        viewer = MeshcatViewer(render_to_animation=True, animation_fps=2)
+        viewer.add_physx_scene(scene)
+        viewer.update()
+        viewer.update()
+        actor.set_global_pose([1., 2., 3.])
+        viewer.update()
+        self.assertEqual(len(list(list(viewer.animation.clips.values())[0].tracks.values())[0].frames), 3)
+        self.assertEqual(len(list(list(viewer.animation.clips.values())[0].tracks.values())[1].frames), 3)
+        pos0 = list(list(viewer.animation.clips.values())[0].tracks.values())[0].values[0]
+        pos2 = list(list(viewer.animation.clips.values())[0].tracks.values())[0].values[2]
+        self.assertAlmostEqual(pos0[0], 0.)
+        self.assertAlmostEqual(pos0[1], 0.)
+        self.assertAlmostEqual(pos0[2], 0.)
+        self.assertAlmostEqual(pos2[0], 1.)
+        self.assertAlmostEqual(pos2[1], 2.)
+        self.assertAlmostEqual(pos2[2], 3.)
+
 
 if __name__ == '__main__':
     unittest.main()

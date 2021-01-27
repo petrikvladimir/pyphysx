@@ -18,6 +18,7 @@ class MeshcatViewer(ViewerBase):
 
     def __init__(self, open_meshcat=False, print_url=False, wait_for_open=False, zmq_url=None,
                  show_frames=False, frame_scale=1., object_prefix="objects",
+                 render_to_animation=False, animation_fps=30,
                  **kwargs) -> None:
         super().__init__()
         self.vis = meshcat.Visualizer(zmq_url=zmq_url)
@@ -35,10 +36,13 @@ class MeshcatViewer(ViewerBase):
         self.show_frames = show_frames
         self.frame_scale = frame_scale
         self.object_prefix = object_prefix
+        self.animation = meshcat.animation.Animation(default_framerate=animation_fps) if render_to_animation else None
+        self.itr = 0
+        self._vis_group = None
 
     @property
     def vis_group(self):
-        return self.vis[self.object_prefix]
+        return self.vis[self.object_prefix] if self._vis_group is None else self._vis_group[self.object_prefix]
 
     def vis_frame(self, actor_id):
         return self.vis_group['frame' + str(actor_id)]
@@ -69,7 +73,7 @@ class MeshcatViewer(ViewerBase):
                 self.vis_frame(i).set_object(g.triad(self.frame_scale))
         self.actors_and_offsets.append((actors, offset, start_index))
 
-    def update(self, blocking=False):
+    def _update_actors(self):
         for actors, offset, start_index in self.actors_and_offsets:
             for i, actor in enumerate(actors, start=start_index):
                 pose = actor.get_global_pose()
@@ -78,6 +82,14 @@ class MeshcatViewer(ViewerBase):
                 self.vis_actor(i).set_transform(pose_to_transformation_matrix(pose))
                 if self.show_frames:
                     self.vis_frame(i).set_transform(pose_to_transformation_matrix(pose))
+
+    def update(self, blocking=False):
+        if self.animation is not None:
+            with self.animation.at_frame(self.vis, self.itr) as self._vis_group:
+                self._update_actors()
+        else:
+            self._update_actors()
+        self.itr += 1
 
     def clear_physx_scenes(self):
         for actors, _, start_index in self.actors_and_offsets:
@@ -111,3 +123,8 @@ class MeshcatViewer(ViewerBase):
             return g.Box((2 * shape.get_box_half_extents()).tolist())
         else:
             raise NotImplementedError("Not supported geometry type.")
+
+    def publish_animation(self, play=True, repetitions=1):
+        """ If animation was recorded, then publish to meshcat server. """
+        if self.animation is not None:
+            self.vis.set_animation(self.animation, play=play, repetitions=repetitions)
