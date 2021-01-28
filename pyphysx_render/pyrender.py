@@ -8,165 +8,58 @@
 import os
 import imageio
 import pyglet
-import pyrender
-import trimesh
 import numpy as np
-from typing import List
 
-from pyrender import Viewer, Primitive, GLTF, TextAlign
+from pyrender import Viewer, TextAlign, Node
 
-from pyphysx import ShapeFlag, Shape, RigidActor, GeometryType
+from pyphysx_render.pyrender_base import PyRenderBase
 from pyphysx_render.pyrender_trackball import RoboticTrackball
 from pyphysx_render.utils import gl_color_from_matplotlib
-from pyphysx_utils.transformations import pose_to_transformation_matrix, multiply_transformations
 
 
-class PyPhysxViewer(Viewer):
+class PyPhysxViewer(PyRenderBase, Viewer):
     def __init__(self, render_scene=None, viewport_size=None, render_flags=None, viewer_flags=None,
                  registered_keys=None, run_in_thread=True, video_filename=None, **kwargs):
-        """
-            Use render_scene to specify camera or lighting or additional geometries if required.
-            Additional viewer flags:
-                - axes_scale - size of coordinate axes
-        """
-
-        if render_scene is None:
-            render_scene = pyrender.Scene()
-            render_scene.bg_color = np.array([0.75] * 3)
-        if render_scene.main_camera_node is None:
-            cam = pyrender.PerspectiveCamera(yfov=np.deg2rad(60), aspectRatio=1.414, znear=0.005)
-            cam_pose = np.eye(4)
-            cam_pose[:3, 3] = RoboticTrackball.spherical_to_cartesian(3., 0., np.deg2rad(45.), target=np.zeros(3))
-            cam_pose[:3, :3] = RoboticTrackball.look_at_rotation(eye=cam_pose[:3, 3], target=np.zeros(3), up=[0, 0, 1])
-            nc = pyrender.Node(camera=cam, matrix=cam_pose)
-            render_scene.add_node(nc)
-            render_scene.main_camera_node = nc
-
+        """ Use render_scene to specify camera or lighting or additional geometries if required. """
         _viewer_flags = {
-            'view_center': np.zeros(3),
-            'window_title': 'PyPhysX Scene Viewer',
-            'show_world_axis': True,
-            'show_mesh_axes': False,
-            'axes_scale': 0.5,
-            'use_raymond_lighting': True,
-            'plane_grid_spacing': 1.,
-            'plane_grid_num_of_lines': 10,
-            'spheres_count': [8, 8],
+            'view_center': np.zeros(3), 'window_title': 'PyPhysX Scene Viewer', 'show_world_axis': True,
+            'show_mesh_axes': False, 'axes_scale': 0.5, 'use_raymond_lighting': True, 'plane_grid_spacing': 1.,
+            'plane_grid_num_of_lines': 10, 'spheres_count': [8, 8], 'refresh_rate': 30.0,
         }
         if viewer_flags is not None:
             _viewer_flags.update(viewer_flags)
-
-        super().__init__(render_scene, viewport_size, render_flags, _viewer_flags, registered_keys, run_in_thread,
-                         **kwargs)
-        self.nodes_and_actors = []
-        fps = self.viewer_flags['refresh_rate']
+        fps = _viewer_flags['refresh_rate']
         self.video_writer = imageio.get_writer(video_filename, fps=fps) if video_filename is not None else None
+        PyRenderBase.__init__(self, render_scene=render_scene,
+                              plane_grid_spacing=_viewer_flags['plane_grid_spacing'],
+                              plane_grid_num_of_lines=_viewer_flags['plane_grid_num_of_lines'],
+                              spheres_count=_viewer_flags['spheres_count'])
+        Viewer.__init__(self, scene=self.render_scene, viewport_size=viewport_size, render_flags=render_flags,
+                        viewer_flags=_viewer_flags, registered_keys=registered_keys, run_in_thread=run_in_thread,
+                        **kwargs)
+
+    @property
+    def is_active(self):
+        """ Use viewer is active property to check if window is active. """
+        return self._is_active
+
+    def _acquire_lock(self, blocking=True):
+        return self.render_lock.acquire(blocking=blocking)
+
+    def _release_lock(self):
+        self.render_lock.release()
 
     def _reset_view(self):
         super()._reset_view()
         self._trackball = RoboticTrackball(self._default_camera_pose, self.viewport_size, self._trackball._scale)
-
-    @staticmethod
-    def has_shape_any_of_flags(shape: Shape, flags: List[ShapeFlag]):
-        """ Return true if shape contains any of the flag from the list. """
-        for show_flag in flags:
-            if shape.get_flag_value(show_flag):
-                return True
-        return False
-
-    def shape_to_meshes(self, shape: Shape):
-        clr_string = shape.get_user_data().get('color', None) if shape.get_user_data() is not None else None
-        clr = gl_color_from_matplotlib(color=clr_string, return_rgba=True)
-        visual_mesh = shape.get_user_data().get('visual_mesh', None) if shape.get_user_data() is not None else None
-
-        meshes = []
-        if visual_mesh is not None:
-            if isinstance(visual_mesh, trimesh.Trimesh):
-                if hasattr(visual_mesh.visual, 'material'):
-                    visual_mesh.visual.material.kwargs['Ns'] = np.abs(visual_mesh.visual.material.kwargs['Ns'])
-                meshes.append(pyrender.Mesh.from_trimesh(visual_mesh))
-            else:
-                raise NotImplementedError('Only trimesh scene or trimesh instances are supported.')
-        elif shape.get_geometry_type() == GeometryType.SPHERE:
-            geom = trimesh.creation.uv_sphere(radius=shape.get_sphere_radius(),
-                                              count=self.viewer_flags['spheres_count'])
-            geom.visual.vertex_colors = clr
-            meshes.append(pyrender.Mesh.from_trimesh(geom))
-        elif shape.get_geometry_type() == GeometryType.BOX:
-            geom = trimesh.creation.box(extents=2 * shape.get_box_half_extents())
-            geom.visual.vertex_colors = clr
-            meshes.append(pyrender.Mesh.from_trimesh(geom))
-        elif shape.get_geometry_type() == GeometryType.PLANE:
-            d = self.viewer_flags['plane_grid_spacing']
-            n = self.viewer_flags['plane_grid_num_of_lines']
-            num_horizontal_lines = 2 * n + 1
-            points = np.zeros((2 * 2 * num_horizontal_lines, 3))
-            g = np.linspace(-n * d, n * d, num_horizontal_lines)
-            points[:2 * num_horizontal_lines, 2] = g.repeat(2)
-            points[:2 * num_horizontal_lines, 1] = np.tile([-n * d, n * d], num_horizontal_lines)
-            points[2 * num_horizontal_lines:, 2] = np.tile([-n * d, n * d], num_horizontal_lines)
-            points[2 * num_horizontal_lines:, 1] = g.repeat(2)
-            clr = [0.8] * 3 + [0.1] if clr_string is None else gl_color_from_matplotlib(clr_string, return_rgba=True)
-            primitive = Primitive(positions=points, normals=None, color_0=clr, mode=GLTF.LINES, poses=None)
-            meshes.append(pyrender.Mesh(primitives=[primitive]))
-        elif shape.get_geometry_type() == GeometryType.CONVEXMESH:
-            data = shape.get_shape_data()  # N x 9 - i.e. 3 triangles
-            primitive = Primitive(positions=data.reshape(-1, 3), normals=None, color_0=clr, mode=GLTF.TRIANGLES,
-                                  poses=None)
-            meshes.append(pyrender.Mesh(primitives=[primitive]))
-        else:
-            raise NotImplementedError('Not supported type of the geometry.')
-        return meshes
-
-    def shape_to_nodes(self, shape):
-        pose = pose_to_transformation_matrix(shape.get_local_pose())
-        return [pyrender.Node(mesh=mesh, matrix=pose) for mesh in self.shape_to_meshes(shape=shape)]
-
-    def actor_to_node(self, actor, flags):
-        shapes = [s for s in actor.get_atached_shapes() if PyPhysxViewer.has_shape_any_of_flags(s, flags)]
-        if len(shapes) == 0:
-            return None
-        all_nodes: List[pyrender.Node] = []
-        for s in shapes:
-            all_nodes += self.shape_to_nodes(s)
-        return pyrender.Node(children=all_nodes)
-
-    def add_physx_scene(self, scene, render_shapes_with_one_of_flags=(ShapeFlag.VISUALIZATION,), offset=np.zeros(3)):
-        """ Call this function to create a renderer scene from physx scene. """
-        actors = scene.get_dynamic_rigid_actors() + scene.get_static_rigid_actors()
-        for i, actor in enumerate(actors):
-            n = self.actor_to_node(actor, render_shapes_with_one_of_flags)
-            if n is not None:
-                self.nodes_and_actors.append((n, actor, offset))
-                self.render_lock.acquire()
-                self.scene.add_node(n)
-                pose = multiply_transformations(offset, actor.get_global_pose())
-                self.scene.set_pose(n, pose_to_transformation_matrix(pose))
-                self.render_lock.release()
-
-    def clear_physx_scenes(self):
-        """ Remove all tracked actors and the corresponding nodes. """
-        self.render_lock.acquire()
-        for node, actor, offset in self.nodes_and_actors:  # type: pyrender.Node, RigidActor
-            self.scene.remove_node(node)
-        self.nodes_and_actors.clear()
-        self.render_lock.release()
-
-    def update(self, blocking=False):
-        """ Update scene if lock can be acquired. Otherwise do nothing. Set blocking to True in order to force it. """
-        if self.render_lock.acquire(blocking=blocking):
-            for node, actor, offset in self.nodes_and_actors:  # type: pyrender.Node, RigidActor
-                pose = multiply_transformations(offset, actor.get_global_pose())
-                self.scene.set_pose(node, pose_to_transformation_matrix(pose))
-            self.render_lock.release()
 
     def _set_axes(self, world, mesh):
         """ Use fixed scale for the axes instead of automatic. """
         scale = self.viewer_flags['axes_scale']
         if world:
             if 'scene' not in self._axes:
-                n = pyrender.Node(mesh=self._axis_mesh, scale=np.ones(3) * scale)
-                self.scene.add_node(n)
+                n = Node(mesh=self._axis_mesh, scale=np.ones(3) * scale)
+                self.render_scene.add_node(n)
                 self._axes['scene'] = n
         else:
             if 'scene' in self._axes:
@@ -183,8 +76,8 @@ class PyPhysxViewer(Viewer):
             for node in old_nodes:
                 if node in self._axes:
                     continue
-                n = pyrender.Node(mesh=self._axis_mesh, scale=np.ones(3) * scale)
-                self.scene.add_node(n, parent_node=node)
+                n = Node(mesh=self._axis_mesh, scale=np.ones(3) * scale)
+                self.render_scene.add_node(n, parent_node=node)
                 self._axes[node] = n
         else:
             to_remove = set()

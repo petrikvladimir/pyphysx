@@ -107,7 +107,14 @@ PyRender is used for pyphysx scene rendering. It allows to render shadows, suppo
     - ``w``: Toggles wireframe mode
       (scene default, flip wireframes, all wireframe, or all solid).
     - ``z``: Resets the camera to the initial view.
-    
+
+### Offscreen renderer via PyRender
+Offscreen renderer shares the api with other PyPhysX viewer, i.e. has `add_physx_scene` and `update` functions.
+RGB and Depth data are obtained by calling `get_rgb_and_depth()` member function.
+Note, that different backend need to be used if running in headless mode (e.g. on computational cluster).
+See [PyRender documentation](https://pyrender.readthedocs.io/en/latest/examples/offscreen.html) for details.
+See [08_offscreen_renderer.py](examples/08_offscreen_renderer.py) example on how to use offscreen renderer.
+
 ### MeshCat
 Meshcat render scene or animation in web browser.
 The PyPhysx just sends the information to the server either on calling `update()` function or on calling `publish_animation()` function.
