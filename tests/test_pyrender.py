@@ -13,7 +13,7 @@ from pyphysx import *
 from pyphysx_render.pyrender_base import PyRenderBase
 from pyphysx_render.pyrender_offscreen_renderer import PyPhysxOffscreenRenderer
 
-os.environ['PYOPENGL_PLATFORM'] = 'egl'  # first set backend to headless mode
+os.environ['PYOPENGL_PLATFORM'] = 'osmesa'  # first set backend to headless mode
 
 
 class TestPyRender(unittest.TestCase):
