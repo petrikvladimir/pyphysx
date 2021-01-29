@@ -14,19 +14,8 @@ addons:
   apt:
     packages:
       - freeglut3-dev
-      - libegl1-mesa
-      - libegl1-mesa-dev
 
 before_install:
-  # Pre-install osmesa required by pyrender osmesa render
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt update ; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo wget https://github.com/mmatl/travis_debs/raw/master/xenial/mesa_18.3.3-0.deb ; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo dpkg -i ./mesa_18.3.3-0.deb || true ; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt install -f ; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then git clone https://github.com/mmatl/pyopengl.git ; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then cd pyopengl ; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then pip install . ; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then cd .. ; fi
   - pip3 install -U pip
   - pip3 install -U conan
   - pip3 install --upgrade numpy

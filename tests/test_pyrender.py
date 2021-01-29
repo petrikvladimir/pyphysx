@@ -5,15 +5,11 @@
 #     Author: Vladimir Petrik <vladimir.petrik@cvut.cz>
 
 import numpy as np
-import os
 import unittest
 from trimesh.creation import uv_sphere
 
 from pyphysx import *
 from pyphysx_render.pyrender_base import PyRenderBase
-from pyphysx_render.pyrender_offscreen_renderer import PyPhysxOffscreenRenderer
-
-os.environ['PYOPENGL_PLATFORM'] = 'osmesa'  # first set backend to headless mode
 
 
 class TestPyRender(unittest.TestCase):
@@ -138,17 +134,6 @@ class TestPyRender(unittest.TestCase):
         actor.attach_shape(Shape.create_box([0.2] * 3, Material()))
         n = r.actor_to_node(actor, [ShapeFlag.VISUALIZATION])
         self.assertEqual(len(n.children), 2)
-
-    def test_offscreen_renderer_shapes(self):
-        r = PyPhysxOffscreenRenderer(viewport_size=(320, 240))
-        rgb, depth = r.get_rgb_and_depth()
-        self.assertEqual(rgb.shape, (240, 320, 3))
-        self.assertEqual(depth.shape, (240, 320))
-        rgba, depth = r.get_rgba_and_depth()
-        self.assertEqual(rgba.shape, (240, 320, 4))
-        self.assertEqual(depth.shape, (240, 320))
-        depth = r.get_depth()
-        self.assertEqual(depth.shape, (240, 320))
 
 
 if __name__ == '__main__':
