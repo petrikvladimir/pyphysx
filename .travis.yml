@@ -14,6 +14,8 @@ addons:
   apt:
     packages:
       - freeglut3-dev
+      - libegl1-mesa
+      - libegl1-mesa-dev
 
 before_install:
   # Pre-install osmesa required by pyrender osmesa render
