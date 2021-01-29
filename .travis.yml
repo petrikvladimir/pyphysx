@@ -4,7 +4,6 @@ jobs:
     - name: "PyPhysX on Linux"
       python:
         - 3.7
-        - 3.8
     - name: "PyPhysX on macOS"
       os: osx
       osx_image: xcode11.2  # Python 3.7.4 running on macOS 10.14.4
