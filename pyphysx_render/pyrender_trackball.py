@@ -13,8 +13,8 @@ from pyphysx_utils.transformations import quat_from_euler
 
 class RoboticTrackball(Trackball):
 
-    def __init__(self, pose, size, scale, target=np.array([0.0, 0.0, 0.0])):
-        super().__init__(pose, size, scale, target)
+    def __init__(self, pose, size, scale, target=None):
+        super().__init__(pose, size, scale, target if target is not None else np.zeros(3))
         self._pdown = np.zeros(2)
 
     def drag(self, point):
@@ -43,8 +43,9 @@ class RoboticTrackball(Trackball):
         self._n_pose[:3, 3] += v
 
     @staticmethod
-    def spherical_to_cartesian(d, a, e, target=np.zeros(3)):
-        return np.array([d * np.sin(e) * np.cos(a), d * np.sin(e) * np.sin(a), d * np.cos(e)]) + target
+    def spherical_to_cartesian(d, a, e, target=None):
+        v = np.array([d * np.sin(e) * np.cos(a), d * np.sin(e) * np.sin(a), d * np.cos(e)])
+        return v + target if target is not None else v
 
     @staticmethod
     def cartesian_to_spherical(eye_pos, target):
