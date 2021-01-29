@@ -15,7 +15,7 @@ addons:
     packages:
       - freeglut3-dev
       - libegl1-mesa-dev
-      - libegl-dev
+      - libegl1
 
 before_install:
   - pip3 install -U pip
