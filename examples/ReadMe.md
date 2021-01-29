@@ -61,3 +61,18 @@ render.update() # update poses of actors
 
 ```
 ![](videos/anim_07_meshcat.gif)
+
+## Offscreen render utilizing PyRender library
+Shows how to create offscreen renderer. It shares the api with other PyPhysX viewer, i.e. has `add_physx_scene` and `update` functions.
+RGB and Depth data are obtained by calling `get_rgb_and_depth()` member function.
+Concatenation of these values are saved into the gif and shown bellow.
+Note, that different backend need to be used if running in headless mode (e.g. on computational cluster). 
+See [PyRender documentation](https://pyrender.readthedocs.io/en/latest/examples/offscreen.html) for details.
+```python
+render = PyPhysxOffscreenRenderer()
+render.add_physx_scene(scene)  # add pyphysx scene into the offscreen renderer
+render.render_scene.ambient_light = [0.1] * 3  # add some light
+render.update()
+rgb, depth = render.get_rgb_and_depth()
+```
+![](videos/anim_08_offscreen_renderer.gif)

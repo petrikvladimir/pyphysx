@@ -13,9 +13,6 @@ from pyphysx_render.utils import gl_color_from_matplotlib
 
 class ViewerBase:
 
-    def __init__(self) -> None:
-        super().__init__()
-
     @property
     def is_active(self):
         """ Return true if viewer is active. """

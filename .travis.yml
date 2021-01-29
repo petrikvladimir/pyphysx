@@ -1,29 +1,20 @@
 language: python
-#os:
-#  - linux
-#  - osx
 jobs:
   include:
     - name: "PyPhysX on Linux"
       python:
         - 3.7
-        - 3.8
     - name: "PyPhysX on macOS"
       os: osx
       osx_image: xcode11.2  # Python 3.7.4 running on macOS 10.14.4
       language: shell       # 'language: python' is an error on Travis CI macOS
-#dist: xenial
-#services:
-#  - xvfb
+
 addons:
   apt:
     packages:
       - freeglut3-dev
-#python:
-#  - 3.7
-#  - 3.8
+
 before_install:
-#  - python --version
   - pip3 install -U pip
   - pip3 install -U conan
   - pip3 install --upgrade numpy
@@ -34,12 +25,15 @@ before_install:
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then pip3 install --user pyrender imageio imageio_ffmpeg trimesh networkx numba numpy_quaternion matplotlib scipy anytree meshcat ; fi
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then pip3 install --user pytest-cov ; fi
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then export PYPHYSX_COV=true ; fi
+
 install:
   - python3 setup.py build
+
 script:
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then export PYTHONPATH=$PYTHONPATH:$(pwd)/build/lib.linux-x86_64-$TRAVIS_PYTHON_VERSION ; fi
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then cd build/temp.linux-x86_64-$TRAVIS_PYTHON_VERSION ; fi
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then pytest tests --cov=codecov --cov ../lib.linux-x86_64-$TRAVIS_PYTHON_VERSION/pyphysx_utils --cov ../lib.linux-x86_64-$TRAVIS_PYTHON_VERSION/pyphysx_render ; fi
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then make gcov ; fi
+
 after_success:
   - codecov -X gcov
