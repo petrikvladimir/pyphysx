@@ -90,6 +90,17 @@ public:
         return from_vector_of_physx_ptr<Material>(materials);
     }
 
+    /** @brief Return boolean value indicating if the two shapes with overlaps if their global pose is known. */
+    auto overlaps(const Shape &other_shape, const physx::PxTransform &global_pose,
+                  const physx::PxTransform &global_pose_other) const {
+        return physx::PxGeometryQuery::overlap(
+                this->get_physx_ptr()->getGeometry().any(),
+                global_pose * this->get_physx_ptr()->getLocalPose(),
+                other_shape.get_physx_ptr()->getGeometry().any(),
+                global_pose_other * other_shape.get_physx_ptr()->getLocalPose()
+        );
+    }
+
     static Shape create_box(const Eigen::Vector3f &sz, Material mat, bool is_exclusive) {
         return Shape::from_geometry(physx::PxBoxGeometry(0.5 * sz[0], 0.5 * sz[1], 0.5 * sz[2]), mat, is_exclusive);
     }

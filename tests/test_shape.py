@@ -126,6 +126,16 @@ class ShapeTestCase(unittest.TestCase):
         s = Shape.create_box(size=[0.1, 0.3, 0.2], material=Material())
         self.assertAlmostEqual(0., np.linalg.norm(s.get_box_half_extents() - [0.05, 0.15, 0.1]))
 
+    def test_overlap(self):
+        s1 = Shape.create_box([0.1] * 3, Material())
+        s2 = Shape.create_box([0.1] * 3, Material())
+        s3 = Shape.create_box([0.1] * 3, Material())
+        s3.set_local_pose([0., 0., -0.3])
+        self.assertTrue(s1.overlaps(s2))
+        self.assertFalse(s1.overlaps(s3))
+        self.assertFalse(s1.overlaps(s2, global_pose_other=[0, 0., 0.3]))
+        self.assertTrue(s1.overlaps(s3, global_pose_other=[0, 0., 0.3]))
+
 
 if __name__ == '__main__':
     unittest.main()
