@@ -229,6 +229,12 @@ PYBIND11_MODULE(pyphysx, m) {
             )
             .def("get_box_half_extents", &Shape::get_box_half_extents,
                  "Get half of the box sizes, i.e. vector of x/2, y/2, z/2. Use only for box geometries."
+            )
+            .def("overlaps", &Shape::overlaps,
+                 arg("other_shape"),
+                 arg("global_pose") = physx::PxTransform(physx::PxIdentity),
+                 arg("global_pose_other") = physx::PxTransform(physx::PxIdentity),
+                 "Return true if two shapes overlaps."
             );
 
     py::class_<RigidActor>(m, "RigidActor")
