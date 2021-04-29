@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<robot name="origins">
+
+    <link name="base">
+        <inertial>
+            <mass value="1."/>
+        </inertial>
+        <visual>
+            <geometry>
+                <unit_box size="0.5 0.5 0.5"/>
+            </geometry>
+        </visual>
+    </link>
+
+    <link name="l1">
+        <inertial>
+            <mass value="1."/>
+        </inertial>
+        <visual>
+            <geometry>
+                <box size="0.5 0.5 0.5"/>
+            </geometry>
+        </visual>
+    </link>
+
+    <joint name="j" type="continuous">
+        <parent link="base"/>
+        <child link="l1"/>
+        <origin xyz="0 0 0.5" rpy="0 0 1.5708"/>
+        <axis xyz="0 0 1"/>
+        <limit effort="6.0" velocity="10.152284264"/>
+    </joint>
+
+</robot>

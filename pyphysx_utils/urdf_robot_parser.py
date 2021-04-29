@@ -198,8 +198,6 @@ class URDFRobot(TreeRobot):
         mass = float(mass_element.get('value')) if mass_element is not None else None
         if mass is None or mass < min_mass:
             if verbose:
-                print(
-                    f'Mass of each link has to be set, otherwise unstable. Using mass {min_mass} kg instead of {mass} kg.'
-                )
+                print(f'Mass of a link is small - simulation unstable. Using {min_mass} kg instead of {mass} kg.')
             mass = min_mass
         return mass
