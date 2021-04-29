@@ -33,6 +33,21 @@ class UrdfParserTestCase(unittest.TestCase):
         with self.assertRaises(NotImplementedError):
             URDFRobot(urdf_path=Path(os.path.realpath(__file__)).parent.joinpath('data/test_urdf_wrong_geometry.urdf'))
 
+    def test_urdf_cyliner(self):
+        robot = URDFRobot(urdf_path=Path(os.path.realpath(__file__)).parent.joinpath('data/test_urdf_cylinder.urdf'))
+        link: Link = list(robot.links.values())[0]
+        shape: Shape = link.actor.get_atached_shapes()[0]
+        data = shape.get_shape_data()
+        points = data.reshape(-1, 3)
+        r = 0.1
+        l = 0.6
+        self.assertAlmostEqual(-r, points[:, 0].min())
+        self.assertAlmostEqual(r, points[:, 0].max())
+        self.assertAlmostEqual(-r, points[:, 1].min())
+        self.assertAlmostEqual(r, points[:, 1].max())
+        self.assertAlmostEqual(-l / 2, points[:, 2].min())
+        self.assertAlmostEqual(l / 2, points[:, 2].max())
+
 
 if __name__ == '__main__':
     unittest.main()
