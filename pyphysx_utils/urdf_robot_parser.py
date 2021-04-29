@@ -69,7 +69,10 @@ class URDFRobot(TreeRobot):
 
     def parse_joints_from_urdf_etree(self, urdf: ElementTree):
         for joint_element in urdf.iterfind('joint'):
-            joint = Joint(joint_element.get('name'), joint_element.get('type', 'fixed'))
+            jtype = joint_element.get('type', 'fixed')
+            if jtype == 'continuous':
+                jtype = 'revolute'
+            joint = Joint(joint_element.get('name'), jtype)
             origin = self._get_origin_from_urdf_element(joint_element)
             limit_element = joint_element.find('limit')
 
@@ -77,14 +80,16 @@ class URDFRobot(TreeRobot):
                 else np.array([float(f) for f in joint_element.find('axis').get('xyz', '1 0 0').split()])
             alignment_transform = (np.zeros(3), quat_between_two_vectors(np.array([1., 0., 0.]), axis))
 
+            lower_limit_exists = limit_element is not None and 'lower' in limit_element.keys()
+            upper_limit_exists = limit_element is not None and 'upper' in limit_element.keys()
             self.add_joint(
                 joint_element.find('parent').get('link'),
                 joint_element.find('child').get('link'),
                 joint,
                 local_pose0=multiply_transformations(origin, alignment_transform),
                 local_pose1=alignment_transform,
-                lower_limit=float(limit_element.get('lower')) if limit_element is not None else None,
-                upper_limit=float(limit_element.get('upper')) if limit_element is not None else None,
+                lower_limit=float(limit_element.get('lower')) if lower_limit_exists else None,
+                upper_limit=float(limit_element.get('upper')) if upper_limit_exists else None,
             )
 
     @staticmethod
@@ -167,11 +172,11 @@ class URDFRobot(TreeRobot):
                 shapes = [Shape.create_sphere(radius=float(geom.get('radius', '1')), material=Material())]
             elif geom.tag == 'cylinder':
                 mesh = trimesh.creation.cylinder(radius=float(geom.get('radius', '1')),
-                                                    height=float(geom.get('length', '1')))
+                                                 height=float(geom.get('length', '1')))
                 scale = float(geom.get('scale', '1').split()[0])
                 shapes = [Shape.create_convex_mesh_from_points(mesh.vertices, Material(), scale)]
             else:
-                raise NotImplementedError('Only sphere/box/cylinder/mesh geometries are supported. Got {}'.format(geom.tag))
+                raise NotImplementedError(f'Only sphere/box/cylinder/mesh geometries are supported. Got {geom.tag}')
         local_pose = URDFRobot._get_origin_from_urdf_element(element)
         for s in shapes:
             s.set_local_pose(local_pose)
@@ -182,7 +187,7 @@ class URDFRobot(TreeRobot):
                 clr = list(materials.values())[0]
                 if clr is None:
                     clr = global_materials.get(list(materials.keys())[0])
-                assert clr is not None, 'Color value must be specified either inside robot or in material. Not found for material {}'.format(materials)
+                assert clr is not None, f'Color value must be specified either inside robot or in material. Not found for material {materials}'
                 for s in shapes:
                     URDFRobot.shape_update_user_data(s, 'color', clr)
         return shapes
@@ -193,7 +198,6 @@ class URDFRobot(TreeRobot):
         mass = float(mass_element.get('value')) if mass_element is not None else None
         if mass is None or mass < min_mass:
             if verbose:
-                print('Mass of each link has to be set, otherwise unstable. Using mass {} kg instead of {} kg.'.format(
-                    min_mass, mass))
+                print(f'Mass of a link is small - simulation unstable. Using {min_mass} kg instead of {mass} kg.')
             mass = min_mass
         return mass
