@@ -23,6 +23,12 @@ class UrdfParserTestCase(unittest.TestCase):
         self.assertEqual(None, robot.links['base'].parent)
         self.assertEqual(robot.links['base'], robot.links['l1'].parent)
 
+    def test_urdf_no_joint_position_limits(self):
+        robot = URDFRobot(urdf_path=Path(os.path.realpath(__file__)).parent.joinpath('test_urdf_limit_joint.urdf'))
+        j: Joint = list(robot.movable_joints.values())[0]
+        self.assertEqual(j.get_limits(), (-np.inf, np.inf))
+        self.assertEqual(j.joint_type, 'revolute')
+
 
 if __name__ == '__main__':
     unittest.main()
