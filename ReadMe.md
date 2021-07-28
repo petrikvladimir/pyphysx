@@ -138,7 +138,7 @@ render = MeshcatViewer(zmq_url='tcp://127.0.0.1:6000')
 Rendering to animation and publish after rendering is done:
 ```python
 render = MeshcatViewer(wait_for_open=True, open_meshcat=True, render_to_animation=True, animation_fps=30)
-render.add_scene(scene)
+render.add_physx_scene(scene)
 for _ in range(100):
     scene.simulate()
     render.update() # will render to animation without sending information to meshcat server, i.e. is fast
