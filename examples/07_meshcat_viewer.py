@@ -12,6 +12,9 @@ import trimesh
 import numpy as np
 
 from pyphysx_utils.urdf_robot_parser import URDFRobot
+import meshcat.geometry as g
+import os
+from pathlib import Path
 
 """ Construct a scene with various objects """
 scene = Scene()
@@ -28,6 +31,19 @@ sphere = Shape.create_sphere(0.1, Material(restitution=1.))
 sphere.set_user_data(dict(color='tab:blue'))
 actor.attach_shape(sphere)
 actor.set_global_pose([-0.5, 0.5, 1.0])
+actor.set_mass(1.)
+scene.add_actor(actor)
+
+"Create a sphere with a texture."
+actor = RigidDynamic()
+sphere = Shape.create_sphere(0.1, Material(restitution=1.))
+sphere.set_user_data(dict(
+    visual_mesh_texture=g.ImageTexture(
+        image=g.PngImage.from_file(Path(os.path.realpath(__file__)).parent.joinpath('texture.png'))
+    ))
+)
+actor.attach_shape(sphere)
+actor.set_global_pose([-0.8, 0.5, 1.0])
 actor.set_mass(1.)
 scene.add_actor(actor)
 
@@ -57,7 +73,6 @@ for i, value in enumerate([0, -np.pi / 4, 0, -3 * np.pi / 4, 0, np.pi / 2, np.pi
     q['panda_joint{}'.format(i + 1)] = value
 robot.reset_pose(q)  # reset pose of all links based on default values for joints (0 m or 0 deg)
 scene.add_aggregate(robot.get_aggregate())  # add robot into the scene, robot is an aggregate of actors with self
-
 
 """ Create a viewer and add the scene into it. """
 render = MeshcatViewer(wait_for_open=True, open_meshcat=True, show_frames=False)
