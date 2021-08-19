@@ -3,13 +3,15 @@
 # Copyright (c) CTU  - All Rights Reserved
 # Created on: 1/22/21
 #     Author: Vladimir Petrik <vladimir.petrik@cvut.cz>
-
+import os
+from pathlib import Path
 
 import numpy as np
 import unittest
 import sys
 
 from pyphysx_render.meshcat_render import MeshcatViewer
+import meshcat.geometry as g
 
 sys.path.append('lib')
 
@@ -49,6 +51,17 @@ class MeschatTest(unittest.TestCase):
         mat = viewer._get_shape_material(box)
         self.assertEqual(mat.color, int('00ff00', base=16))
         self.assertAlmostEqual(mat.opacity, 0.)
+
+    def test_geometry_material_texture(self):
+        viewer = MeshcatViewer()
+        box = Shape.create_box([0.2] * 3, Material())
+        texture = g.ImageTexture(
+            image=g.PngImage.from_file(Path(os.path.realpath(__file__)).parent.joinpath('data/texture.png'))
+        )
+        box.set_user_data(dict(visual_mesh_texture=texture))
+        mat = viewer._get_shape_material(box)
+        self.assertEqual(mat.map, texture)
+        self.assertAlmostEqual(mat.opacity, 1.)
 
     def test_geometry_shape_box(self):
         viewer = MeshcatViewer()

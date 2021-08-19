@@ -102,9 +102,9 @@ class MeshcatViewer(ViewerBase):
         self.actors_and_offsets.clear()
 
     def _get_shape_material(self, shape):
-        visual_mesh = shape.get_user_data().get('visual_mesh', None) if shape.get_user_data() is not None else None
-        if visual_mesh is not None:
-            pass
+        texture = shape.get_user_data().get('visual_mesh_texture', None) if shape.get_user_data() is not None else None
+        if texture is not None:
+            return g.MeshLambertMaterial(map=texture, opacity=1.)
         clr = [int(v) for v in self.get_shape_color(shape=shape)]
         color = int(clr[0]) * 256 ** 2 + int(clr[1]) * 256 + int(clr[2])
         return g.MeshLambertMaterial(color=color, opacity=clr[3] / 255.)
