@@ -93,6 +93,17 @@ class MeschatTest(unittest.TestCase):
         self.assertAlmostEqual(pmax[1], gmax[1], places=5)
         self.assertAlmostEqual(pmax[2], gmax[2], places=5)
 
+    def test_geometry_shape_visual(self):
+        viewer = MeshcatViewer()
+        s = Shape.create_sphere(0.5, Material())
+        import trimesh.creation
+        obj = trimesh.creation.uv_sphere(0.5)
+        geom = viewer._get_shape_geometry(s)
+        self.assertTrue(isinstance(geom, g.Sphere))
+        s.set_user_data(dict(visual_mesh=obj))
+        geom = viewer._get_shape_geometry(s)
+        self.assertTrue(isinstance(geom, g.MeshGeometry))
+
     def test_no_animation_default(self):
         viewer = MeshcatViewer()
         self.assertIsNone(viewer.animation)

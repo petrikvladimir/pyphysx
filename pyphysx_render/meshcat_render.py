@@ -8,6 +8,7 @@ import numpy as np
 
 import meshcat
 import meshcat.geometry as g
+import trimesh.exchange.obj
 
 from pyphysx import ShapeFlag, GeometryType
 from pyphysx_render.render_base import ViewerBase
@@ -112,7 +113,9 @@ class MeshcatViewer(ViewerBase):
     def _get_shape_geometry(self, shape):
         visual_mesh = shape.get_user_data().get('visual_mesh', None) if shape.get_user_data() is not None else None
         if visual_mesh is not None:
-            return g.TriangularMeshGeometry(vertices=visual_mesh.vertices, faces=visual_mesh.faces)
+            return g.ObjMeshGeometry.from_stream(
+                trimesh.util.wrap_as_stream(trimesh.exchange.obj.export_obj(visual_mesh))
+            )
         elif shape.get_geometry_type() == GeometryType.CONVEXMESH:
             data = shape.get_shape_data()  # N x 9 - i.e. 3 triangles
             faces = np.arange(0, data.shape[0] * 3, 1, dtype=np.int).reshape(-1, 3)
