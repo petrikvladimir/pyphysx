@@ -23,11 +23,11 @@ jobs:
           pip3 install codecov
           pip3 install pyrender imageio imageio_ffmpeg trimesh networkx numba numpy_quaternion matplotlib scipy anytree meshcat
           pip3 install pytest-cov
-          export PYPHYSX_COV=true
         if: runner.os == 'Linux'
       - name: Build
         run: |
-          python3 setup.py build
+          PYPHYSX_COV=true python3 setup.py build
+        if: runner.os == 'Linux'
       - name: Generate coverage report
         run: |
           export PYTHONPATH=$PYTHONPATH:$(pwd)/build/lib.linux-x86_64-${{ matrix.python-version }}
