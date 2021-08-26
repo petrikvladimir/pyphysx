@@ -15,6 +15,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Dependencies
         run: |
+          sudo apt-get install freeglut3-dev
           pip3 install -U pip
           pip3 install -U conan
           pip3 install --upgrade numpy
