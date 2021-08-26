@@ -26,3 +26,13 @@ jobs:
       - name: Build
         run: |
           python3 setup.py build
+      - name: Generate coverage report
+        run: |
+          export PYTHONPATH=$PYTHONPATH:$(pwd)/build/lib.linux-x86_64-${{ matrix.python-version }}
+          cd build/temp.linux-x86_64-$${{ matrix.python-version }}
+          pytest tests --cov=codecov --cov ../lib.linux-x86_64-${{ matrix.python-version }}/pyphysx_utils --cov ../lib.linux-x86_64-${{ matrix.python-version }}/pyphysx_render
+          make gcov
+        if: runner.os == 'Linux'
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
+
