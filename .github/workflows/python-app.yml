@@ -1,7 +1,7 @@
 name: PyPhysX
 on: [push]
 jobs:
-  build-wheel:
+  build:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -13,9 +13,16 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install
+      - name: Dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install wheel
-          pip install --user six==1.15.0
-          python setup.py install --user
+          pip3 install -U pip
+          pip3 install -U conan
+          pip3 install --upgrade numpy
+          pip3 install codecov
+          pip3 install pyrender imageio imageio_ffmpeg trimesh networkx numba numpy_quaternion matplotlib scipy anytree meshcat
+          pip3 install pytest-cov
+          export PYPHYSX_COV=true
+        if: runner.os == 'Linux'
+      - name: Build
+        run: |
+          python3 setup.py build
