@@ -75,7 +75,7 @@ setup(
     cmdclass=dict(build_ext=CMakeBuild),
     install_requires=['conan', 'numpy', 'imageio', 'imageio_ffmpeg', 'trimesh', 'networkx',
                       'numba', 'numpy_quaternion', 'matplotlib', 'scipy', 'anytree', 'pyrender', 'meshcat'],
-    setup_requires=['wheel', 'pytest-runner', 'conan', 'numpy', 'imageio', 'imageio_ffmpeg', 'trimesh', 'networkx',
+    setup_requires=['pytest-runner', 'conan', 'numpy', 'imageio', 'imageio_ffmpeg', 'trimesh', 'networkx',
                     'numba', 'numpy_quaternion', 'matplotlib', 'scipy', 'anytree', 'pyrender', 'meshcat'],
     tests_require=['pytest'],
     packages=['pyphysx_render', 'pyphysx_utils'],
