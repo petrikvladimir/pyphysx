@@ -11,7 +11,7 @@
 #define SIM_PHYSX_PHYSICS_H
 
 #include <PxPhysicsAPI.h>
-//#include <PxCudaContextManager.h>
+#include <cudamanager/PxCudaContextManager.h>
 
 class Physics {
 
@@ -29,7 +29,7 @@ public:
 #if !__APPLE__
         physx::PxCudaContextManagerDesc desc;
         desc.interopMode = physx::PxCudaInteropMode::NO_INTEROP;
-        /*
+        
         Physics::get().cuda_context_manager = PxCreateCudaContextManager(*Physics::get().foundation, desc);
         if (Physics::get().cuda_context_manager) {
             if (!Physics::get().cuda_context_manager->contextIsValid()) {
@@ -37,7 +37,7 @@ public:
                 Physics::get().cuda_context_manager = nullptr;
             }
         }
-        */
+        
 #endif
     }
 
