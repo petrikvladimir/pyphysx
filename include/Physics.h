@@ -11,6 +11,7 @@
 #define SIM_PHYSX_PHYSICS_H
 
 #include <PxPhysicsAPI.h>
+#include <PxCudaContextManager.h>
 
 class Physics {
 
