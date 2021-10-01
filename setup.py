@@ -44,6 +44,7 @@ class CMakeBuild(build_ext):
 
         if platform.system() == "Windows":
             cmake_args += ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}'.format(cfg.upper(), extdir)]
+            cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
             if sys.maxsize > 2 ** 32:
                 cmake_args += ['-A', 'x64']
             build_args += ['--', '/m']
@@ -66,7 +67,7 @@ class CMakeBuild(build_ext):
 
 setup(
     name='pyphysx',
-    version='0.1.7',
+    version='0.1.8',
     author='Vladimir Petrik',
     author_email='vladimir.petrik@cvut.cz',
     description='PyPhysX - python wrapper for PhysX Nvidia simulator.',

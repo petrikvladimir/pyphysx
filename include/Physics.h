@@ -25,7 +25,7 @@ public:
     }
 
     static auto init_gpu() {
-#if !__APPLE__
+#if !__APPLE__ and !defined(_WIN64) and !defined(_WIN32)
         physx::PxCudaContextManagerDesc desc;
         desc.interopMode = physx::PxCudaInteropMode::NO_INTEROP;
         Physics::get().cuda_context_manager = PxCreateCudaContextManager(*Physics::get().foundation, desc);

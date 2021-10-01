@@ -9,6 +9,8 @@ if (NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
 endif ()
 include(${CMAKE_BINARY_DIR}/conan.cmake)
 
+add_compile_definitions(PX_PHYSX_STATIC_LIB)
+conan_add_remote(NAME conan-center URL https://conan.bintray.com)
 conan_cmake_run(REQUIRES
         tinyobjloader/1.0.6
         pybind11/2.4.3

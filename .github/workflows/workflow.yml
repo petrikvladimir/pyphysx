@@ -5,7 +5,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-latest, macos-latest ] #, windows-latest
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
         python-version: [ '3.8' ] # , '3.9'
     steps:
       - uses: actions/checkout@v2
@@ -24,7 +24,7 @@ jobs:
       - name: Python Dependencies
         run: |
           pip3 install -U pip
-          pip3 install -U conan
+          pip3 install -U conan --upgrade
           pip3 install --upgrade numpy
           pip3 install codecov
           pip3 install pyrender imageio imageio_ffmpeg trimesh networkx numba numpy_quaternion matplotlib scipy anytree meshcat
@@ -48,5 +48,8 @@ jobs:
         if: runner.os == 'Linux'
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
+#        with: todo: fix coverage
+#          files: ./coverage1.xml,./coverage2.xml # optional
+#          verbose: true # optional (default = false)
         if: runner.os == 'Linux'
 
