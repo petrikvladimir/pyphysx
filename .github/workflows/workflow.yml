@@ -25,7 +25,7 @@ jobs:
       - name: Python Dependencies
         run: |
           pip3 install -U pip
-          pip3 install -U conan==1.33.0
+          pip3 install -U conan --upgrade
           pip3 install --upgrade numpy
           pip3 install codecov
           pip3 install pyrender imageio imageio_ffmpeg trimesh networkx numba numpy_quaternion matplotlib scipy anytree meshcat
