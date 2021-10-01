@@ -33,6 +33,7 @@ jobs:
 
       - name: Build without coverage and tests
         run: |
+          conan remote add bintray
           python3 setup.py build
         if: runner.os != 'Linux'
 
