@@ -33,7 +33,7 @@ jobs:
 
       - name: Build without coverage and tests
         run: |
-          conan remote add bintray
+          conan remote add conan-center "https://conan.bintray.com"
           python3 setup.py build
         if: runner.os != 'Linux'
 
