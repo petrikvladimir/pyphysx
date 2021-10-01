@@ -13,6 +13,13 @@ pip install --upgrade git+https://github.com/petrikvladimir/pyphysx.git@master
 ```
 If pip install fails, build it from source:
 ```
+# Install dependencies:
+pip install -U pip
+pip install -U conan --upgrade
+pip install --upgrade numpy
+pip install codecov pyrender imageio imageio_ffmpeg trimesh networkx numba numpy_quaternion matplotlib scipy anytree meshcat pytest-cov
+
+# Clone and build from source:
 git clone https://github.com/petrikvladimir/pyphysx.git
 python setup.py install --user
 ```
