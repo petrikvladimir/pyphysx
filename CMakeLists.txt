@@ -25,7 +25,6 @@ find_package(codecov)
 include_directories(include)
 
 pybind11_add_module(pyphysx MODULE NO_EXTRAS src/pyphysx.cpp)
-MESSAGE(WARN "HERE are libraries: ${CONAN_LIBS}")
 target_link_libraries(pyphysx PUBLIC ${CONAN_LIBS})
 add_custom_command(TARGET pyphysx POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:pyphysx> ${PHYSX_LIBRARY_OUTPUT_DIRECTORY}/$<TARGET_FILE_NAME:pyphysx>
