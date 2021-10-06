@@ -3,6 +3,7 @@
 [![codecov](https://codecov.io/gh/petrikvladimir/pyphysx/branch/master/graph/badge.svg)](https://codecov.io/gh/petrikvladimir/pyphysx)
 
 ## Installation
+### PIP installation
 To install for the first time:
 ```
 pip install git+https://github.com/petrikvladimir/pyphysx.git@master
@@ -11,7 +12,22 @@ To update if its already installed:
 ```
 pip install --upgrade git+https://github.com/petrikvladimir/pyphysx.git@master
 ```
-If pip install fails, build it from source:
+
+Optionally, you can install in anaconda
+```
+conda create -n py38 python=3.8
+conda activate py38
+conda install -c anaconda gcc_linux-64 gxx_linux-64
+pip install git+https://github.com/petrikvladimir/pyphysx.git@master
+```
+
+### Build from source
+If pip install fails, build the library from source.
+
+For windows users, install these system dependencies:
+- CMake for Windows, with _Add to path_ option selected during installation
+- Visual studio build tools from this [link](https://visualstudio.microsoft.com/cs/visual-cpp-build-tools/)
+
 ```
 # Install dependencies:
 pip install -U pip
@@ -22,13 +38,6 @@ pip install codecov pyrender imageio imageio_ffmpeg trimesh networkx numba numpy
 # Clone and build from source:
 git clone https://github.com/petrikvladimir/pyphysx.git
 python setup.py install --user
-```
-Optionally, you can install in anaconda
-```
-conda create -n py38 python=3.8
-conda activate py38
-conda install -c anaconda gcc_linux-64 gxx_linux-64
-pip install git+https://github.com/petrikvladimir/pyphysx.git@master
 ```
 
 ## Trivial example
