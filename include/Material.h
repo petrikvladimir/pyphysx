@@ -26,7 +26,7 @@ public:
         get_physx_ptr()->setStaticFriction(static_friction);
     }
 
-    [[nodiscard]] auto get_static_friction() const {
+    auto get_static_friction() const {
         return get_physx_ptr()->getStaticFriction();
     }
 
@@ -34,7 +34,7 @@ public:
         get_physx_ptr()->setDynamicFriction(dynamic_friction);
     }
 
-    [[nodiscard]] auto get_dynamic_friction() const {
+    auto get_dynamic_friction() const {
         return get_physx_ptr()->getDynamicFriction();
     }
 
@@ -42,7 +42,7 @@ public:
         get_physx_ptr()->setRestitution(restitution);
     }
 
-    [[nodiscard]] auto get_restitution() const {
+    auto get_restitution() const {
         return get_physx_ptr()->getRestitution();
     }
 };
