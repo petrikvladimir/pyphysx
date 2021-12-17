@@ -10,11 +10,11 @@ endif ()
 include(${CMAKE_BINARY_DIR}/conan.cmake)
 
 add_compile_definitions(PX_PHYSX_STATIC_LIB)
-conan_add_remote(NAME conan-center URL https://conan.bintray.com)
+conan_add_remote(NAME conan-center URL https://center.conan.io)
 conan_cmake_run(REQUIRES
         tinyobjloader/1.0.6
         pybind11/2.4.3
-        eigen/3.3.7@conan/stable
+        eigen/3.3.7
         physx/4.1.1
         BASIC_SETUP BUILD missing)
 

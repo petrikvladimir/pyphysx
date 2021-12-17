@@ -67,7 +67,7 @@ class CMakeBuild(build_ext):
 
 setup(
     name='pyphysx',
-    version='0.1.8',
+    version='0.1.9',
     author='Vladimir Petrik',
     author_email='vladimir.petrik@cvut.cz',
     description='PyPhysX - python wrapper for PhysX Nvidia simulator.',
