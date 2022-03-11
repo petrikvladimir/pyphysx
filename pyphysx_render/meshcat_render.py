@@ -112,9 +112,11 @@ class MeshcatViewer(ViewerBase):
     def _get_shape_geometry(self, shape):
         visual_mesh = shape.get_user_data().get('visual_mesh', None) if shape.get_user_data() is not None else None
         if visual_mesh is not None:
-            return g.ObjMeshGeometry.from_stream(
-                trimesh.util.wrap_as_stream(trimesh.exchange.obj.export_obj(visual_mesh))
-            )
+            try:
+                exp_obj = trimesh.exchange.obj.export_obj(visual_mesh)
+            except ValueError:
+                exp_obj = trimesh.exchange.obj.export_obj(visual_mesh, include_texture=False)
+            return g.ObjMeshGeometry.from_stream(trimesh.util.wrap_as_stream(exp_obj))
         elif shape.get_geometry_type() == GeometryType.CONVEXMESH:
             data = shape.get_shape_data()  # N x 9 - i.e. 3 triangles
             faces = np.arange(0, data.shape[0] * 3, 1, dtype=np.int).reshape(-1, 3)
