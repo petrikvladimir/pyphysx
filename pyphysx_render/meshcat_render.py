@@ -30,7 +30,8 @@ class MeshcatViewer(ViewerBase):
         if wait_for_open:
             self.vis.wait()
 
-        self.vis["/Background"].set_property("visible", False)
+        self.vis["/Background"].set_property("top_color", [1] * 3)
+        self.vis["/Background"].set_property("bottom_color", [1] * 3)
 
         self.actors_and_offsets = []
         self.show_frames = show_frames
