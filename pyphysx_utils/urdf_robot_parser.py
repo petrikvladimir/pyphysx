@@ -127,6 +127,7 @@ class URDFRobot(TreeRobot):
     @staticmethod
     def load_mesh_shapes(mesh_path, material, scale, set_visual_mesh_userdata=False) -> List[Shape]:
         """ Load mesh obj file and return all shapes in an array. """
+        # from trimesh.exchange.dae import load_collada
         mesh_resolver = trimesh.resolvers.FilePathResolver(mesh_path)
         obj = trimesh.load(mesh_path, split_object=True, group_material=False, resolver=mesh_resolver)
         transform = np.diag([*scale, 1])

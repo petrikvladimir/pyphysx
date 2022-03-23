@@ -48,6 +48,11 @@ class UrdfParserTestCase(unittest.TestCase):
         self.assertAlmostEqual(-l / 2, points[:, 2].min())
         self.assertAlmostEqual(l / 2, points[:, 2].max())
 
+    def test_urdf_dae(self):
+        robot = URDFRobot(urdf_path=Path(os.path.realpath(__file__)).parent.joinpath('data/test_urdf_dae.urdf'))
+        link: Link = list(robot.links.values())[0]
+        shape: Shape = link.actor.get_atached_shapes()[0]
+        self.assertTrue('visual_mesh' in shape.get_user_data())
 
 if __name__ == '__main__':
     unittest.main()
