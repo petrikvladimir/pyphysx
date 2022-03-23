@@ -67,7 +67,7 @@ class CMakeBuild(build_ext):
 
 setup(
     name='pyphysx',
-    version='0.2.0',
+    version='0.2.1',
     author='Vladimir Petrik',
     author_email='vladimir.petrik@cvut.cz',
     description='PyPhysX - python wrapper for PhysX Nvidia simulator.',
@@ -75,9 +75,11 @@ setup(
     ext_modules=[CMakeExtension('pyphysx')],
     cmdclass=dict(build_ext=CMakeBuild),
     install_requires=['conan', 'numpy', 'imageio', 'imageio_ffmpeg', 'trimesh', 'networkx',
-                      'numba', 'numpy_quaternion', 'matplotlib', 'scipy', 'anytree', 'pyrender', 'meshcat'],
+                      'numba', 'numpy_quaternion', 'matplotlib', 'scipy', 'anytree', 'pyrender', 'meshcat',
+                      'pycollada'],
     setup_requires=['pytest-runner', 'conan', 'numpy', 'imageio', 'imageio_ffmpeg', 'trimesh', 'networkx',
-                    'numba', 'numpy_quaternion', 'matplotlib', 'scipy', 'anytree', 'pyrender', 'meshcat'],
+                    'numba', 'numpy_quaternion', 'matplotlib', 'scipy', 'anytree', 'pyrender', 'meshcat',
+                    'pycollada'],
     tests_require=['pytest'],
     packages=['pyphysx_render', 'pyphysx_utils'],
     zip_safe=False,

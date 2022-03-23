@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<robot name="origins">
+
+    <link name="base">
+        <inertial>
+            <mass value="1."/>
+        </inertial>
+        <visual>
+            <geometry>
+                <mesh filename="finger.dae"/>
+            </geometry>
+        </visual>
+    </link>
+</robot>

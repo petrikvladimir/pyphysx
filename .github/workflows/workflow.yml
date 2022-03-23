@@ -27,7 +27,7 @@ jobs:
           pip3 install -U conan --upgrade
           pip3 install --upgrade numpy
           pip3 install codecov
-          pip3 install pyrender imageio imageio_ffmpeg trimesh networkx numba numpy_quaternion matplotlib scipy anytree meshcat
+          pip3 install pyrender imageio imageio_ffmpeg trimesh pycollada networkx numba numpy_quaternion matplotlib scipy anytree meshcat
           pip3 install pytest-cov
 
       - name: Build without coverage and tests
