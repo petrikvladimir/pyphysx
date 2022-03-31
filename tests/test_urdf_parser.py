@@ -54,5 +54,15 @@ class UrdfParserTestCase(unittest.TestCase):
         shape: Shape = link.actor.get_atached_shapes()[0]
         self.assertTrue('visual_mesh' in shape.get_user_data())
 
+    def test_urdf_sphere_instead_of_mesh(self):
+        no_sphere = 'data/test_urdf_dae.urdf'
+        sphere = 'data/test_urdf_dae_with_collision_geom.urdf'
+        for i, path in enumerate([no_sphere, sphere]):
+            robot = URDFRobot(urdf_path=Path(os.path.realpath(__file__)).parent.joinpath(path))
+            link: Link = list(robot.links.values())[0]
+            shape: Shape = link.actor.get_atached_shapes()[0]
+            self.assertEqual(shape.get_geometry_type(), GeometryType.SPHERE if i == 1 else GeometryType.CONVEXMESH)
+
+
 if __name__ == '__main__':
     unittest.main()
