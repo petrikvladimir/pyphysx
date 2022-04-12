@@ -89,6 +89,10 @@ public:
     void set_kinematic_target(const physx::PxTransform &pose) {
         get_dyn_ptr()->setKinematicTarget(pose);
     }
+	
+	void set_rigid_dynamic_lockflag(const physx::PxRigidDynamicLockFlag::Enum& flag, const bool value) {
+        get_dyn_ptr()->setRigidDynamicLockFlag(flag, value);
+    }
 
 };
 

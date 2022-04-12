@@ -37,6 +37,15 @@ PYBIND11_MODULE(pyphysx, m) {
             .value("ENABLE_SPECULATIVE_CCD", physx::PxRigidBodyFlag::eENABLE_SPECULATIVE_CCD)
             .value("ENABLE_POSE_INTEGRATION_PREVIEW", physx::PxRigidBodyFlag::eENABLE_POSE_INTEGRATION_PREVIEW)
             .export_values();
+			
+	py::enum_<physx::PxRigidDynamicLockFlag::Enum>(m, "RigidDynamicLockFlag")
+            .value("LOCK_LINEAR_X", physx::PxRigidDynamicLockFlag::eLOCK_LINEAR_X)
+            .value("LOCK_LINEAR_Y", physx::PxRigidDynamicLockFlag::eLOCK_LINEAR_Y)
+            .value("LOCK_LINEAR_Z", physx::PxRigidDynamicLockFlag::eLOCK_LINEAR_Z)
+            .value("LOCK_ANGULAR_X", physx::PxRigidDynamicLockFlag::eLOCK_ANGULAR_X)
+            .value("LOCK_ANGULAR_Y", physx::PxRigidDynamicLockFlag::eLOCK_ANGULAR_Y)
+            .value("LOCK_ANGULAR_Z", physx::PxRigidDynamicLockFlag::eLOCK_ANGULAR_Z)
+            .export_values();
 
     py::enum_<physx::PxSceneFlag::Enum>(m, "SceneFlag")
             .value("ENABLE_CCD", physx::PxSceneFlag::eENABLE_CCD)
@@ -303,6 +312,10 @@ PYBIND11_MODULE(pyphysx, m) {
             )
             .def("set_kinematic_target", &RigidDynamic::set_kinematic_target,
                  arg("pose") = physx::PxTransform(physx::PxIdentity)
+            )
+            .def("set_rigid_dynamic_lockflag", &RigidDynamic::set_rigid_dynamic_lockflag,
+                 arg("flag"),
+                 arg("value")
             );
 
     py::class_<RigidStatic, RigidActor>(m, "RigidStatic")
