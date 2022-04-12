@@ -19,6 +19,10 @@ public:
     Material(float static_friction, float dynamic_friction, float restitution) :
             BasePhysxPointer(Physics::get_physics()->createMaterial(static_friction, dynamic_friction, restitution)) {
     }
+	
+	~Material() {
+		get_physx_ptr()->release();
+	}
 
     explicit Material(physx::PxMaterial *pref) : BasePhysxPointer<physx::PxMaterial>(pref) {}
 

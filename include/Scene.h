@@ -43,6 +43,10 @@ public:
 
         set_physx_ptr(Physics::get().physics->createScene(sceneDesc));
     }
+	
+	~Scene() {
+		get_physx_ptr()->release();
+	}
 
     /** @brief Simulate scene for given amount of time dt and fetch results with blocking. */
     void simulate(float dt) {

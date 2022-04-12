@@ -17,6 +17,10 @@ public:
             BasePhysxPointer<physx::PxAggregate>(
                     Physics::get_physics()->createAggregate(max_size, enable_self_collision)) {}
 
+    ~Aggregate() {
+		get_physx_ptr()->release();
+	}
+
     explicit Aggregate(physx::PxAggregate *physxPtr) : BasePhysxPointer<physx::PxAggregate>(physxPtr) {}
 
     void add_actor(RigidActor actor) {

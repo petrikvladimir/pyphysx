@@ -18,6 +18,10 @@ public:
                                                       a1.get_physx_ptr(), local_pose1)) {
         get_physx_ptr()->setConstraintFlag(physx::PxConstraintFlag::eENABLE_EXTENDED_LIMITS, true);
     }
+	
+	~D6Joint() {
+		get_physx_ptr()->release();
+	}
 
     void set_motion(physx::PxD6Axis::Enum axis, physx::PxD6Motion::Enum type) {
         get_physx_ptr()->setMotion(axis, type);

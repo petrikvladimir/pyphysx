@@ -16,6 +16,10 @@ class RigidActor : public BasePhysxPointer<physx::PxRigidActor> {
 public:
     explicit RigidActor(physx::PxRigidActor *physxPtr) : BasePhysxPointer(physxPtr) {}
 
+    ~RigidActor() {
+		get_physx_ptr()->release();
+	}
+
     auto get_global_pose() {
         return get_physx_ptr()->getGlobalPose();
     }

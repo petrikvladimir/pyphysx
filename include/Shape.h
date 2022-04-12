@@ -24,6 +24,10 @@ class Shape : public BasePhysxPointer<physx::PxShape> {
 public:
     explicit Shape(physx::PxShape *pref) : BasePhysxPointer<physx::PxShape>(pref) {}
 
+	~Shape() {
+		get_physx_ptr()->release();
+	}
+	
     void set_flag(physx::PxShapeFlag::Enum flag, bool value) {
         get_physx_ptr()->setFlag(flag, value);
     }

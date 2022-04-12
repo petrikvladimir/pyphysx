@@ -21,6 +21,10 @@ private:
 public:
     RigidDynamic() : RigidDynamic(Physics::get_physics()->createRigidDynamic(physx::PxTransform(physx::PxIdentity))) {
     }
+	
+	~RigidDynamic() {
+		get_physx_ptr()->release();
+	}
 
     explicit RigidDynamic(physx::PxRigidDynamic *physxPtr) :
             RigidActor(reinterpret_cast<RigidActor::type_physx *>(physxPtr)) {
@@ -88,8 +92,7 @@ public:
 
     void set_kinematic_target(const physx::PxTransform &pose) {
         get_dyn_ptr()->setKinematicTarget(pose);
-    }
-
+    }	
 };
 
 #endif //SIM_PHYSX_RIGIDDYNAMIC_H

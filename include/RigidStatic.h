@@ -24,6 +24,10 @@ public:
     explicit RigidStatic(physx::PxRigidStatic *physxPtr) :
             RigidActor(reinterpret_cast<RigidActor::type_physx *>(physxPtr)) {
     }
+	
+	~RigidStatic() {
+		get_physx_ptr()->release();
+	}
 
     static RigidStatic create_plane(Material mat, float nx, float ny, float nz, float distance) {
         return RigidStatic(physx::PxCreatePlane(*Physics::get_physics(), physx::PxPlane(nx, ny, nz, distance),
