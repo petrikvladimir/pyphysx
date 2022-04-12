@@ -10,6 +10,7 @@
 #include <Physics.h>
 #include <RigidActor.h>
 
+
 class RigidDynamic : public RigidActor {
 
 private:
@@ -88,6 +89,14 @@ public:
 
     void set_kinematic_target(const physx::PxTransform &pose) {
         get_dyn_ptr()->setKinematicTarget(pose);
+    }
+
+    void set_rigid_dynamic_lock_flag(const physx::PxRigidDynamicLockFlag::Enum &flag, const bool value) {
+        get_dyn_ptr()->setRigidDynamicLockFlag(flag, value);
+    }
+
+    auto get_rigid_dynamic_lock_flag_value(const physx::PxRigidDynamicLockFlag::Enum &flag) {
+        return get_dyn_ptr()->getRigidDynamicLockFlags().isSet(flag);
     }
 
 };

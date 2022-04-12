@@ -126,6 +126,13 @@ class ActorTest(unittest.TestCase):
         self.assertAlmostEqual(np.linalg.norm(a.get_linear_velocity() - [0, 0, 0.05]), 0.)
         self.assertAlmostEqual(np.linalg.norm(a.get_angular_velocity() - [0, 0, 0.1]), 0.)
 
+    def test_rigid_dynamic_lock_flag(self):
+        a = RigidDynamic()
+        a.set_rigid_dynamic_lock_flag(RigidDynamicLockFlag.LOCK_LINEAR_X, True)
+        self.assertTrue(a.get_rigid_dynamic_lock_flag_value(RigidDynamicLockFlag.LOCK_LINEAR_X))
+        a.set_rigid_dynamic_lock_flag(RigidDynamicLockFlag.LOCK_LINEAR_X, False)
+        self.assertFalse(a.get_rigid_dynamic_lock_flag_value(RigidDynamicLockFlag.LOCK_LINEAR_X))
+
 
 if __name__ == '__main__':
     unittest.main()
