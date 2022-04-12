@@ -28,14 +28,22 @@ PYBIND11_MODULE(pyphysx, m) {
 
     py::enum_<physx::PxRigidBodyFlag::Enum>(m, "RigidBodyFlag")
             .value("KINEMATIC", physx::PxRigidBodyFlag::eKINEMATIC)
-            .value("USE_KINEMATIC_TARGET_FOR_SCENE_QUERIES",
-                   physx::PxRigidBodyFlag::eUSE_KINEMATIC_TARGET_FOR_SCENE_QUERIES)
+            .value("USE_KINEMATIC_TARGET_FOR_SCENE_QUERIES", physx::PxRigidBodyFlag::eUSE_KINEMATIC_TARGET_FOR_SCENE_QUERIES)
             .value("RETAIN_ACCELERATIONS", physx::PxRigidBodyFlag::eRETAIN_ACCELERATIONS)
             .value("ENABLE_CCD", physx::PxRigidBodyFlag::eENABLE_CCD)
             .value("ENABLE_CCD_FRICTION", physx::PxRigidBodyFlag::eENABLE_CCD_FRICTION)
             .value("ENABLE_CCD_MAX_CONTACT_IMPULSE", physx::PxRigidBodyFlag::eENABLE_CCD_MAX_CONTACT_IMPULSE)
             .value("ENABLE_SPECULATIVE_CCD", physx::PxRigidBodyFlag::eENABLE_SPECULATIVE_CCD)
             .value("ENABLE_POSE_INTEGRATION_PREVIEW", physx::PxRigidBodyFlag::eENABLE_POSE_INTEGRATION_PREVIEW)
+            .export_values();
+			
+	py::enum_<physx::PxRigidDynamicLockFlag::Enum>(m, "RigidDynamicLockFlag")
+            .value("LOCK_LINEAR_X", physx::PxRigidDynamicLockFlag::eLOCK_LINEAR_X)
+            .value("LOCK_LINEAR_Y", physx::PxRigidDynamicLockFlag::eLOCK_LINEAR_Y)
+            .value("LOCK_LINEAR_Z", physx::PxRigidDynamicLockFlag::eLOCK_LINEAR_Z)
+            .value("LOCK_ANGULAR_X", physx::PxRigidDynamicLockFlag::eLOCK_ANGULAR_X)
+            .value("LOCK_ANGULAR_Y", physx::PxRigidDynamicLockFlag::eLOCK_ANGULAR_Y)
+            .value("LOCK_ANGULAR_Z", physx::PxRigidDynamicLockFlag::eLOCK_ANGULAR_Z)
             .export_values();
 
     py::enum_<physx::PxSceneFlag::Enum>(m, "SceneFlag")
@@ -303,6 +311,10 @@ PYBIND11_MODULE(pyphysx, m) {
             )
             .def("set_kinematic_target", &RigidDynamic::set_kinematic_target,
                  arg("pose") = physx::PxTransform(physx::PxIdentity)
+            )
+			.def("set_rigid_dynamic_lockflag", &RigidDynamic::set_rigid_dynamic_lockflag,
+                 arg("flag"),
+                 arg("value")
             );
 
     py::class_<RigidStatic, RigidActor>(m, "RigidStatic")
