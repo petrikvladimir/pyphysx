@@ -312,9 +312,12 @@ PYBIND11_MODULE(pyphysx, m) {
             .def("set_kinematic_target", &RigidDynamic::set_kinematic_target,
                  arg("pose") = physx::PxTransform(physx::PxIdentity)
             )
-			.def("set_rigid_dynamic_lockflag", &RigidDynamic::set_rigid_dynamic_lockflag,
+			.def("set_rigid_dynamic_lock_flag", &RigidDynamic::set_rigid_dynamic_lock_flag,
                  arg("flag"),
                  arg("value")
+            )
+            .def("get_rigid_dynamic_lock_flag_value", &RigidDynamic::get_rigid_dynamic_lock_flag_value,
+                 arg("flag")
             );
 
     py::class_<RigidStatic, RigidActor>(m, "RigidStatic")
