@@ -43,13 +43,10 @@ jobs:
         run: |
           export PYTHONPATH=$PYTHONPATH:$(pwd)/build/lib.linux-x86_64-${{ matrix.python-version }}
           cd build/temp.linux-x86_64-${{ matrix.python-version }}
-          pytest tests --cov=codecov --cov ../lib.linux-x86_64-${{ matrix.python-version }}/pyphysx_utils --cov ../lib.linux-x86_64-${{ matrix.python-version }}/pyphysx_render
+          pytest tests --cov=codecov --cov ../lib.linux-x86_64-${{ matrix.python-version }}/pyphysx_utils --cov ../lib.linux-x86_64-${{ matrix.python-version }}/pyphysx_render --cov-report=xml
           make gcov
         if: runner.os == 'Linux'
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
-#        with: todo: fix coverage
-#          files: ./coverage1.xml,./coverage2.xml # optional
-#          verbose: true # optional (default = false)
         if: runner.os == 'Linux'
 
