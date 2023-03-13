@@ -1,0 +1,17 @@
+[build-system]
+requires = ["scikit-build-core", "pybind11", "conan==1.59.0"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "pyphysx"
+version = "0.2.5"
+license = { text = "GPL-3.0-or-later" }
+authors = [
+    { name = "Vladimir Petrik", email = "vladimir.petrik@cvut.cz" },
+]
+description = "PyPhysX - python wrapper for PhysX Nvidia simulator."
+readme = "ReadMe.md"
+requires-python = ">=3.7"
+dependencies = ['conan==1.59.0', 'numpy<=1.23', 'imageio', 'imageio_ffmpeg', 'trimesh', 'networkx',
+    'numba', 'numpy_quaternion', 'matplotlib', 'scipy', 'anytree', 'pyrender', 'meshcat',
+    'pycollada']

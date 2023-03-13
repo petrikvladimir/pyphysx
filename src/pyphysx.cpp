@@ -20,7 +20,7 @@
 namespace py = pybind11;
 using py::arg;
 
-PYBIND11_MODULE(pyphysx, m) {
+PYBIND11_MODULE(_pyphysx, m) {
 
     /***
      * Define enumerations.
