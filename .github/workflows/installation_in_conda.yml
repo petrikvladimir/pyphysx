@@ -4,10 +4,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - uses: conda-incubator/setup-miniconda@v2
         with:
           auto-update-conda: true
           python-version: 3.8
-      - uses: actions/checkout@v2
-      - run: |
-          pip install .
+      - run: conda info
+      - run: conda list
+      - run: pip install .
