@@ -1,0 +1,18 @@
+name: PyPhysX install in conda
+on: [ push ]
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest]
+        python-version: [ '3.8' ]
+    steps:
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+      - run: |
+          conda info
+          conda list
+          pip install git+https://github.com/petrikvladimir/pyphysx.git@master
