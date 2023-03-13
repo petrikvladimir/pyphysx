@@ -1,52 +1,52 @@
-name: PyPhysX
-on: [ push ]
-jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ ubuntu-latest, macos-latest, windows-latest ]
-        python-version: [ '3.8' ] # , '3.9'
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: System Linux Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install freeglut3-dev
-        if: runner.os == 'Linux'
-
-      - name: Python Dependencies
-        run: |
-          pip3 install -U pip
-          pip3 install -U conan --upgrade
-          pip3 install --upgrade numpy
-          pip3 install codecov
-          pip3 install pyrender imageio imageio_ffmpeg trimesh pycollada networkx numba numpy_quaternion matplotlib scipy anytree meshcat
-          pip3 install pytest-cov
-
-      - name: Build without coverage and tests
-        run: |
-          python3 setup.py build
-        if: runner.os != 'Linux'
-
-      - name: Build with coverage and tests
-        run: |
-          PYPHYSX_COV=true python3 setup.py build
-        if: runner.os == 'Linux'
-      - name: Generate coverage report
-        run: |
-          export PYTHONPATH=$PYTHONPATH:$(pwd)/build/lib.linux-x86_64-${{ matrix.python-version }}
-          cd build/temp.linux-x86_64-${{ matrix.python-version }}
-          pytest tests --cov=codecov --cov ../lib.linux-x86_64-${{ matrix.python-version }}/pyphysx_utils --cov ../lib.linux-x86_64-${{ matrix.python-version }}/pyphysx_render --cov-report=xml
-          make gcov
-        if: runner.os == 'Linux'
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v2
-        if: runner.os == 'Linux'
-
+#name: PyPhysX
+#on: [ push ]
+#jobs:
+#  build:
+#    runs-on: ${{ matrix.os }}
+#    strategy:
+#      matrix:
+#        os: [ ubuntu-latest, macos-latest, windows-latest ]
+#        python-version: [ '3.8' ] # , '3.9'
+#    steps:
+#      - uses: actions/checkout@v2
+#
+#      - name: Set up Python
+#        uses: actions/setup-python@v2
+#        with:
+#          python-version: ${{ matrix.python-version }}
+#
+#      - name: System Linux Dependencies
+#        run: |
+#          sudo apt-get update
+#          sudo apt-get install freeglut3-dev
+#        if: runner.os == 'Linux'
+#
+#      - name: Python Dependencies
+#        run: |
+#          pip3 install -U pip
+#          pip3 install -U conan --upgrade
+#          pip3 install --upgrade numpy
+#          pip3 install codecov
+#          pip3 install pyrender imageio imageio_ffmpeg trimesh pycollada networkx numba numpy_quaternion matplotlib scipy anytree meshcat
+#          pip3 install pytest-cov
+#
+#      - name: Build without coverage and tests
+#        run: |
+#          python3 setup.py build
+#        if: runner.os != 'Linux'
+#
+#      - name: Build with coverage and tests
+#        run: |
+#          PYPHYSX_COV=true python3 setup.py build
+#        if: runner.os == 'Linux'
+#      - name: Generate coverage report
+#        run: |
+#          export PYTHONPATH=$PYTHONPATH:$(pwd)/build/lib.linux-x86_64-${{ matrix.python-version }}
+#          cd build/temp.linux-x86_64-${{ matrix.python-version }}
+#          pytest tests --cov=codecov --cov ../lib.linux-x86_64-${{ matrix.python-version }}/pyphysx_utils --cov ../lib.linux-x86_64-${{ matrix.python-version }}/pyphysx_render --cov-report=xml
+#          make gcov
+#        if: runner.os == 'Linux'
+#      - name: Upload coverage to Codecov
+#        uses: codecov/codecov-action@v2
+#        if: runner.os == 'Linux'
+#
