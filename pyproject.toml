@@ -17,4 +17,4 @@ dependencies = ['numpy<=1.23', 'imageio', 'imageio_ffmpeg', 'trimesh', 'networkx
     'pycollada']
 
 [tool.scikit-build]
-wheel.packages = ["pyphysx_utils", "pyphysx_render", "pyphysx"]
+wheel.packages = ["pyphysx_utils", "pyphysx_render", "src/pyphysx"]

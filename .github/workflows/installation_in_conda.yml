@@ -12,4 +12,5 @@ jobs:
       - run: conda info
       - run: conda install -c conda-forge conan==1.59.0
       - run: conda list
+      - run: conan
       - run: pip install .
