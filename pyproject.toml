@@ -12,7 +12,7 @@ authors = [
 description = "PyPhysX - python wrapper for PhysX Nvidia simulator."
 readme = "ReadMe.md"
 requires-python = ">=3.7"
-dependencies = ['conan==1.59.0', 'numpy<=1.23', 'imageio', 'imageio_ffmpeg', 'trimesh', 'networkx',
+dependencies = ['numpy<=1.23', 'imageio', 'imageio_ffmpeg', 'trimesh', 'networkx',
     'numba', 'numpy_quaternion', 'matplotlib', 'scipy', 'anytree', 'pyrender', 'meshcat',
     'pycollada']
 

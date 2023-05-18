@@ -2,13 +2,14 @@ name: PyPhysX install in conda
 on: [ push ]
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v2
       - uses: conda-incubator/setup-miniconda@v2
         with:
           auto-update-conda: true
-          python-version: 3.8
+          python-version: "3.8"
       - run: conda info
+      - run: conda install -c conda-forge conan==1.59.0
       - run: conda list
       - run: pip install .
