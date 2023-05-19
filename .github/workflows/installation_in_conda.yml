@@ -10,4 +10,7 @@ jobs:
           auto-update-conda: true
           python-version: "3.8"
       - shell: bash -el {0}
-        run: pip install .
+        run: |
+          pip install .
+          pip install pytest
+          pytest tests
