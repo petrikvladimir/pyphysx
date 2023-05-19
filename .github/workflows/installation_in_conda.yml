@@ -9,8 +9,5 @@ jobs:
         with:
           auto-update-conda: true
           python-version: "3.8"
-      - run: conda info
-      - run: conda install -c conda-forge conan==1.59.0
-      - run: conda list
-      - run: conan
-      - run: pip install .
+      - shell: bash -el {0}
+        run: pip install .
