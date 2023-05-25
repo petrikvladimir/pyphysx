@@ -21,18 +21,10 @@ jobs:
           sudo apt-get install freeglut3-dev
         if: runner.os == 'Linux'
 
-#      - name: Build without tests
-#        run: |
-#          pip3 install .
-#          pip3 install pytest
-#        if: runner.os != 'Linux'
-
       - name: Install
         run: |
           pip3 install .
-#        if: runner.os == 'Linux'
       - name: Test
         run: |
           pip3 install pytest
           pytest tests
-#        if: runner.os == 'Linux'

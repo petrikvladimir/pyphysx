@@ -16,15 +16,15 @@ class TestRate(unittest.TestCase):
         self.assertAlmostEqual(r.frequency(), 25.)
 
     def test_sleep(self):
-        r = Rate(10)
+        r = Rate(1)
         creation_time = time.time()
         r.sleep()
         after_sleep_time = time.time()
-        time.sleep(0.09)  # majority of time in this part
+        time.sleep(0.8)  # majority of time in this part
         r.sleep()  # this should take just remaining time, s.t. after_sleep2_time - after_sleep is 0.1
         after_sleep2_time = time.time()
-        self.assertAlmostEqual(after_sleep_time - creation_time, 0.1, places=2)
-        self.assertAlmostEqual(after_sleep2_time - after_sleep_time, 0.1, places=2)
+        self.assertAlmostEqual(after_sleep_time - creation_time, 1.0, places=2)
+        self.assertAlmostEqual(after_sleep2_time - after_sleep_time, 1.0, places=2)
 
 
 if __name__ == '__main__':
