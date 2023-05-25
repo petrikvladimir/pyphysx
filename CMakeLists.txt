@@ -32,6 +32,5 @@ target_link_libraries(_pyphysx PUBLIC ${CONAN_LIBS})
 
 install(TARGETS _pyphysx DESTINATION pyphysx)
 
-add_coverage(pyphysx)
-
+add_coverage(_pyphysx)
 coverage_evaluate()

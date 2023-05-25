@@ -5,6 +5,9 @@
 #     Author: Vladimir Petrik <vladimir.petrik@cvut.cz>
 
 from skbuild import setup
+import os
 
 if __name__ == '__main__':
-    setup()
+    setup(
+        cmake_args=['-DENABLE_COVERAGE=On'] if os.environ.get('PYPHYSX_COV') == 'true' else ()
+    )

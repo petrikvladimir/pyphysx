@@ -100,10 +100,10 @@ class PyPhysxViewer(PyRenderBase, Viewer):
         if filename is not None:
             self.viewer_flags['save_directory'] = os.path.dirname(filename)
             if filename.endswith('.gif'):
-                imageio.mimwrite(filename, self._saved_frames, fps=self.viewer_flags['refresh_rate'],
+                imageio.mimwrite(filename, self._saved_frames, duration=1000 // self.viewer_flags['refresh_rate'],
                                  palettesize=128, subrectangles=True)
             else:
-                imageio.mimwrite(filename, self._saved_frames, fps=self.viewer_flags['refresh_rate'])
+                imageio.mimwrite(filename, self._saved_frames, duration=1000 // self.viewer_flags['refresh_rate'])
         self._saved_frames = []
 
     def add_label(self, text, location=TextAlign.CENTER, font_name='OpenSans-Regular', font_pt=40, color=None,
