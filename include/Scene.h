@@ -19,13 +19,14 @@ public:
           const physx::PxBroadPhaseType::Enum &broad_phase_type,
           const std::vector<physx::PxSceneFlag::Enum> &scene_flags,
           size_t gpu_max_num_partitions,
-          float gpu_dynamic_allocation_scale
+          float gpu_dynamic_allocation_scale,
+          physx::PxVec3 gravity
     ) : BasePhysxPointer() {
         physx::PxSceneDesc sceneDesc(Physics::get().physics->getTolerancesScale());
         sceneDesc.cpuDispatcher = Physics::get().dispatcher;
         sceneDesc.cudaContextManager = Physics::get().cuda_context_manager;
         sceneDesc.filterShader = physx::PxDefaultSimulationFilterShader;
-        sceneDesc.gravity = physx::PxVec3(0.0f, 0.0f, -9.81f);
+        sceneDesc.gravity = gravity;
         for (const auto &flag : scene_flags) {
             sceneDesc.flags |= flag;
         }

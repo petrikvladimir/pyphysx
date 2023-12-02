@@ -135,12 +135,13 @@ PYBIND11_MODULE(_pyphysx, m) {
             .def_static("init_gpu", &Physics::init_gpu);
 
     py::class_<Scene>(m, "Scene")
-            .def(py::init<physx::PxFrictionType::Enum, physx::PxBroadPhaseType::Enum, std::vector<physx::PxSceneFlag::Enum>, size_t, float>(),
+            .def(py::init<physx::PxFrictionType::Enum, physx::PxBroadPhaseType::Enum, std::vector<physx::PxSceneFlag::Enum>, size_t, float, physx::PxVec3>(),
                  arg("friction_type") = physx::PxFrictionType::ePATCH,
                  arg("broad_phase_type") = physx::PxBroadPhaseType::eABP,
                  arg("scene_flags") = std::vector<physx::PxSceneFlag::Enum>(),
                  arg("gpu_max_num_partitions") = 8,
-                 arg("gpu_dynamic_allocation_scale") = 1.
+                 arg("gpu_dynamic_allocation_scale") = 1.,
+                 arg("gravity") = physx::PxVec3(0.0, 0.0, -9.81)
             )
             .def("simulate", &Scene::simulate,
                  arg("dt") = 1. / 60.

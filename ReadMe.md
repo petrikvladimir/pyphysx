@@ -6,20 +6,14 @@
 ### PIP installation
 To install for the first time:
 ```
-pip install git+https://github.com/petrikvladimir/pyphysx.git@master
+pip install git+https://github.com/StanislavPetrovV/pyphysx.git@master
 ```
 To update if its already installed: 
 ```
-pip install --upgrade git+https://github.com/petrikvladimir/pyphysx.git@master
+pip install --upgrade git+https://github.com/StanislavPetrovV/pyphysx.git@master
 ```
 
-Optionally, you can install in anaconda
-```
-conda create -n py38 python=3.8
-conda activate py38
-conda install -c anaconda gcc_linux-64 gxx_linux-64
-pip install git+https://github.com/petrikvladimir/pyphysx.git@master
-```
+
 
 ### Build from source
 If pip install fails, build the library from source.
@@ -36,7 +30,7 @@ pip install --upgrade numpy
 pip install codecov pyrender imageio imageio_ffmpeg trimesh networkx numba numpy_quaternion matplotlib scipy anytree meshcat pytest-cov
 
 # Clone and build from source:
-git clone https://github.com/petrikvladimir/pyphysx.git
+git clone https://github.com/StanislavPetrovV/pyphysx.git
 python setup.py install --user
 ```
 
